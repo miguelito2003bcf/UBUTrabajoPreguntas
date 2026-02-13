@@ -1,1 +1,4 @@
-Prueba de primer documento creado en el repositorio.
+La primera puesta en comun con César Ignacio García Osorio, mi tutor del TFG, fue a finales de noviembre de 2025 donde pusimos en común el objetivo del trabajo.
+Desde ese día hasta la semana pasada, a fecha de 6 de enero de 2026, estuve realizando diferentes investigaciones de las diferemtes GUIs posibles a trabajar en java, repase todos las aspectos de latex y otros aspectos como xml o html.
+Ese dia lo utilizamos para fijarnos los tiempos aproximados de las diferentes actividades planteadas para el TFG. La idea fue alrededor de 2 meses para el desarrollo general de la GUI, 1 mes para el desarrollo de funcionalidades y un ultimo mes para la creacion de la memoria, y todo lo relacionado con las entregas finales.
+A idea del primer sprint, que ha tenido lugar durante la primera semana, he realizado la correcta instalación de Moodle, la creación y puesta a punto del repositorio, un avance en los conocimientos de xml que me serán utiles para el trabajo y por ultimo he adaptado el eclipse para poder realizar el trabajo sin problemas.
