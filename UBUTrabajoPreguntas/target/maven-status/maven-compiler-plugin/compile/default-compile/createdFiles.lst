@@ -1,0 +1,11 @@
+moodleviewer\Main.class
+moodleviewer\model\MatchingQuestion.class
+moodleviewer\model\Category.class
+moodleviewer\model\GenericQuestion.class
+moodleviewer\model\ClozeQuestion.class
+moodleviewer\model\NumericalQuestion.class
+moodleviewer\model\ShortAnswerQuestion.class
+moodleviewer\model\TrueFalseQuestion.class
+moodleviewer\model\Question.class
+moodleviewer\model\MultichoiceQuestion.class
+moodleviewer\parser\XMLParser.class
