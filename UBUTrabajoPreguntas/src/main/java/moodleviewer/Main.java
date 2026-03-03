@@ -1,3 +1,5 @@
+//Trabajo realizado por Miguel Alonso Alonso.
+
 package moodleviewer;
 
 import javafx.application.Application;
