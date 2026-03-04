@@ -15,13 +15,19 @@ public class MultichoiceQuestion extends Question {
 
     @Override
     public String getDetails() {
-        StringBuilder sb = new StringBuilder(getBasicDetails());
-        sb.append("\n\n--- Opciones (Multichoice) ---\n");
-        sb.append("¿Respuesta única?: ").append(singleAnswer ? "Sí" : "No").append("\n");
-        sb.append("¿Barajar respuestas?: ").append(shuffleAnswers ? "Sí" : "No").append("\n\nRespuestas:\n");
+        StringBuilder sb = new StringBuilder(getBasicDetailsHtml());
+        
+        sb.append("<div style='font-family: Arial, sans-serif; font-size: 13px; margin-top: 15px;'>");
+        sb.append("<h4 style='color: #2980b9;'>--- Opciones (Multichoice) ---</h4>");
+        sb.append("<b>¿Respuesta única?:</b> ").append(singleAnswer ? "Sí" : "No").append("<br>");
+        sb.append("<b>¿Barajar respuestas?:</b> ").append(shuffleAnswers ? "Sí" : "No").append("<br><br>");
+        sb.append("<b>Respuestas:</b><ul>");
+        
         for (String a : answers) {
-            sb.append("- ").append(a.replaceAll("<[^>]*>", "")).append("\n");
+            sb.append("<li>").append(a).append("</li>");
         }
+        sb.append("</ul></div>");
+        
         return sb.toString();
     }
 }

@@ -1,11 +1,12 @@
-C:\Users\MIGUEL\eclipse-workspace\moodle-xml-viewer\src\main\java\moodleviewer\model\ShortAnswerQuestion.java
-C:\Users\MIGUEL\eclipse-workspace\moodle-xml-viewer\src\main\java\moodleviewer\model\MultichoiceQuestion.java
-C:\Users\MIGUEL\eclipse-workspace\moodle-xml-viewer\src\main\java\moodleviewer\Main.java
-C:\Users\MIGUEL\eclipse-workspace\moodle-xml-viewer\src\main\java\moodleviewer\model\Question.java
-C:\Users\MIGUEL\eclipse-workspace\moodle-xml-viewer\src\main\java\moodleviewer\model\NumericalQuestion.java
-C:\Users\MIGUEL\eclipse-workspace\moodle-xml-viewer\src\main\java\moodleviewer\model\GenericQuestion.java
-C:\Users\MIGUEL\eclipse-workspace\moodle-xml-viewer\src\main\java\moodleviewer\parser\XMLParser.java
-C:\Users\MIGUEL\eclipse-workspace\moodle-xml-viewer\src\main\java\moodleviewer\model\Category.java
-C:\Users\MIGUEL\eclipse-workspace\moodle-xml-viewer\src\main\java\moodleviewer\model\MatchingQuestion.java
-C:\Users\MIGUEL\eclipse-workspace\moodle-xml-viewer\src\main\java\moodleviewer\model\TrueFalseQuestion.java
-C:\Users\MIGUEL\eclipse-workspace\moodle-xml-viewer\src\main\java\moodleviewer\model\ClozeQuestion.java
+C:\Users\MIGUEL\Desktop\TFG Clonacion\UBUTrabajoPreguntas\src\main\java\moodleviewer\model\TrueFalseQuestion.java
+C:\Users\MIGUEL\Desktop\TFG Clonacion\UBUTrabajoPreguntas\src\main\java\moodleviewer\parser\XMLParser.java
+C:\Users\MIGUEL\Desktop\TFG Clonacion\UBUTrabajoPreguntas\src\main\java\moodleviewer\model\GenericQuestion.java
+C:\Users\MIGUEL\Desktop\TFG Clonacion\UBUTrabajoPreguntas\src\main\java\moodleviewer\model\MoodleFile.java
+C:\Users\MIGUEL\Desktop\TFG Clonacion\UBUTrabajoPreguntas\src\main\java\moodleviewer\model\NumericalQuestion.java
+C:\Users\MIGUEL\Desktop\TFG Clonacion\UBUTrabajoPreguntas\src\main\java\moodleviewer\Main.java
+C:\Users\MIGUEL\Desktop\TFG Clonacion\UBUTrabajoPreguntas\src\main\java\moodleviewer\model\Question.java
+C:\Users\MIGUEL\Desktop\TFG Clonacion\UBUTrabajoPreguntas\src\main\java\moodleviewer\model\Category.java
+C:\Users\MIGUEL\Desktop\TFG Clonacion\UBUTrabajoPreguntas\src\main\java\moodleviewer\model\ShortAnswerQuestion.java
+C:\Users\MIGUEL\Desktop\TFG Clonacion\UBUTrabajoPreguntas\src\main\java\moodleviewer\model\MatchingQuestion.java
+C:\Users\MIGUEL\Desktop\TFG Clonacion\UBUTrabajoPreguntas\src\main\java\moodleviewer\model\MultichoiceQuestion.java
+C:\Users\MIGUEL\Desktop\TFG Clonacion\UBUTrabajoPreguntas\src\main\java\moodleviewer\model\ClozeQuestion.java

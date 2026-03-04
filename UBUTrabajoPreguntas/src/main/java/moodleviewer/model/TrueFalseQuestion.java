@@ -10,6 +10,10 @@ public class TrueFalseQuestion extends Question {
 
     @Override
     public String getDetails() {
-        return getBasicDetails() + "\n\n--- Verdadero / Falso ---\nRespuesta correcta: " + correctAnswer;
+        return getBasicDetailsHtml() + 
+               "<div style='font-family: Arial, sans-serif; font-size: 13px; margin-top: 15px;'>" +
+               "<h4 style='color: #2980b9;'>--- Verdadero / Falso ---</h4>" +
+               "<b>Respuesta correcta:</b> " + correctAnswer + 
+               "</div>";
     }
 }

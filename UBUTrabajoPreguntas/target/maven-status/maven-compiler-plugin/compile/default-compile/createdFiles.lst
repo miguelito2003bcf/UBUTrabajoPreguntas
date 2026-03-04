@@ -9,3 +9,4 @@ moodleviewer\model\TrueFalseQuestion.class
 moodleviewer\model\Question.class
 moodleviewer\model\MultichoiceQuestion.class
 moodleviewer\parser\XMLParser.class
+moodleviewer\model\MoodleFile.class

@@ -11,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebView; // Añadida la importación del WebView
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import moodleviewer.model.Category;
@@ -23,7 +24,7 @@ public class Main extends Application {
 
     private TreeView<Category> categoryTreeView;
     private ListView<Question> questionListView;
-    private TextArea detailsTextArea;
+    private WebView detailsWebView; // CAMBIO: Usamos WebView en lugar de TextArea
 
     @Override
     public void start(Stage primaryStage) {
@@ -32,23 +33,21 @@ public class Main extends Application {
         // Elementos de la UI
         categoryTreeView = new TreeView<>();
         questionListView = new ListView<>();
-        detailsTextArea = new TextArea();
-        detailsTextArea.setEditable(false);
-        detailsTextArea.setWrapText(true);
+        detailsWebView = new WebView(); // CAMBIO: Inicializamos el WebView
 
         // Configurar los contenedores (VBox)
         VBox leftPane = new VBox(5, new Label("Categorías:"), categoryTreeView);
         VBox rightTopPane = new VBox(5, new Label("Preguntas:"), questionListView);
-        VBox rightBottomPane = new VBox(5, new Label("Detalles de la pregunta:"), detailsTextArea);
+        VBox rightBottomPane = new VBox(5, new Label("Detalles de la pregunta:"), detailsWebView);
 
         leftPane.setPadding(new Insets(5));
         rightTopPane.setPadding(new Insets(5));
         rightBottomPane.setPadding(new Insets(5));
 
-        // Truco: Hacer que las listas crezcan para ocupar todo el espacio disponible
+        // Truco: Hacer que las listas y el webview crezcan para ocupar todo el espacio
         VBox.setVgrow(categoryTreeView, Priority.ALWAYS);
         VBox.setVgrow(questionListView, Priority.ALWAYS);
-        VBox.setVgrow(detailsTextArea, Priority.ALWAYS);
+        VBox.setVgrow(detailsWebView, Priority.ALWAYS); // CAMBIO: Aplicado al WebView
 
         // 1. SplitPane Derecho (Vertical: Preguntas arriba, Detalles abajo)
         SplitPane rightSplitPane = new SplitPane();
@@ -82,14 +81,15 @@ public class Main extends Application {
         categoryTreeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null && newVal.getValue() != null) {
                 questionListView.setItems(FXCollections.observableArrayList(newVal.getValue().getQuestions()));
-                detailsTextArea.clear();
+                detailsWebView.getEngine().loadContent(""); // Limpiamos el WebView
             }
         });
 
         // Cuando se selecciona una pregunta, mostrar sus detalles
         questionListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
-                detailsTextArea.setText(newVal.getDetails());
+                // CAMBIO: Cargamos el HTML generado por el modelo en el motor del WebView
+                detailsWebView.getEngine().loadContent(newVal.getDetails());
             }
         });
     }
@@ -109,7 +109,7 @@ public class Main extends Application {
                 categoryTreeView.setShowRoot(false); 
                 
                 questionListView.getItems().clear();
-                detailsTextArea.clear();
+                detailsWebView.getEngine().loadContent(""); // Limpiamos al cargar nuevo archivo
                 
             } catch (Exception ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Error al leer el archivo XML: " + ex.getMessage());

@@ -12,7 +12,11 @@ public class NumericalQuestion extends Question {
 
     @Override
     public String getDetails() {
-        return getBasicDetails() + "\n\n--- Respuesta Numérica ---\nRespuesta esperada: " + answer + 
-               "\nTolerancia permitida: " + (tolerance != null ? tolerance : "0");
+        return getBasicDetailsHtml() + 
+               "<div style='font-family: Arial, sans-serif; font-size: 13px; margin-top: 15px;'>" +
+               "<h4 style='color: #2980b9;'>--- Respuesta Numérica ---</h4>" +
+               "<b>Respuesta esperada:</b> " + answer + "<br>" +
+               "<b>Tolerancia permitida:</b> " + (tolerance != null ? tolerance : "0") + 
+               "</div>";
     }
 }

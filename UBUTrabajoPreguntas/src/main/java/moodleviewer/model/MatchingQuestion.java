@@ -11,11 +11,15 @@ public class MatchingQuestion extends Question {
 
     @Override
     public String getDetails() {
-        StringBuilder sb = new StringBuilder(getBasicDetails());
-        sb.append("\n\n--- Pares de Emparejamiento ---\n");
+        StringBuilder sb = new StringBuilder(getBasicDetailsHtml());
+        
+        sb.append("<div style='font-family: Arial, sans-serif; font-size: 13px; margin-top: 15px;'>");
+        sb.append("<h4 style='color: #2980b9;'>--- Pares de Emparejamiento ---</h4><ul>");
         for (String p : pairs) {
-            sb.append("- ").append(p.replaceAll("<[^>]*>", "")).append("\n");
+            sb.append("<li>").append(p).append("</li>");
         }
+        sb.append("</ul></div>");
+        
         return sb.toString();
     }
 }

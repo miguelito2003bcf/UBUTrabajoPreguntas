@@ -12,7 +12,11 @@ public class ShortAnswerQuestion extends Question {
 
     @Override
     public String getDetails() {
-        return getBasicDetails() + "\n\n--- Respuesta Corta ---\nRespuesta esperada: " + expectedAnswer + 
-               "\n¿Distingue mayúsculas?: " + (caseSensitive ? "Sí" : "No");
+        return getBasicDetailsHtml() + 
+               "<div style='font-family: Arial, sans-serif; font-size: 13px; margin-top: 15px;'>" +
+               "<h4 style='color: #2980b9;'>--- Respuesta Corta ---</h4>" +
+               "<b>Respuesta esperada:</b> " + expectedAnswer + "<br>" +
+               "<b>¿Distingue mayúsculas?:</b> " + (caseSensitive ? "Sí" : "No") + 
+               "</div>";
     }
 }

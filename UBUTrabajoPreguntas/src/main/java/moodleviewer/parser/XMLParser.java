@@ -61,6 +61,19 @@ public class XMLParser {
                     String grade = getSimpleText(questionElement, "defaultgrade");
                     String penalty = getSimpleText(questionElement, "penalty");
 
+                    // --- NUEVO CÓDIGO: EXTRAER LOS ARCHIVOS (IMÁGENES EN BASE64) ---
+                    List<MoodleFile> questionFiles = new ArrayList<>();
+                    NodeList fileNodes = questionElement.getElementsByTagName("file");
+                    for (int f = 0; f < fileNodes.getLength(); f++) {
+                        Element fileElem = (Element) fileNodes.item(f);
+                        String fName = fileElem.getAttribute("name");
+                        String fPath = fileElem.getAttribute("path");
+                        String fEncoding = fileElem.getAttribute("encoding");
+                        String fContent = fileElem.getTextContent().trim();
+                        questionFiles.add(new MoodleFile(fName, fPath, fEncoding, fContent));
+                    }
+                    // ---------------------------------------------------------------
+
                     Question q; // Declaramos el padre
 
                     // POLIMORFISMO: Instanciamos a la hija correspondiente
@@ -126,6 +139,11 @@ public class XMLParser {
                             q = new GenericQuestion(type, name, text, grade, penalty);
                             break;
                     }
+                    
+                    // --- NUEVO CÓDIGO: INYECTAMOS LOS ARCHIVOS EN LA PREGUNTA ---
+                    q.setFiles(questionFiles);
+                    // ------------------------------------------------------------
+                    
                     currentCategory.addQuestion(q);
                 }
             }
