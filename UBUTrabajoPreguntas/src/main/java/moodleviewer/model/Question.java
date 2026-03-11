@@ -10,7 +10,6 @@ public abstract class Question {
     protected String defaultGrade;
     protected String penalty;
     
-    // NUEVO: Lista para guardar las imágenes incrustadas
     protected List<MoodleFile> files = new ArrayList<>();
 
     public Question(String type, String name, String questionText, String defaultGrade, String penalty) {
@@ -21,7 +20,6 @@ public abstract class Question {
         this.penalty = penalty;
     }
 
-    // NUEVO: Setter para inyectar los archivos desde el Parser
     public void setFiles(List<MoodleFile> files) {
         this.files = files;
     }
@@ -32,11 +30,9 @@ public abstract class Question {
     public String getDefaultGrade() { return defaultGrade; }
     public String getPenalty() { return penalty; }
 
-    // NUEVO: Devuelve el texto base en formato HTML y procesa las imágenes
     protected String getBasicDetailsHtml() {
         String htmlText = questionText != null ? questionText : "N/A";
 
-        // Magia: Reemplazamos la etiqueta de Moodle por la imagen real
         if (files != null) {
             for (MoodleFile file : files) {
                 if ("base64".equals(file.encoding)) {
@@ -47,7 +43,6 @@ public abstract class Question {
             }
         }
 
-        // Construimos el contenedor HTML
         return "<div style='font-family: Arial, sans-serif; font-size: 14px;'>" +
                "<h3 style='color: #2c3e50;'>Tipo de pregunta: " + type + "</h3>" +
                "<b>Nombre:</b> " + name + "<br>" +
@@ -63,5 +58,9 @@ public abstract class Question {
     @Override
     public String toString() {
         return name != null && !name.isEmpty() ? name : "Pregunta (" + type + ")";
+    }
+    
+    public List<MoodleFile> getFiles() { 
+        return files; 
     }
 }

@@ -6,12 +6,12 @@ import java.util.List;
 public class Category {
     private String name;
     private List<Question> questions;
-    private List<Category> subcategories; // NUEVO: Lista para guardar las subcategorías
+    private List<Category> subcategories; 
 
     public Category(String name) {
         this.name = name;
         this.questions = new ArrayList<>();
-        this.subcategories = new ArrayList<>(); // Inicializamos la lista vacía
+        this.subcategories = new ArrayList<>(); 
     }
 
     public String getName() {

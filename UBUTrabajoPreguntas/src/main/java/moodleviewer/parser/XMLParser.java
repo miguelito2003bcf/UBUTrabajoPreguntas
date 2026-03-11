@@ -61,7 +61,6 @@ public class XMLParser {
                     String grade = getSimpleText(questionElement, "defaultgrade");
                     String penalty = getSimpleText(questionElement, "penalty");
 
-                    // --- NUEVO CÓDIGO: EXTRAER LOS ARCHIVOS (IMÁGENES EN BASE64) ---
                     List<MoodleFile> questionFiles = new ArrayList<>();
                     NodeList fileNodes = questionElement.getElementsByTagName("file");
                     for (int f = 0; f < fileNodes.getLength(); f++) {
@@ -72,78 +71,9 @@ public class XMLParser {
                         String fContent = fileElem.getTextContent().trim();
                         questionFiles.add(new MoodleFile(fName, fPath, fEncoding, fContent));
                     }
-                    // ---------------------------------------------------------------
 
-                    Question q; // Declaramos el padre
-
-                    // POLIMORFISMO: Instanciamos a la hija correspondiente
-                    switch (type) {
-                        case "matching":
-                            List<String> pairs = new ArrayList<>();
-                            NodeList subqs = questionElement.getElementsByTagName("subquestion");
-                            for(int j=0; j<subqs.getLength(); j++){
-                                Element sq = (Element)subqs.item(j);
-                                String qT = getSimpleText(sq, "text");
-                                String aT = getNestedText(sq, "answer", "text");
-                                if(qT != null && aT != null) pairs.add(qT + "  ->  " + aT);
-                            }
-                            q = new MatchingQuestion(type, name, text, grade, penalty, pairs);
-                            break;
-
-                        case "multichoice":
-                            boolean single = "true".equals(getSimpleText(questionElement, "single"));
-                            boolean shuffleMulti = "true".equals(getSimpleText(questionElement, "shuffleanswers"));
-                            List<String> answers = new ArrayList<>();
-                            NodeList ansNodes = questionElement.getElementsByTagName("answer");
-                            for(int j=0; j<ansNodes.getLength(); j++){
-                                Element ansElem = (Element)ansNodes.item(j);
-                                String fraction = ansElem.getAttribute("fraction");
-                                String aText = getSimpleText(ansElem, "text");
-                                if(aText != null) answers.add(aText + " (Valor: " + fraction + "%)");
-                            }
-                            q = new MultichoiceQuestion(type, name, text, grade, penalty, single, shuffleMulti, answers);
-                            break;
-
-                        case "truefalse":
-                            String correctTf = "Desconocida";
-                            NodeList tfNodes = questionElement.getElementsByTagName("answer");
-                            for(int j=0; j<tfNodes.getLength(); j++){
-                                Element ansElem = (Element)tfNodes.item(j);
-                                if("100".equals(ansElem.getAttribute("fraction"))) correctTf = getSimpleText(ansElem, "text");
-                            }
-                            q = new TrueFalseQuestion(type, name, text, grade, penalty, correctTf);
-                            break;
-
-                        case "numerical":
-                            String numAns = getNestedText(questionElement, "answer", "text");
-                            String tolerance = getNestedText(questionElement, "answer", "tolerance");
-                            q = new NumericalQuestion(type, name, text, grade, penalty, numAns, tolerance);
-                            break;
-
-                        case "shortanswer":
-                            boolean caseSensitive = "1".equals(getSimpleText(questionElement, "usecase"));
-                            String shortAns = "";
-                            NodeList saNodes = questionElement.getElementsByTagName("answer");
-                            for(int j=0; j<saNodes.getLength(); j++){
-                                Element ansElem = (Element)saNodes.item(j);
-                                if("100".equals(ansElem.getAttribute("fraction"))) shortAns = getSimpleText(ansElem, "text");
-                            }
-                            q = new ShortAnswerQuestion(type, name, text, grade, penalty, shortAns, caseSensitive);
-                            break;
-
-                        case "cloze":
-                            q = new ClozeQuestion(type, name, text, grade, penalty);
-                            break;
-
-                        default:
-                            q = new GenericQuestion(type, name, text, grade, penalty);
-                            break;
-                    }
-                    
-                    // --- NUEVO CÓDIGO: INYECTAMOS LOS ARCHIVOS EN LA PREGUNTA ---
+                    Question q = QuestionFactory.createQuestion(type, name, text, grade, penalty, questionElement);
                     q.setFiles(questionFiles);
-                    // ------------------------------------------------------------
-                    
                     currentCategory.addQuestion(q);
                 }
             }
@@ -151,7 +81,7 @@ public class XMLParser {
         return rootCategory;
     }
 
-    private static String getNestedText(Element parent, String outerTag, String innerTag) {
+    public static String getNestedText(Element parent, String outerTag, String innerTag) {
         NodeList outerList = parent.getElementsByTagName(outerTag);
         if (outerList.getLength() > 0) {
             Element outerElement = (Element) outerList.item(0);
@@ -161,7 +91,7 @@ public class XMLParser {
         return null;
     }
 
-    private static String getSimpleText(Element parent, String tag) {
+    public static String getSimpleText(Element parent, String tag) {
         NodeList list = parent.getChildNodes();
         for (int i=0; i<list.getLength(); i++) {
             if (list.item(i).getNodeName().equals(tag)) return list.item(i).getTextContent().trim();

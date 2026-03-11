@@ -8,7 +8,6 @@ public class GenericQuestion extends Question {
 
     @Override
     public String getDetails() {
-        // Al ser genérica, solo devuelve la parte de HTML base de la clase padre
         return getBasicDetailsHtml();
     }
 }

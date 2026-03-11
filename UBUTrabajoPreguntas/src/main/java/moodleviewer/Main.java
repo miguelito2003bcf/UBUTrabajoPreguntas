@@ -1,8 +1,7 @@
-//Trabajo realizado por Miguel Alonso Alonso.
-
 package moodleviewer;
 
 import javafx.application.Application;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -11,59 +10,76 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.web.WebView; // Añadida la importación del WebView
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import moodleviewer.model.Category;
 import moodleviewer.model.Question;
 import moodleviewer.parser.XMLParser;
+import moodleviewer.parser.XMLExporter;
 
 import java.io.File;
 
 public class Main extends Application {
 
     private TreeView<Category> categoryTreeView;
-    private ListView<Question> questionListView;
-    private WebView detailsWebView; // CAMBIO: Usamos WebView en lugar de TextArea
+    
+    private TableView<Question> questionTableView; 
+    private WebView detailsWebView;
+    
+    private Category currentRootCategory; 
+    private Button saveButton;
 
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Visor de Preguntas Moodle XML");
 
-        // Elementos de la UI
         categoryTreeView = new TreeView<>();
-        questionListView = new ListView<>();
-        detailsWebView = new WebView(); // CAMBIO: Inicializamos el WebView
+        detailsWebView = new WebView();
+        
+        questionTableView = new TableView<>();
+        
+        TableColumn<Question, String> nameColumn = new TableColumn<>("Nombre de la pregunta");
+        nameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
+        
+        TableColumn<Question, String> typeColumn = new TableColumn<>("Tipo");
+        typeColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getType()));
+        
+        nameColumn.prefWidthProperty().bind(questionTableView.widthProperty().multiply(0.75));
+        typeColumn.prefWidthProperty().bind(questionTableView.widthProperty().multiply(0.24));
+        
+        questionTableView.getColumns().add(nameColumn);
+        questionTableView.getColumns().add(typeColumn);
 
-        // Configurar los contenedores (VBox)
         VBox leftPane = new VBox(5, new Label("Categorías:"), categoryTreeView);
-        VBox rightTopPane = new VBox(5, new Label("Preguntas:"), questionListView);
+        VBox rightTopPane = new VBox(5, new Label("Preguntas:"), questionTableView); 
         VBox rightBottomPane = new VBox(5, new Label("Detalles de la pregunta:"), detailsWebView);
 
         leftPane.setPadding(new Insets(5));
         rightTopPane.setPadding(new Insets(5));
         rightBottomPane.setPadding(new Insets(5));
 
-        // Truco: Hacer que las listas y el webview crezcan para ocupar todo el espacio
         VBox.setVgrow(categoryTreeView, Priority.ALWAYS);
-        VBox.setVgrow(questionListView, Priority.ALWAYS);
-        VBox.setVgrow(detailsWebView, Priority.ALWAYS); // CAMBIO: Aplicado al WebView
+        VBox.setVgrow(questionTableView, Priority.ALWAYS); 
+        VBox.setVgrow(detailsWebView, Priority.ALWAYS);
 
-        // 1. SplitPane Derecho (Vertical: Preguntas arriba, Detalles abajo)
         SplitPane rightSplitPane = new SplitPane();
         rightSplitPane.setOrientation(Orientation.VERTICAL);
         rightSplitPane.getItems().addAll(rightTopPane, rightBottomPane);
-        rightSplitPane.setDividerPositions(0.5f); // Mitad y mitad
+        rightSplitPane.setDividerPositions(0.5f);
 
-        // 2. SplitPane Principal (Horizontal: Categorías izquierda, Resto a la derecha)
         SplitPane mainSplitPane = new SplitPane();
         mainSplitPane.getItems().addAll(leftPane, rightSplitPane);
-        mainSplitPane.setDividerPositions(0.3f); // 30% para la izquierda, 70% para la derecha
+        mainSplitPane.setDividerPositions(0.3f);
 
-        // Barra superior con botón para abrir archivo
         Button openButton = new Button("Cargar XML de Moodle");
         openButton.setOnAction(e -> openFile(primaryStage));
-        ToolBar toolBar = new ToolBar(openButton);
+
+        saveButton = new Button("Guardar Cambios XML");
+        saveButton.setOnAction(e -> saveFile(primaryStage));
+        saveButton.setDisable(true); 
+
+        ToolBar toolBar = new ToolBar(openButton, saveButton);
 
         BorderPane root = new BorderPane();
         root.setTop(toolBar);
@@ -77,18 +93,15 @@ public class Main extends Application {
     }
 
     private void setupSelectionListeners() {
-        // Al seleccionar un elemento del árbol (rama), mostramos sus preguntas
         categoryTreeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null && newVal.getValue() != null) {
-                questionListView.setItems(FXCollections.observableArrayList(newVal.getValue().getQuestions()));
-                detailsWebView.getEngine().loadContent(""); // Limpiamos el WebView
+                questionTableView.setItems(FXCollections.observableArrayList(newVal.getValue().getQuestions()));
+                detailsWebView.getEngine().loadContent("");
             }
         });
 
-        // Cuando se selecciona una pregunta, mostrar sus detalles
-        questionListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+        questionTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
-                // CAMBIO: Cargamos el HTML generado por el modelo en el motor del WebView
                 detailsWebView.getEngine().loadContent(newVal.getDetails());
             }
         });
@@ -101,19 +114,43 @@ public class Main extends Application {
 
         if (file != null) {
             try {
-                Category rootCategory = XMLParser.parseMoodleXML(file);
-                TreeItem<Category> rootItem = createTreeItem(rootCategory);
+                currentRootCategory = XMLParser.parseMoodleXML(file);
+                TreeItem<Category> rootItem = createTreeItem(currentRootCategory);
                 rootItem.setExpanded(true);
                 
                 categoryTreeView.setRoot(rootItem);
                 categoryTreeView.setShowRoot(false); 
                 
-                questionListView.getItems().clear();
-                detailsWebView.getEngine().loadContent(""); // Limpiamos al cargar nuevo archivo
+                questionTableView.getItems().clear(); 
+                detailsWebView.getEngine().loadContent(""); 
+                
+                saveButton.setDisable(false);
                 
             } catch (Exception ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Error al leer el archivo XML: " + ex.getMessage());
                 alert.showAndWait();
+            }
+        }
+    }
+
+    private void saveFile(Stage stage) {
+        if (currentRootCategory == null) return;
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Guardar XML de Moodle");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
+        File file = fileChooser.showSaveDialog(stage);
+
+        if (file != null) {
+            try {
+                XMLExporter.exportMoodleXML(currentRootCategory, file);
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Archivo guardado con éxito.");
+                alert.setHeaderText(null);
+                alert.showAndWait();
+            } catch (Exception ex) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Error al guardar el archivo XML: " + ex.getMessage());
+                alert.showAndWait();
+                ex.printStackTrace();
             }
         }
     }
