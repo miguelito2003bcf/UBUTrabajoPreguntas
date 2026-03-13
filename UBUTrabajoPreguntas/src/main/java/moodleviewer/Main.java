@@ -1,170 +1,253 @@
 package moodleviewer;
 
 import javafx.application.Application;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
 import moodleviewer.model.Category;
 import moodleviewer.model.Question;
-import moodleviewer.parser.XMLParser;
-import moodleviewer.parser.XMLExporter;
 
-import java.io.File;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 public class Main extends Application {
 
-    private TreeView<Category> categoryTreeView;
+    private TreeView<Category> categoryTreeView = new TreeView<>();
+    private TableView<Question> questionTableView = new TableView<>();
+    private WebView detailsWebView = new WebView();
     
-    private TableView<Question> questionTableView; 
-    private WebView detailsWebView;
+    private Button openButton = new Button("Cargar XML de Moodle");
+    private Button saveButton = new Button("Guardar Cambios XML");
+    private Button addQuestionButton = new Button("➕ Añadir Pregunta");
     
+    private Button addCategoryButton = new Button("➕ Categoría");
+
+    private TextField searchCategoryField = new TextField();
+    private TextField searchQuestionField = new TextField();
+    private MenuButton typeFilterMenu = new MenuButton("Filtrar por Tipo");
+
     private Category currentRootCategory; 
-    private Button saveButton;
+    private Set<String> activeTypeFilters = new HashSet<>(); 
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Visor de Preguntas Moodle XML");
+        primaryStage.setTitle("Editor Avanzado de Preguntas Moodle XML");
 
-        categoryTreeView = new TreeView<>();
-        detailsWebView = new WebView();
-        
-        questionTableView = new TableView<>();
-        
-        TableColumn<Question, String> nameColumn = new TableColumn<>("Nombre de la pregunta");
-        nameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
-        
-        TableColumn<Question, String> typeColumn = new TableColumn<>("Tipo");
-        typeColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getType()));
-        
-        nameColumn.prefWidthProperty().bind(questionTableView.widthProperty().multiply(0.75));
-        typeColumn.prefWidthProperty().bind(questionTableView.widthProperty().multiply(0.24));
-        
-        questionTableView.getColumns().add(nameColumn);
-        questionTableView.getColumns().add(typeColumn);
+        initBasicComponents(primaryStage);
+        TableManager.configure(this);
+        TreeManager.configure(this);
+        Scene scene = LayoutManager.buildScene(this);
 
-        VBox leftPane = new VBox(5, new Label("Categorías:"), categoryTreeView);
-        VBox rightTopPane = new VBox(5, new Label("Preguntas:"), questionTableView); 
-        VBox rightBottomPane = new VBox(5, new Label("Detalles de la pregunta:"), detailsWebView);
-
-        leftPane.setPadding(new Insets(5));
-        rightTopPane.setPadding(new Insets(5));
-        rightBottomPane.setPadding(new Insets(5));
-
-        VBox.setVgrow(categoryTreeView, Priority.ALWAYS);
-        VBox.setVgrow(questionTableView, Priority.ALWAYS); 
-        VBox.setVgrow(detailsWebView, Priority.ALWAYS);
-
-        SplitPane rightSplitPane = new SplitPane();
-        rightSplitPane.setOrientation(Orientation.VERTICAL);
-        rightSplitPane.getItems().addAll(rightTopPane, rightBottomPane);
-        rightSplitPane.setDividerPositions(0.5f);
-
-        SplitPane mainSplitPane = new SplitPane();
-        mainSplitPane.getItems().addAll(leftPane, rightSplitPane);
-        mainSplitPane.setDividerPositions(0.3f);
-
-        Button openButton = new Button("Cargar XML de Moodle");
-        openButton.setOnAction(e -> openFile(primaryStage));
-
-        saveButton = new Button("Guardar Cambios XML");
-        saveButton.setOnAction(e -> saveFile(primaryStage));
-        saveButton.setDisable(true); 
-
-        ToolBar toolBar = new ToolBar(openButton, saveButton);
-
-        BorderPane root = new BorderPane();
-        root.setTop(toolBar);
-        root.setCenter(mainSplitPane);
-
-        setupSelectionListeners();
-
-        Scene scene = new Scene(root, 900, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    private void setupSelectionListeners() {
+    private void initBasicComponents(Stage stage) {
+        searchCategoryField.setPromptText("🔍 Buscar categoría...");
+        searchCategoryField.textProperty().addListener((obs, oldVal, newVal) -> applyCategoryFilter(newVal));
+
+        searchQuestionField.setPromptText("🔍 Buscar por nombre...");
+        searchQuestionField.textProperty().addListener((obs, oldVal, newVal) -> refreshQuestionTable());
+        HBox.setHgrow(searchQuestionField, Priority.ALWAYS); 
+
+        typeFilterMenu.setDisable(true); 
+        
+        addQuestionButton.setDisable(true);
+        addQuestionButton.setOnAction(e -> showAddQuestionDialog());
+
+        addCategoryButton.setDisable(true);
+        addCategoryButton.setOnAction(e -> showAddCategoryDialog());
+
+        openButton.setOnAction(e -> handleLoadXML(stage));
+        saveButton.setDisable(true);
+        saveButton.setOnAction(e -> FileManager.saveXML(stage, currentRootCategory));
+
         categoryTreeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null && newVal.getValue() != null) {
-                questionTableView.setItems(FXCollections.observableArrayList(newVal.getValue().getQuestions()));
-                detailsWebView.getEngine().loadContent("");
-            }
+            refreshQuestionTable();
+            detailsWebView.getEngine().loadContent("");
         });
 
         questionTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                detailsWebView.getEngine().loadContent(newVal.getDetails());
-            }
+            if (newVal != null) detailsWebView.getEngine().loadContent(newVal.getDetails());
         });
     }
 
-    private void openFile(Stage stage) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
-        File file = fileChooser.showOpenDialog(stage);
-
-        if (file != null) {
-            try {
-                currentRootCategory = XMLParser.parseMoodleXML(file);
-                TreeItem<Category> rootItem = createTreeItem(currentRootCategory);
-                rootItem.setExpanded(true);
-                
-                categoryTreeView.setRoot(rootItem);
-                categoryTreeView.setShowRoot(false); 
-                
-                questionTableView.getItems().clear(); 
-                detailsWebView.getEngine().loadContent(""); 
-                
-                saveButton.setDisable(false);
-                
-            } catch (Exception ex) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Error al leer el archivo XML: " + ex.getMessage());
-                alert.showAndWait();
-            }
-        }
+    private void handleLoadXML(Stage stage) {
+        FileManager.openXML(stage).ifPresent(root -> {
+            currentRootCategory = root;
+            searchCategoryField.setText("");
+            searchQuestionField.setText("");
+            populateTypeFilterMenu(currentRootCategory);
+            
+            categoryTreeView.setRoot(TreeBuilder.createTreeItem(currentRootCategory));
+            categoryTreeView.setShowRoot(false); 
+            
+            questionTableView.getItems().clear(); 
+            detailsWebView.getEngine().loadContent(""); 
+            
+            saveButton.setDisable(false);
+            addQuestionButton.setDisable(false); 
+            addCategoryButton.setDisable(false); 
+        });
     }
 
-    private void saveFile(Stage stage) {
+    private void showAddCategoryDialog() {
         if (currentRootCategory == null) return;
 
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Guardar XML de Moodle");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
-        File file = fileChooser.showSaveDialog(stage);
+        TreeItem<Category> selectedItem = categoryTreeView.getSelectionModel().getSelectedItem();
+        Category parentCategory = (selectedItem != null) ? selectedItem.getValue() : currentRootCategory;
 
-        if (file != null) {
-            try {
-                XMLExporter.exportMoodleXML(currentRootCategory, file);
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Archivo guardado con éxito.");
-                alert.setHeaderText(null);
-                alert.showAndWait();
-            } catch (Exception ex) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Error al guardar el archivo XML: " + ex.getMessage());
-                alert.showAndWait();
-                ex.printStackTrace();
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Añadir Nueva Categoría");
+        dialog.setHeaderText("Crear una nueva categoría en el banco");
+
+        ButtonType btnAceptar = new ButtonType("Aceptar", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(btnAceptar, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField nameField = new TextField();
+        nameField.setPromptText("Ej: Tema 2 - Álgebra");
+
+        ToggleGroup group = new ToggleGroup();
+        RadioButton rbRoot = new RadioButton("Como Categoría Principal (Raíz)");
+        RadioButton rbSub = new RadioButton("Como subcategoría de: " + (selectedItem != null ? parentCategory.getName() : ""));
+        rbRoot.setToggleGroup(group);
+        rbSub.setToggleGroup(group);
+
+        if (selectedItem != null) {
+            rbSub.setSelected(true);
+        } else {
+            rbRoot.setSelected(true);
+            rbSub.setDisable(true);
+        }
+
+        grid.add(new Label("Ubicación:"), 0, 0);
+        grid.add(new VBox(5, rbRoot, rbSub), 1, 0);
+        grid.add(new Label("Nombre:"), 0, 1);
+        grid.add(nameField, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == btnAceptar && !nameField.getText().trim().isEmpty()) {
+                Category newCat = new Category(nameField.getText().trim());
+                if (rbRoot.isSelected()) {
+                    currentRootCategory.getSubcategories().add(newCat);
+                } else {
+                    parentCategory.getSubcategories().add(newCat);
+                }
+                applyCategoryFilter(searchCategoryField.getText());
             }
+            return null;
+        });
+
+        dialog.showAndWait();
+    }
+
+    private void showAddQuestionDialog() {
+        TreeItem<Category> selectedCategoryItem = categoryTreeView.getSelectionModel().getSelectedItem();
+        if (selectedCategoryItem == null) {
+            new Alert(Alert.AlertType.WARNING, "Por favor, selecciona una categoría.").showAndWait();
+            return;
+        }
+        
+        Category targetCategory = selectedCategoryItem.getValue();
+        AddQuestionDialog dialog = new AddQuestionDialog(targetCategory);
+        Optional<Question> result = dialog.showAndWait();
+
+        result.ifPresent(newQuestion -> {
+            targetCategory.addQuestion(newQuestion);
+            if (!typeContainsFilter(newQuestion.getType())) populateTypeFilterMenu(currentRootCategory);
+            refreshQuestionTable();
+            categoryTreeView.refresh(); 
+        });
+    }
+
+    public void applyCategoryFilter(String searchText) {
+        if (currentRootCategory == null) return;
+        if (searchText == null || searchText.trim().isEmpty()) {
+            categoryTreeView.setRoot(TreeBuilder.createTreeItem(currentRootCategory));
+            return;
+        }
+        TreeItem<Category> filteredRoot = TreeBuilder.createFilteredTreeItem(currentRootCategory, searchText.toLowerCase());
+        categoryTreeView.setRoot(filteredRoot);
+    }
+
+    public void refreshQuestionTable() {
+        TreeItem<Category> selectedNode = categoryTreeView.getSelectionModel().getSelectedItem();
+        if (selectedNode != null && selectedNode.getValue() != null) {
+            Category selectedCat = selectedNode.getValue();
+            ObservableList<Question> obsList = FXCollections.observableArrayList(selectedCat.getQuestions());
+            
+            FilteredList<Question> filteredData = new FilteredList<>(obsList, q -> {
+                String searchTxt = searchQuestionField.getText();
+                boolean matchesText = searchTxt == null || searchTxt.isEmpty() || q.getName().toLowerCase().contains(searchTxt.toLowerCase());
+                boolean matchesType = activeTypeFilters.isEmpty() || activeTypeFilters.contains(q.getType());
+                return matchesText && matchesType;
+            });
+            
+            SortedList<Question> sortedData = new SortedList<>(filteredData);
+            sortedData.comparatorProperty().bind(questionTableView.comparatorProperty());
+            questionTableView.setItems(sortedData);
+        } else {
+            questionTableView.setItems(FXCollections.observableArrayList());
         }
     }
 
-    private TreeItem<Category> createTreeItem(Category category) {
-        TreeItem<Category> item = new TreeItem<>(category);
-        for (Category sub : category.getSubcategories()) {
-            item.getChildren().add(createTreeItem(sub));
+    private void populateTypeFilterMenu(Category rootCategory) {
+        typeFilterMenu.getItems().clear();
+        activeTypeFilters.clear(); 
+        Set<String> uniqueTypes = new HashSet<>();
+        collectTypesRecursively(rootCategory, uniqueTypes);
+        
+        for (String type : uniqueTypes) {
+            CheckMenuItem menuItem = new CheckMenuItem(type);
+            menuItem.setSelected(false); 
+            menuItem.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+                if (isSelected) activeTypeFilters.add(type); else activeTypeFilters.remove(type);
+                refreshQuestionTable(); 
+            });
+            typeFilterMenu.getItems().add(menuItem);
         }
-        item.setExpanded(true); 
-        return item;
+        typeFilterMenu.setDisable(false); 
     }
 
-    public static void main(String[] args) {
-        launch(args);
+    private void collectTypesRecursively(Category cat, Set<String> typesSet) {
+        for (Question q : cat.getQuestions()) typesSet.add(q.getType());
+        for (Category sub : cat.getSubcategories()) collectTypesRecursively(sub, typesSet);
     }
+
+    private boolean typeContainsFilter(String type) {
+        for(MenuItem item : typeFilterMenu.getItems()) if (item.getText().equals(type)) return true;
+        return false;
+    }
+
+    public TreeView<Category> getCategoryTreeView() { return categoryTreeView; }
+    public TableView<Question> getQuestionTableView() { return questionTableView; }
+    public WebView getDetailsWebView() { return detailsWebView; }
+    public TextField getSearchCategoryField() { return searchCategoryField; }
+    public TextField getSearchQuestionField() { return searchQuestionField; }
+    public MenuButton getTypeFilterMenu() { return typeFilterMenu; }
+    public Button getAddQuestionButton() { return addQuestionButton; }
+    public Button getAddCategoryButton() { return addCategoryButton; } 
+    public Button getOpenButton() { return openButton; }
+    public Button getSaveButton() { return saveButton; }
+
+    public static void main(String[] args) { launch(args); }
 }

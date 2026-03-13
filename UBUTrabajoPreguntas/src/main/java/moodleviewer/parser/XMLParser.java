@@ -11,7 +11,7 @@ import java.util.List;
 public class XMLParser {
 
     public static Category parseMoodleXML(File xmlFile) throws Exception {
-        Category rootCategory = new Category("Categorías de Moodle");
+        Category rootCategory = new Category("Banco de Preguntas");
         Category currentCategory = rootCategory;
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -32,48 +32,43 @@ public class XMLParser {
                     String fullPath = getNestedText(questionElement, "category", "text");
                     if (fullPath != null) {
                         fullPath = fullPath.replace("$module$/top/", "").replace("$course$/top/", "");
-                        if (fullPath.equals("$module$/top") || fullPath.equals("$course$/top")) fullPath = "General";
-
-                        String[] parts = fullPath.split("/");
-                        Category navCategory = rootCategory;
-                        for (String part : parts) {
-                            part = part.trim();
-                            if (part.isEmpty()) continue;
-                            
-                            Category found = null;
-                            for (Category sub : navCategory.getSubcategories()) {
-                                if (sub.getName().equals(part)) {
-                                    found = sub;
-                                    break;
-                                }
-                            }
-                            if (found == null) {
-                                found = new Category(part);
-                                navCategory.addSubcategory(found);
-                            }
-                            navCategory = found;
-                        }
-                        currentCategory = navCategory;
+                        if (fullPath.equals("$module$/top") || fullPath.equals("$course$/top")) continue;
+                        currentCategory = findOrCreateCategory(rootCategory, fullPath);
                     }
-                } else {
-                    String name = getNestedText(questionElement, "name", "text");
-                    String text = getNestedText(questionElement, "questiontext", "text");
-                    String grade = getSimpleText(questionElement, "defaultgrade");
-                    String penalty = getSimpleText(questionElement, "penalty");
+                    continue;
+                }
 
-                    List<MoodleFile> questionFiles = new ArrayList<>();
-                    NodeList fileNodes = questionElement.getElementsByTagName("file");
-                    for (int f = 0; f < fileNodes.getLength(); f++) {
-                        Element fileElem = (Element) fileNodes.item(f);
-                        String fName = fileElem.getAttribute("name");
-                        String fPath = fileElem.getAttribute("path");
-                        String fEncoding = fileElem.getAttribute("encoding");
-                        String fContent = fileElem.getTextContent().trim();
-                        questionFiles.add(new MoodleFile(fName, fPath, fEncoding, fContent));
-                    }
+                String name = getNestedText(questionElement, "name", "text");
+                String text = getNestedText(questionElement, "questiontext", "text");
+                String defaultGrade = getSimpleText(questionElement, "defaultgrade");
+                if (defaultGrade == null || defaultGrade.isEmpty()) defaultGrade = "1.0000000";
+                String penalty = getSimpleText(questionElement, "penalty");
+                if (penalty == null || penalty.isEmpty()) penalty = "0.3333333";
+                String generalFeedback = getNestedText(questionElement, "generalfeedback", "text");
 
-                    Question q = QuestionFactory.createQuestion(type, name, text, grade, penalty, questionElement);
-                    q.setFiles(questionFiles);
+                List<MoodleFile> questionFiles = new ArrayList<>();
+                NodeList fileNodes = questionElement.getElementsByTagName("file");
+                for (int j = 0; j < fileNodes.getLength(); j++) {
+                    Element fileElem = (Element) fileNodes.item(j);
+                    String fName = fileElem.getAttribute("name");
+                    String fPath = fileElem.getAttribute("path");
+                    String fEncoding = fileElem.getAttribute("encoding");
+                    String fContent = fileElem.getTextContent().trim();
+                    questionFiles.add(new MoodleFile(fName, fPath, fEncoding, fContent));
+                }
+
+                Question q = QuestionFactory.createQuestion(
+                        type, 
+                        name != null ? name : "Sin nombre", 
+                        text != null ? text : "", 
+                        defaultGrade, 
+                        penalty, 
+                        questionElement
+                );
+
+                if (q != null) {
+                    q.setFiles(questionFiles); 
+                    if (generalFeedback != null) q.setGeneralFeedback(generalFeedback);
                     currentCategory.addQuestion(q);
                 }
             }
@@ -97,5 +92,28 @@ public class XMLParser {
             if (list.item(i).getNodeName().equals(tag)) return list.item(i).getTextContent().trim();
         }
         return null;
+    }
+
+    private static Category findOrCreateCategory(Category root, String fullPath) {
+        if (fullPath == null || fullPath.isEmpty()) return root;
+        String[] parts = fullPath.split("/");
+        Category current = root;
+        for (String part : parts) {
+            part = part.trim();
+            if (part.isEmpty()) continue;
+            Category next = null;
+            for (Category sub : current.getSubcategories()) {
+                if (sub.getName().equals(part)) {
+                    next = sub;
+                    break;
+                }
+            }
+            if (next == null) {
+                next = new Category(part);
+                current.addSubcategory(next);
+            }
+            current = next;
+        }
+        return current;
     }
 }

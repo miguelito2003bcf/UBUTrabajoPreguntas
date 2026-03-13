@@ -7,10 +7,6 @@ public class ClozeQuestion extends Question {
 
     @Override
     public String getDetails() {
-        return getBasicDetailsHtml() + 
-               "<div style='font-family: Arial, sans-serif; font-size: 13px; margin-top: 15px;'>" +
-               "<h4 style='color: #2980b9;'>--- Pregunta Anidada (Cloze) ---</h4>" +
-               "Las respuestas están incrustadas en el texto usando la sintaxis { ... }." +
-               "</div>";
+        return getBasicDetailsHtml() + "<p style='font-family: Arial; font-size: 13px; color: #7f8c8d;'><i>(Pregunta anidada tipo Cloze)</i></p>";
     }
 }

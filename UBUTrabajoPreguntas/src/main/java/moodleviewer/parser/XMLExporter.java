@@ -1,105 +1,112 @@
 package moodleviewer.parser;
 
-import moodleviewer.model.Category;
-import moodleviewer.model.MoodleFile;
-import moodleviewer.model.Question;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import moodleviewer.model.*;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 
 public class XMLExporter {
 
-    public static void exportMoodleXML(Category rootCategory, File outputFile) throws Exception {
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-        Document doc = docBuilder.newDocument();
-
-        Element rootElement = doc.createElement("quiz");
-        doc.appendChild(rootElement);
-
-        processCategory(rootCategory, rootElement, doc, "$course$/top");
-
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-
-        DOMSource source = new DOMSource(doc);
-        StreamResult result = new StreamResult(outputFile);
-        transformer.transform(source, result);
+    public static void exportMoodleXML(Category rootCategory, File file) throws Exception {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            writer.write("<quiz>\n\n");
+            exportCategoryRecursive(rootCategory, "$course$/top", writer);
+            writer.write("</quiz>\n");
+        }
     }
 
-    private static void processCategory(Category category, Element parentElement, Document doc, String currentPath) {
-        String categoryPath = currentPath;
+    private static void exportCategoryRecursive(Category category, String currentPath, BufferedWriter writer) throws Exception {
+        String newPath = currentPath;
+        if (!category.getName().equals("Banco de Preguntas")) {
+            newPath = currentPath + "/" + escapeXML(category.getName());
+            
+            writer.write("  \n");
+            writer.write("  <question type=\"category\">\n");
+            writer.write("    <category>\n");
+            writer.write("      <text>" + newPath + "</text>\n");
+            writer.write("    </category>\n");
+            writer.write("    <info format=\"html\">\n      <text><![CDATA[]]></text>\n    </info>\n");
+            writer.write("  </question>\n\n");
+        }
+
+        for (Question q : category.getQuestions()) writeQuestion(q, writer);
+        for (Category sub : category.getSubcategories()) exportCategoryRecursive(sub, newPath, writer);
+    }
+
+    private static void writeQuestion(Question q, BufferedWriter writer) throws Exception {
+        writer.write("  <question type=\"" + q.getType() + "\">\n");
         
-        if (!category.getName().equals("Categorías de Moodle") && !category.getName().equals("General")) {
-            categoryPath += "/" + category.getName();
-            
-            Element catQuestion = doc.createElement("question");
-            catQuestion.setAttribute("type", "category");
-            
-            Element catElement = doc.createElement("category");
-            Element textElement = doc.createElement("text");
-            textElement.setTextContent(categoryPath);
-            
-            catElement.appendChild(textElement);
-            catQuestion.appendChild(catElement);
-            parentElement.appendChild(catQuestion);
+        writer.write("    <name>\n      <text><![CDATA[" + q.getName() + "]]></text>\n    </name>\n");
+        writer.write("    <questiontext format=\"html\">\n");
+        writer.write("      <text><![CDATA[" + q.getText() + "]]></text>\n");
+        if (q.getFiles() != null && !q.getFiles().isEmpty()) {
+            for (MoodleFile f : q.getFiles()) {
+                writer.write("      <file name=\"" + escapeXML(f.name) + "\" path=\"" + escapeXML(f.path) + "\" encoding=\"" + escapeXML(f.encoding) + "\">" + f.content + "</file>\n");
+            }
+        }
+        writer.write("    </questiontext>\n");
+        writer.write("    <defaultgrade>" + escapeXML(q.getDefaultGrade()) + "</defaultgrade>\n");
+        writer.write("    <penalty>" + escapeXML(q.getPenalty()) + "</penalty>\n");
+        writer.write("    <hidden>0</hidden>\n");
+        writer.write("    <idnumber></idnumber>\n");
+
+        if (q.getGeneralFeedback() != null && !q.getGeneralFeedback().isEmpty()) {
+            writer.write("    <generalfeedback format=\"html\">\n      <text><![CDATA[" + q.getGeneralFeedback() + "]]></text>\n    </generalfeedback>\n");
         }
 
-        for (Question q : category.getQuestions()) {
-            Element qElement = doc.createElement("question");
-            qElement.setAttribute("type", q.getType());
-
-            Element nameElem = doc.createElement("name");
-            Element nameText = doc.createElement("text");
-            nameText.setTextContent(q.getName());
-            nameElem.appendChild(nameText);
-            qElement.appendChild(nameElem);
-
-            Element qTextElem = doc.createElement("questiontext");
-            qTextElem.setAttribute("format", "html");
-            Element qTextStr = doc.createElement("text");
-            qTextStr.setTextContent(q.getQuestionText());
-            qTextElem.appendChild(qTextStr);
+        if (q instanceof TrueFalseQuestion) {
+            TrueFalseQuestion tfq = (TrueFalseQuestion) q;
+            writeAnswer(tfq.getTrueAnswer(), writer);
+            writeAnswer(tfq.getFalseAnswer(), writer);
             
-            if (q.getFiles() != null) {
-                for (MoodleFile mf : q.getFiles()) {
-                    Element fileElem = doc.createElement("file");
-                    fileElem.setAttribute("name", mf.name);
-                    fileElem.setAttribute("path", mf.path);
-                    fileElem.setAttribute("encoding", mf.encoding);
-                    fileElem.setTextContent(mf.content);
-                    qTextElem.appendChild(fileElem);
-                }
+        } else if (q instanceof MultichoiceQuestion) {
+            MultichoiceQuestion mcq = (MultichoiceQuestion) q;
+            writer.write("    <single>" + (mcq.isSingleAnswer() ? "true" : "false") + "</single>\n");
+            writer.write("    <shuffleanswers>" + (mcq.isShuffleAnswers() ? "true" : "false") + "</shuffleanswers>\n");
+            writer.write("    <answernumbering>abc</answernumbering>\n");
+            for (Answer a : mcq.getAnswers()) writeAnswer(a, writer);
+            
+        } else if (q instanceof ShortAnswerQuestion) {
+            ShortAnswerQuestion saq = (ShortAnswerQuestion) q;
+            writer.write("    <usecase>" + (saq.isCaseSensitive() ? "1" : "0") + "</usecase>\n");
+            for (Answer a : saq.getAnswers()) writeAnswer(a, writer);
+            
+        } else if (q instanceof MatchingQuestion) {
+            MatchingQuestion mq = (MatchingQuestion) q;
+            writer.write("    <shuffleanswers>true</shuffleanswers>\n");
+            for (MatchingPair p : mq.getPairs()) {
+                writer.write("    <subquestion format=\"html\">\n");
+                writer.write("      <text><![CDATA[" + p.getQuestionText() + "]]></text>\n");
+                writer.write("      <answer>\n        <text><![CDATA[" + p.getAnswerText() + "]]></text>\n      </answer>\n");
+                writer.write("    </subquestion>\n");
             }
-            qElement.appendChild(qTextElem);
-
-            if (q.getDefaultGrade() != null) {
-                Element gradeElem = doc.createElement("defaultgrade");
-                gradeElem.setTextContent(q.getDefaultGrade());
-                qElement.appendChild(gradeElem);
-            }
-            if (q.getPenalty() != null) {
-                Element penaltyElem = doc.createElement("penalty");
-                penaltyElem.setTextContent(q.getPenalty());
-                qElement.appendChild(penaltyElem);
-            }
-
-
-            parentElement.appendChild(qElement);
+            
+        } else if (q instanceof NumericalQuestion) {
+            NumericalQuestion nq = (NumericalQuestion) q;
+            writer.write("    <answer fraction=\"" + nq.getAnswer().getFraction() + "\" format=\"moodle_auto_format\">\n");
+            writer.write("      <text>" + escapeXML(nq.getAnswer().getText()) + "</text>\n");
+            writer.write("      <feedback format=\"html\">\n        <text><![CDATA[" + nq.getAnswer().getFeedback() + "]]></text>\n      </feedback>\n");
+            writer.write("      <tolerance>" + escapeXML(nq.getTolerance()) + "</tolerance>\n");
+            writer.write("    </answer>\n");
         }
 
-        for (Category sub : category.getSubcategories()) {
-            processCategory(sub, parentElement, doc, categoryPath);
-        }
+        writer.write("  </question>\n\n");
+    }
+
+    private static void writeAnswer(Answer a, BufferedWriter writer) throws Exception {
+        writer.write("    <answer fraction=\"" + escapeXML(a.getFraction()) + "\" format=\"html\">\n");
+        writer.write("      <text><![CDATA[" + a.getText() + "]]></text>\n");
+        writer.write("      <feedback format=\"html\">\n        <text><![CDATA[" + a.getFeedback() + "]]></text>\n      </feedback>\n");
+        writer.write("    </answer>\n");
+    }
+
+    private static String escapeXML(String str) {
+        if (str == null) return "";
+        return str.replace("&", "&amp;")
+                  .replace("<", "&lt;")
+                  .replace(">", "&gt;")
+                  .replace("\"", "&quot;")
+                  .replace("'", "&apos;");
     }
 }

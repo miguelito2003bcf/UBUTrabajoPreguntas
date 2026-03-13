@@ -7,7 +7,6 @@ public class CategoryTest {
 
     @Test
     public void testCategoryCreation() {
-    	
         String categoryName = "Ingeniería Informática";
         Category category = new Category(categoryName);
 
@@ -18,9 +17,9 @@ public class CategoryTest {
 
     @Test
     public void testAddSubcategory() {
-
         Category root = new Category("Programación");
         Category sub = new Category("Java y Programación Orientada a Objetos");
+
         root.addSubcategory(sub);
 
         assertEquals(1, root.getSubcategories().size(), "Debería haber exactamente 1 subcategoría.");
@@ -29,15 +28,20 @@ public class CategoryTest {
 
     @Test
     public void testAddQuestion() {
-
         Category category = new Category("Bases de Datos");
+        
+        // --- CÓDIGO ACTUALIZADO: Usamos la nueva clase Answer ---
+        Answer trueAns = new Answer("100", "Verdadero", "¡Correcto!");
+        Answer falseAns = new Answer("0", "Falso", "Repasa la teoría.");
+        
         Question mockQuestion = new TrueFalseQuestion(
             "truefalse", 
             "SQL Básico", 
             "¿La sentencia SELECT se utiliza para extraer datos de una base de datos?", 
             "1.00", 
             "0.00", 
-            "Verdadero"
+            trueAns,
+            falseAns
         );
 
         category.addQuestion(mockQuestion);
