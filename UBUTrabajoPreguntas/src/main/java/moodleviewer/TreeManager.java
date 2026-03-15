@@ -1,5 +1,6 @@
 package moodleviewer;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
@@ -8,10 +9,8 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
 import moodleviewer.model.Category;
-import moodleviewer.model.Question;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 public class TreeManager {
 
@@ -19,7 +18,6 @@ public class TreeManager {
 
     public static void configure(Main main) {
         TreeView<Category> tree = main.getCategoryTreeView();
-        TableView<Question> table = main.getQuestionTableView();
 
         tree.setCellFactory(tv -> {
             TreeCell<Category> cell = new TreeCell<Category>() {
@@ -34,11 +32,12 @@ public class TreeManager {
                 }
             };
 
+            // 1. INICIAR EL ARRASTRE DE CATEGORÍA
             cell.setOnDragDetected(event -> {
                 if (!cell.isEmpty() && cell.getItem() != null) {
                     TreeItem<Category> draggedNode = cell.getTreeItem();
                     
-                    if (draggedNode != null && draggedNode.getParent() != null) { 
+                    if (draggedNode.getParent() != null) {
                         Dragboard db = cell.startDragAndDrop(TransferMode.MOVE);
                         ClipboardContent content = new ClipboardContent();
                         content.putString("MOVER_CATEGORIA");
@@ -54,16 +53,15 @@ public class TreeManager {
                     }
                 }
             });
-            
+
+            // 2. PERMITIR SOLTAR (SOLO ACEPTA OTRAS CATEGORÍAS)
             cell.setOnDragOver(event -> {
                 Dragboard db = event.getDragboard();
                 if (db.hasString() && !cell.isEmpty()) {
                     String dragType = db.getString();
                     TreeItem<Category> targetNode = cell.getTreeItem();
 
-                    if ("MOVER_PREGUNTAS".equals(dragType)) {
-                        event.acceptTransferModes(TransferMode.MOVE);
-                    } else if ("MOVER_CATEGORIA".equals(dragType)) {
+                    if ("MOVER_CATEGORIA".equals(dragType)) {
                         if (isValidDropTarget(draggedCategoryNode, targetNode)) {
                             event.acceptTransferModes(TransferMode.MOVE);
                         }
@@ -72,63 +70,81 @@ public class TreeManager {
                 event.consume();
             });
 
+            // 3. SOLTAR (PREGUNTAR: ¿SUBCATEGORÍA O COMBINAR?)
             cell.setOnDragDropped(event -> {
                 Dragboard db = event.getDragboard();
-                boolean success = false;
                 
-                if (db.hasString() && !cell.isEmpty()) {
-                    String dragType = db.getString();
+                if (db.hasString() && !cell.isEmpty() && "MOVER_CATEGORIA".equals(db.getString())) {
                     TreeItem<Category> targetNode = cell.getTreeItem();
-                    
-                    if (targetNode != null && targetNode.getValue() != null) {
-                        Category targetCategory = targetNode.getValue();
 
-                        if ("MOVER_PREGUNTAS".equals(dragType)) {
-                            TreeItem<Category> selectedNode = tree.getSelectionModel().getSelectedItem();
-                            if (selectedNode != null && selectedNode.getValue() != targetCategory) {
-                                List<Question> questionsToMove = new ArrayList<>(table.getSelectionModel().getSelectedItems());
-                                selectedNode.getValue().getQuestions().removeAll(questionsToMove);
-                                targetCategory.getQuestions().addAll(questionsToMove);
-                                
-                                main.refreshQuestionTable();
-                                tree.refresh(); 
-                                success = true;
-                            }
-                        } 
-                        else if ("MOVER_CATEGORIA".equals(dragType)) {
-                            if (draggedCategoryNode != null && isValidDropTarget(draggedCategoryNode, targetNode)) {
-                                TreeItem<Category> sourceParentNode = draggedCategoryNode.getParent();
-                                
-                                if (sourceParentNode != null) {
-                                    Category sourceCategory = draggedCategoryNode.getValue();
-                                    Category sourceParentCategory = sourceParentNode.getValue();
+                    if (draggedCategoryNode != null && isValidDropTarget(draggedCategoryNode, targetNode)) {
+                        // Guardamos las referencias antes de que termine el evento
+                        TreeItem<Category> sourceNode = draggedCategoryNode;
+                        TreeItem<Category> destNode = targetNode;
 
+                        // Le decimos a JavaFX que el arrastre ha terminado para que no se congele el ratón
+                        event.setDropCompleted(true);
+                        event.consume();
+
+                        // Lanzamos la pregunta un milisegundo después en el hilo de la interfaz
+                        Platform.runLater(() -> {
+                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                            alert.setTitle("Mover Categoría");
+                            alert.setHeaderText("Has arrastrado '" + sourceNode.getValue().getName() + "' sobre '" + destNode.getValue().getName() + "'");
+                            alert.setContentText("¿Qué deseas hacer con el contenido?");
+
+                            ButtonType btnSub = new ButtonType("Convertir en Subcategoría");
+                            ButtonType btnCombine = new ButtonType("Combinar (Fusionar)");
+                            ButtonType btnCancel = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                            alert.getButtonTypes().setAll(btnSub, btnCombine, btnCancel);
+
+                            Optional<ButtonType> result = alert.showAndWait();
+                            
+                            if (result.isPresent() && result.get() != btnCancel) {
+                                Category sourceCategory = sourceNode.getValue();
+                                Category targetCategory = destNode.getValue();
+                                Category sourceParentCategory = sourceNode.getParent().getValue();
+
+                                if (result.get() == btnSub) {
+                                    // OPCIÓN A: COMPORTAMIENTO NORMAL (Convertir en Subcategoría)
                                     sourceParentCategory.getSubcategories().remove(sourceCategory);
                                     targetCategory.getSubcategories().add(sourceCategory);
 
-                                    sourceParentNode.getChildren().remove(draggedCategoryNode);
-                                    targetNode.getChildren().add(draggedCategoryNode);
-                                    targetNode.setExpanded(true);
+                                    sourceNode.getParent().getChildren().remove(sourceNode);
+                                    destNode.getChildren().add(sourceNode);
+                                    destNode.setExpanded(true);
+                                    destNode.getChildren().sort((n1, n2) -> n1.getValue().getName().compareToIgnoreCase(n2.getValue().getName()));
 
-                                    targetNode.getChildren().sort((n1, n2) -> 
-                                        n1.getValue().getName().compareToIgnoreCase(n2.getValue().getName())
-                                    );
-
-                                    tree.getSelectionModel().select(draggedCategoryNode);
-                                    main.refreshQuestionTable();
-                                    tree.refresh();
+                                    tree.getSelectionModel().select(sourceNode);
                                     
-                                    success = true;
-                                    draggedCategoryNode = null; 
+                                } else if (result.get() == btnCombine) {
+                                    // OPCIÓN B: NUEVO COMPORTAMIENTO (Fusionar carpetas)
+                                    // 1. Pasamos todas las preguntas
+                                    targetCategory.getQuestions().addAll(sourceCategory.getQuestions());
+                                    // 2. Pasamos todas las subcategorías
+                                    targetCategory.getSubcategories().addAll(sourceCategory.getSubcategories());
+                                    // 3. Eliminamos la carpeta origen vacía
+                                    sourceParentCategory.getSubcategories().remove(sourceCategory);
+
+                                    // Refrescamos el árbol entero para que se dibuje la fusión correctamente
+                                    main.applyCategoryFilter(main.getSearchCategoryField().getText());
+                                    tree.getSelectionModel().select(destNode);
                                 }
+                                
+                                main.refreshQuestionTable();
+                                tree.refresh();
                             }
-                        }
+                            draggedCategoryNode = null; 
+                        });
+                        return; // Salimos de la función aquí
                     }
                 }
-                event.setDropCompleted(success);
+                event.setDropCompleted(false);
                 event.consume();
             });
 
+            // MENÚ CONTEXTUAL
             ContextMenu categoryMenu = new ContextMenu();
             
             MenuItem addCatItem = new MenuItem("➕ Añadir Subcategoría");
@@ -156,42 +172,33 @@ public class TreeManager {
                     dialog.setTitle("Editar Categoría");
                     dialog.setHeaderText("Nuevo nombre:");
                     dialog.showAndWait().ifPresent(newName -> {
-                        if (!newName.trim().isEmpty()) {
-                            c.setName(newName.trim());
-                            tree.refresh(); 
-                        }
+                        c.setName(newName);
+                        tree.refresh(); 
                     });
                 }
             });
 
-            MenuItem deleteCatItem = new MenuItem("📂 Eliminar (Mover contenido al padre)");
+            MenuItem deleteCatItem = new MenuItem("📂 Eliminar");
             deleteCatItem.setOnAction(event -> {
                 TreeItem<Category> treeItemToDelete = cell.getTreeItem();
-                if (treeItemToDelete != null) {
-                    TreeItem<Category> parentItem = treeItemToDelete.getParent();
+                TreeItem<Category> parentItem = treeItemToDelete.getParent();
+                
+                if (parentItem != null) { 
+                    Category catToDelete = treeItemToDelete.getValue();
+                    Category parentCat = parentItem.getValue();
                     
-                    if (parentItem != null) { 
-                        Category catToDelete = treeItemToDelete.getValue();
-                        Category parentCat = parentItem.getValue();
-                        
-                        parentCat.getQuestions().addAll(catToDelete.getQuestions());
-                        parentCat.getSubcategories().addAll(catToDelete.getSubcategories());
-                        parentCat.getSubcategories().remove(catToDelete); 
-                        
-                        main.applyCategoryFilter(main.getSearchCategoryField().getText());
-                    } else {
-                        new Alert(Alert.AlertType.WARNING, "No se puede eliminar la categoría principal.").show();
-                    }
+                    parentCat.getQuestions().addAll(catToDelete.getQuestions());
+                    parentCat.getSubcategories().addAll(catToDelete.getSubcategories());
+                    parentCat.getSubcategories().remove(catToDelete); 
+                    
+                    main.applyCategoryFilter(main.getSearchCategoryField().getText());
+                } else {
+                    new Alert(Alert.AlertType.WARNING, "No se puede eliminar la categoría principal.").show();
                 }
             });
             
             categoryMenu.getItems().addAll(addCatItem, editCatItem, deleteCatItem);
-            cell.contextMenuProperty().bind(
-                Bindings.when(cell.emptyProperty())
-                .then((ContextMenu) null)
-                .otherwise(categoryMenu)
-            );
-            
+            cell.contextMenuProperty().bind(Bindings.when(cell.emptyProperty()).then((ContextMenu) null).otherwise(categoryMenu));
             return cell;
         });
     }

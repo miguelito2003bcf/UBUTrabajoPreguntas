@@ -15,21 +15,20 @@ public class NumericalQuestion extends Question {
 
     @Override
     public String getDetails() {
-        StringBuilder sb = new StringBuilder(getBasicDetailsHtml());
-        sb.append("<div style='font-family: Arial, sans-serif; font-size: 13px; margin-top: 15px;'>");
-        sb.append("<h4 style='color: #2980b9; margin-bottom: 10px;'>--- Respuesta Numérica ---</h4>");
+        StringBuilder sb = new StringBuilder(getMoodleHeader());
         
-        sb.append("<table style='border-collapse: collapse; width: 100%; border: 1px solid #ddd;'>");
-        sb.append("<tr style='background-color: #f4f6f8;'><th style='padding: 8px; border: 1px solid #ddd;'>Respuesta Esperada</th><th style='padding: 8px; border: 1px solid #ddd;'>Tolerancia</th><th style='padding: 8px; border: 1px solid #ddd;'>Valor</th><th style='padding: 8px; border: 1px solid #ddd;'>Retroalimentación</th></tr>");
-
-        sb.append("<tr>");
-        sb.append("<td style='padding: 8px; border: 1px solid #ddd; font-weight: bold; color: #27ae60;'>").append(answer.getText()).append("</td>");
-        sb.append("<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>± ").append(tolerance != null ? tolerance : "0").append("</td>");
-        sb.append("<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>").append(answer.getFraction()).append("%</td>");
-        sb.append("<td style='padding: 8px; border: 1px solid #ddd; font-style: italic; color: #7f8c8d;'>").append(answer.getFeedback().isEmpty() ? "-" : answer.getFeedback()).append("</td>");
-        sb.append("</tr>");
-
-        sb.append("</table></div>");
+        sb.append("<div style=\"display: flex; align-items: center; margin-bottom: 20px; font-size: 15px; color: #212529;\">")
+          .append("<strong style=\"margin-right: 15px;\">Respuesta:</strong>")
+          .append("<input type=\"text\" disabled style=\"padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 150px; background-color: #f8f9fa;\">")
+          .append("</div>");
+          
+        String tolText = (tolerance != null && !tolerance.equals("0") && !tolerance.isEmpty()) ? " (margen de error ±" + tolerance + ")" : "";
+        
+        sb.append("<div style=\"margin-top: 30px; padding: 15px; background-color: #fcf8e3; border: 1px solid #faebcc; border-radius: 4px; font-size: 14px; color: #8a6d3b;\">")
+          .append("La respuesta correcta es: <strong>").append(processPluginFiles(answer.getText())).append("</strong>").append(tolText)
+          .append("</div>");
+        
+        sb.append(getMoodleFooter());
         return sb.toString();
     }
 }

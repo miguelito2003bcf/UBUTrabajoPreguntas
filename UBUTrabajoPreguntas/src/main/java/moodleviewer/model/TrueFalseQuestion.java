@@ -15,28 +15,20 @@ public class TrueFalseQuestion extends Question {
 
     @Override
     public String getDetails() {
-        StringBuilder sb = new StringBuilder(getBasicDetailsHtml());
-        sb.append("<div style='font-family: Arial, sans-serif; font-size: 13px; margin-top: 15px;'>");
-        sb.append("<h4 style='color: #2980b9; margin-bottom: 10px;'>--- Verdadero / Falso ---</h4>");
+        StringBuilder sb = new StringBuilder(getMoodleHeader());
         
-        sb.append("<table style='border-collapse: collapse; width: 100%; border: 1px solid #ddd;'>");
-        sb.append("<tr style='background-color: #f4f6f8;'><th style='padding: 8px; border: 1px solid #ddd; width: 10%;'>Valor</th><th style='padding: 8px; border: 1px solid #ddd; width: 20%;'>Opción</th><th style='padding: 8px; border: 1px solid #ddd; width: 70%;'>Retroalimentación</th></tr>");
-
-        String trueColor = "100".equals(trueAnswer.getFraction()) ? "#27ae60" : "#e74c3c";
-        sb.append("<tr>");
-        sb.append("<td style='padding: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: ").append(trueColor).append(";'>").append(trueAnswer.getFraction()).append("%</td>");
-        sb.append("<td style='padding: 8px; border: 1px solid #ddd;'>Verdadero</td>");
-        sb.append("<td style='padding: 8px; border: 1px solid #ddd; font-style: italic; color: #7f8c8d;'>").append(trueAnswer.getFeedback().isEmpty() ? "-" : trueAnswer.getFeedback()).append("</td>");
-        sb.append("</tr>");
-
-        String falseColor = "100".equals(falseAnswer.getFraction()) ? "#27ae60" : "#e74c3c";
-        sb.append("<tr>");
-        sb.append("<td style='padding: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: ").append(falseColor).append(";'>").append(falseAnswer.getFraction()).append("%</td>");
-        sb.append("<td style='padding: 8px; border: 1px solid #ddd;'>Falso</td>");
-        sb.append("<td style='padding: 8px; border: 1px solid #ddd; font-style: italic; color: #7f8c8d;'>").append(falseAnswer.getFeedback().isEmpty() ? "-" : falseAnswer.getFeedback()).append("</td>");
-        sb.append("</tr>");
-
-        sb.append("</table></div>");
+        sb.append("<div style=\"margin-bottom: 15px; font-size: 14px; font-weight: bold; color: #333;\">Seleccione una:</div>");
+        sb.append("<div style=\"margin-left: 5px;\">");
+        sb.append("<div style=\"display: flex; align-items: flex-start; margin-bottom: 10px; font-size: 15px; color: #212529;\"><input type=\"radio\" disabled style=\"margin-top: 5px; margin-right: 12px; transform: scale(1.2);\"><div>Verdadero</div></div>");
+        sb.append("<div style=\"display: flex; align-items: flex-start; margin-bottom: 10px; font-size: 15px; color: #212529;\"><input type=\"radio\" disabled style=\"margin-top: 5px; margin-right: 12px; transform: scale(1.2);\"><div>Falso</div></div>");
+        sb.append("</div>");
+        
+        String correctAnswer = "100".equals(trueAnswer.getFraction()) ? "Verdadero" : "Falso";
+        sb.append("<div style=\"margin-top: 30px; padding: 15px; background-color: #fcf8e3; border: 1px solid #faebcc; border-radius: 4px; font-size: 14px; color: #8a6d3b;\">")
+          .append("La respuesta correcta es '<strong>").append(correctAnswer).append("</strong>'.")
+          .append("</div>");
+        
+        sb.append(getMoodleFooter());
         return sb.toString();
     }
 }

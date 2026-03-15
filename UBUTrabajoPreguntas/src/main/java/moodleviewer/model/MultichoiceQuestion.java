@@ -1,4 +1,5 @@
 package moodleviewer.model;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MultichoiceQuestion extends Question {
@@ -19,29 +20,39 @@ public class MultichoiceQuestion extends Question {
 
     @Override
     public String getDetails() {
-        StringBuilder sb = new StringBuilder(getBasicDetailsHtml());
-        sb.append("<div style='font-family: Arial, sans-serif; font-size: 13px; margin-top: 15px;'>");
-        sb.append("<h4 style='color: #2980b9; margin-bottom: 5px;'>--- Opciones (Multichoice) ---</h4>");
-        sb.append("<p style='margin-top: 0; color: #555;'><b>¿Respuesta única?:</b> ").append(singleAnswer ? "Sí" : "No").append("</p>");
+        StringBuilder sb = new StringBuilder(getMoodleHeader());
         
-        sb.append("<table style='border-collapse: collapse; width: 100%; border: 1px solid #ddd;'>");
-        sb.append("<tr style='background-color: #f4f6f8;'><th style='padding: 8px; border: 1px solid #ddd; width: 10%;'>Valor</th><th style='padding: 8px; border: 1px solid #ddd; width: 45%;'>Respuesta</th><th style='padding: 8px; border: 1px solid #ddd; width: 45%;'>Retroalimentación</th></tr>");
-
+        sb.append("<div style=\"margin-bottom: 15px; font-size: 14px; font-weight: bold; color: #333;\">Seleccione una").append(isSingleAnswer() ? ":" : " o más de una:").append("</div>");
+        
+        char letter = 'a';
+        List<String> correctAnswers = new ArrayList<>();
+        
+        sb.append("<div style=\"margin-left: 5px;\">");
         for (Answer a : answers) {
-            String color = "#333";
             try {
-                double val = Double.parseDouble(a.getFraction());
-                if (val > 0) color = "#27ae60";
-                else if (val < 0) color = "#e74c3c";
-            } catch(Exception e){}
-
-            sb.append("<tr>");
-            sb.append("<td style='padding: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: ").append(color).append(";'>").append(a.getFraction()).append("%</td>");
-            sb.append("<td style='padding: 8px; border: 1px solid #ddd;'>").append(a.getText()).append("</td>");
-            sb.append("<td style='padding: 8px; border: 1px solid #ddd; font-style: italic; color: #7f8c8d;'>").append(a.getFeedback().isEmpty() ? "-" : a.getFeedback()).append("</td>");
-            sb.append("</tr>");
+                if (Double.parseDouble(a.getFraction()) > 0) {
+                    correctAnswers.add(processPluginFiles(a.getText()));
+                }
+            } catch (Exception e) {}
+            
+            String inputType = isSingleAnswer() ? "radio" : "checkbox";
+            
+            sb.append("<div style=\"display: flex; align-items: flex-start; margin-bottom: 10px; font-size: 15px; color: #212529;\">")
+              .append("<input type=\"").append(inputType).append("\" disabled style=\"margin-top: 5px; margin-right: 12px; transform: scale(1.2);\">")
+              .append("<div><strong>").append(letter).append(".</strong> ").append(processPluginFiles(a.getText()))
+              .append("</div></div>");
+            letter++;
         }
-        sb.append("</table></div>");
+        sb.append("</div>");
+        
+        if (!correctAnswers.isEmpty()) {
+            sb.append("<div style=\"margin-top: 30px; padding: 15px; background-color: #fcf8e3; border: 1px solid #faebcc; border-radius: 4px; font-size: 14px; color: #8a6d3b;\">")
+              .append("La(s) respuesta(s) correcta(s):<br><ul>");
+            for (String ca : correctAnswers) sb.append("<li>").append(ca).append("</li>");
+            sb.append("</ul></div>");
+        }
+        
+        sb.append(getMoodleFooter());
         return sb.toString();
     }
 }

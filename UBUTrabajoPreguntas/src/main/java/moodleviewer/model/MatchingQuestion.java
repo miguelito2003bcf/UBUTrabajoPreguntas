@@ -13,20 +13,24 @@ public class MatchingQuestion extends Question {
 
     @Override
     public String getDetails() {
-        StringBuilder sb = new StringBuilder(getBasicDetailsHtml());
-        sb.append("<div style='font-family: Arial, sans-serif; font-size: 13px; margin-top: 15px;'>");
-        sb.append("<h4 style='color: #2980b9; margin-bottom: 10px;'>--- Pares de Emparejamiento ---</h4>");
+        StringBuilder sb = new StringBuilder(getMoodleHeader());
         
-        sb.append("<table style='border-collapse: collapse; width: 100%; border: 1px solid #ddd;'>");
-        sb.append("<tr style='background-color: #f4f6f8;'><th style='padding: 8px; border: 1px solid #ddd; width: 50%;'>Pregunta / Estímulo</th><th style='padding: 8px; border: 1px solid #ddd; width: 50%;'>Respuesta Correcta</th></tr>");
+        sb.append("<table style=\"width: 100%; border-collapse: separate; border-spacing: 0 15px; font-size: 15px; color: #212529;\">");
         
         for (MatchingPair p : pairs) {
-            sb.append("<tr>");
-            sb.append("<td style='padding: 8px; border: 1px solid #ddd;'>").append(p.getQuestionText()).append("</td>");
-            sb.append("<td style='padding: 8px; border: 1px solid #ddd; color: #27ae60; font-weight: bold;'>").append(p.getAnswerText()).append("</td>");
-            sb.append("</tr>");
+            sb.append("<tr>")
+              .append("<td style=\"vertical-align: middle; width: 45%; text-align: right; padding-right: 20px;\">").append(processPluginFiles(p.getQuestionText())).append("</td>")
+              .append("<td style=\"vertical-align: middle; width: 55%;\">")
+              .append("<select disabled style=\"padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; max-width: 250px; background-color: #f8f9fa;\">")
+              .append("<option>Elegir...</option>")
+              .append("<option selected>").append(processPluginFiles(p.getAnswerText())).append("</option>")
+              .append("</select>")
+              .append("</td>")
+              .append("</tr>");
         }
-        sb.append("</table></div>");
+        sb.append("</table>");
+        
+        sb.append(getMoodleFooter());
         return sb.toString();
     }
 }

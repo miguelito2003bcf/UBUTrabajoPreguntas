@@ -10,6 +10,7 @@ public abstract class Question {
     protected String defaultGrade;
     protected String penalty;
     protected String generalFeedback;
+    
     protected List<MoodleFile> files = new ArrayList<>();
 
     public Question(String type, String name, String text, String defaultGrade, String penalty) {
@@ -26,10 +27,13 @@ public abstract class Question {
     public String getText() { return text; }
     public String getDefaultGrade() { return defaultGrade; }
     public String getPenalty() { return penalty; }
+    
     public String getGeneralFeedback() { return generalFeedback; }
     public void setGeneralFeedback(String generalFeedback) { this.generalFeedback = generalFeedback; }
+
     public List<MoodleFile> getFiles() { return files; }
     public void setFiles(List<MoodleFile> files) { this.files = files; }
+
     public String processPluginFiles(String html) {
         if (html == null || html.isEmpty()) return "";
         if (files == null || files.isEmpty()) return html;
@@ -44,7 +48,6 @@ public abstract class Question {
                 else if (nameLower.endsWith(".svg")) mimeType = "image/svg+xml";
 
                 String base64URI = "data:" + mimeType + ";base64," + f.content.replace("\n", "").replace("\r", "");
-                
                 processed = processed.replace("@@PLUGINFILE@@" + f.path + f.name, base64URI);
                 processed = processed.replace("@@PLUGINFILE@@/" + f.name, base64URI);
             }
@@ -52,22 +55,29 @@ public abstract class Question {
         return processed;
     }
 
-    protected String getBasicDetailsHtml() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<div style='font-family: Arial, sans-serif; padding: 10px;'>");
-        sb.append("<h3 style='color: #2c3e50; margin-bottom: 5px;'>").append(name).append("</h3>");
-        sb.append("<span style='background-color: #e0e0e0; padding: 3px 8px; border-radius: 12px; font-size: 12px;'>").append(type.toUpperCase()).append("</span>");
-        sb.append("<hr style='border: 0; height: 1px; background: #ddd; margin: 15px 0;'>");
-        
+    // --- DISEÑO ESTILO MOODLE (SIN BORDES BLANCOS) ---
+    protected String getMoodleHeader() {
         String safeText = processPluginFiles(text);
-        sb.append("<p style='font-size: 14px; line-height: 1.5;'>").append(safeText).append("</p>");
         
+        // Inyectamos CSS para eliminar los márgenes por defecto del navegador web incrustado
+        return "<style>body { margin: 0; padding: 0; background-color: #f8f9fa; }</style>" +
+               "<div style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; padding: 20px; min-height: 100vh; box-sizing: border-box;\">" +
+               "  <div style=\"background-color: #fff; border: 1px solid #dee2e6; border-radius: 4px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,.05);\">" +
+               "    <div style=\"border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;\">" +
+               "      <strong style=\"color: #1177d1; font-size: 1.2rem;\">" + name + "</strong>" +
+               "      <span style=\"background-color: #6c757d; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;\">" + type.toUpperCase() + "</span>" +
+               "    </div>" +
+               "    <div style=\"font-size: 15px; margin-bottom: 25px; color: #212529; line-height: 1.5;\">" + safeText + "</div>";
+    }
+
+    protected String getMoodleFooter() {
+        StringBuilder sb = new StringBuilder();
         if (generalFeedback != null && !generalFeedback.isEmpty()) {
-            sb.append("<div style='margin-top: 15px; padding: 10px; background-color: #e8f4f8; border-left: 4px solid #3498db;'>");
-            sb.append("<b>Feedback general:</b><br>").append(processPluginFiles(generalFeedback));
-            sb.append("</div>");
+            sb.append("<div style=\"margin-top: 25px; padding: 15px; background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; color: #0c5460; font-size: 14px;\">")
+              .append("<strong>Retroalimentación general:</strong><br><br>").append(processPluginFiles(generalFeedback))
+              .append("</div>");
         }
-        sb.append("</div>");
+        sb.append("  </div></div>"); 
         return sb.toString();
     }
 
