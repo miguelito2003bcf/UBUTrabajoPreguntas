@@ -8,7 +8,6 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
-import javafx.scene.Scene;
 import moodleviewer.model.Category;
 import moodleviewer.model.Question;
 
@@ -33,31 +32,24 @@ public class TableManager {
         
         table.getColumns().add(nameColumn);
         table.getColumns().add(typeColumn);
-        
-        table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        table.setOnDragDetected(event -> {
-            List<Question> selectedQuestions = table.getSelectionModel().getSelectedItems();
-            if (!selectedQuestions.isEmpty()) {
-                Dragboard db = table.startDragAndDrop(TransferMode.MOVE);
-                ClipboardContent content = new ClipboardContent();
-                content.putString("MOVER_PREGUNTAS"); 
-                db.setContent(content);
-                
-                Label dragLabel = new Label("Moviendo " + selectedQuestions.size() + " pregunta(s)");
-                dragLabel.setStyle("-fx-background-color: #2980b9; -fx-text-fill: white; -fx-padding: 8px 12px; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 5px;");
-                
-                new Scene(dragLabel); 
-                SnapshotParameters params = new SnapshotParameters();
-                params.setFill(Color.TRANSPARENT); 
-                db.setDragView(dragLabel.snapshot(params, null), dragLabel.getWidth() / 2, dragLabel.getHeight() / 2);
-                event.consume();
-            }
-        });
 
         table.setRowFactory(tv -> {
             TableRow<Question> row = new TableRow<>();
-            ContextMenu questionMenu = new ContextMenu();
-            
+            row.setOnDragDetected(event -> {
+                if (!row.isEmpty()) {
+                    Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
+                    ClipboardContent content = new ClipboardContent();
+                    content.putString("MOVER_PREGUNTAS");
+                    db.setContent(content);
+                    
+                    SnapshotParameters params = new SnapshotParameters();
+                    params.setFill(Color.TRANSPARENT);
+                    db.setDragView(row.snapshot(params, null));
+                    event.consume();
+                }
+            });
+
+            ContextMenu questionMenu = new ContextMenu(); 
             MenuItem editQuestionItem = new MenuItem("✏️ Editar Nombre");
             editQuestionItem.setOnAction(event -> {
                 Question q = row.getItem();
@@ -79,10 +71,20 @@ public class TableManager {
                 TreeItem<Category> selectedCategory = tree.getSelectionModel().getSelectedItem();
                 
                 if (!questionsToDelete.isEmpty() && selectedCategory != null) {
-                    selectedCategory.getValue().getQuestions().removeAll(questionsToDelete);
-                    main.refreshQuestionTable(); 
-                    main.getDetailsWebView().getEngine().loadContent(""); 
-                    tree.refresh(); 
+
+                    Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+                    confirm.setTitle("Confirmar Eliminación");
+                    confirm.setHeaderText("¿Estás seguro de que deseas eliminar las preguntas seleccionadas?");
+                    confirm.setContentText("Esta acción borrará las preguntas de la categoría actual.");
+
+                    confirm.showAndWait().ifPresent(response -> {
+                        if (response == ButtonType.OK) {
+                            selectedCategory.getValue().getQuestions().removeAll(questionsToDelete);
+                            main.refreshQuestionTable(); 
+                            main.getDetailsWebView().getEngine().loadContent(""); 
+                            tree.refresh(); 
+                        }
+                    });
                 }
             });
             
