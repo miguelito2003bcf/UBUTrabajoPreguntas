@@ -50,4 +50,26 @@ public class FileManager {
             }
         }
     }
+    
+    public static void exportLaTeX(Stage stage, Category currentRootCategory) {
+        if (currentRootCategory == null) return;
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Exportar a LaTeX");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivo LaTeX", "*.tex"));
+        File file = fileChooser.showSaveDialog(stage);
+
+        if (file != null) {
+            try {
+                moodleviewer.parser.LaTeXExporter.exportToLaTeX(currentRootCategory, file);
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Archivo LaTeX exportado con éxito.");
+                alert.setHeaderText(null);
+                alert.showAndWait();
+            } catch (Exception ex) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Error al exportar a LaTeX: " + ex.getMessage());
+                alert.showAndWait();
+                ex.printStackTrace();
+            }
+        }
+    }
 }

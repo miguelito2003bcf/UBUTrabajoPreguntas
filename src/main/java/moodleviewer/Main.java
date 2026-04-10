@@ -31,7 +31,7 @@ public class Main extends Application {
     private Button openButton = new Button("Cargar XML de Moodle");
     private Button saveButton = new Button("Guardar Cambios XML");
     private Button addQuestionButton = new Button("➕ Añadir Pregunta");
-    
+    private Button exportLatexButton = new Button("Guardar Cambios LaTeX");
     private Button addCategoryButton = new Button("➕ Categoría");
 
     private TextField searchCategoryField = new TextField();
@@ -66,6 +66,9 @@ public class Main extends Application {
         
         addQuestionButton.setDisable(true);
         addQuestionButton.setOnAction(e -> showAddQuestionDialog());
+        
+        exportLatexButton.setDisable(true);
+        exportLatexButton.setOnAction(e -> FileManager.exportLaTeX(stage, currentRootCategory));
 
         addCategoryButton.setDisable(true);
         addCategoryButton.setOnAction(e -> showAddCategoryDialog());
@@ -100,6 +103,7 @@ public class Main extends Application {
             saveButton.setDisable(false);
             addQuestionButton.setDisable(false); 
             addCategoryButton.setDisable(false); 
+            exportLatexButton.setDisable(false);
         });
     }
 
@@ -248,6 +252,7 @@ public class Main extends Application {
     public Button getAddCategoryButton() { return addCategoryButton; } 
     public Button getOpenButton() { return openButton; }
     public Button getSaveButton() { return saveButton; }
+    public Button getExportLatexButton() { return exportLatexButton; }
 
     public static void main(String[] args) { launch(args); }
 }

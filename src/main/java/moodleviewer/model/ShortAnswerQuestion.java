@@ -40,4 +40,9 @@ public class ShortAnswerQuestion extends Question {
         sb.append(getMoodleFooter());
         return sb.toString();
     }
+    
+    @Override
+    public void accept(QuestionVisitor visitor) {
+        visitor.visit(this);
+    }
 }

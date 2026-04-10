@@ -92,4 +92,6 @@ public abstract class Question {
         sb.append("</div></body></html>");
         return sb.toString();
     }
+    
+    public abstract void accept(QuestionVisitor visitor);
 }

@@ -8,6 +8,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.Region;
 
 public class LayoutManager {
     
@@ -37,8 +38,11 @@ public class LayoutManager {
         SplitPane mainSplitPane = new SplitPane();
         mainSplitPane.getItems().addAll(leftPane, rightSplitPane);
         mainSplitPane.setDividerPositions(0.3f);
+        
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        ToolBar toolBar = new ToolBar(main.getOpenButton(), main.getSaveButton());
+        ToolBar toolBar = new ToolBar(main.getOpenButton(), spacer, main.getSaveButton(), main.getExportLatexButton());
 
         BorderPane root = new BorderPane();
         root.setTop(toolBar);
