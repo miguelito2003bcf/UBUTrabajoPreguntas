@@ -13,14 +13,24 @@ public class LaTeXExporter {
 
     public static void exportToLaTeX(Category rootCategory, File file) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, java.nio.charset.StandardCharsets.UTF_8))) {
-            writer.write("\\documentclass[12pt,a4paper]{article}\n");
-            writer.write("\\usepackage[utf8]{inputenc}\n");
-            writer.write("\\usepackage[spanish]{babel}\n");
-            writer.write("\\usepackage{amsmath, amsfonts, amssymb}\n");
-            writer.write("\\usepackage{enumitem}\n");
-            writer.write("\\usepackage{graphicx}\n"); 
-            writer.write("\\usepackage[margin=2cm]{geometry}\n\n");
-            writer.write("\\begin{document}\n\n");
+        	writer.write("\\documentclass[12pt,a4paper]{article}\n");
+        	writer.write("\\usepackage[T1]{fontenc}\n"); 
+        	writer.write("\\usepackage[utf8]{inputenc}\n");
+        	writer.write("\\usepackage{lmodern}\n"); 
+        	writer.write("\\usepackage[spanish]{babel}\n");
+        	writer.write("\\usepackage{amsmath, amsfonts, amssymb}\n");
+        	writer.write("\\usepackage{enumitem}\n");
+        	writer.write("\\usepackage{graphicx}\n");
+        	writer.write("\\usepackage[margin=2cm]{geometry}\n");
+        	writer.write("\\providecommand{\\pandocbounded}[1]{#1}\n");
+        	writer.write("\\usepackage[export]{adjustbox}\n"); 
+        	writer.write("\\setkeys{Gin}{max width=0.95\\linewidth,max height=.4\\textheight,keepaspectratio}\n\n");
+        	writer.write("\\usepackage{longtable, booktabs, array, calc}\n");
+        	writer.write("\\usepackage{textcomp}\n");
+        	writer.write("\\providecommand{\\tightlist}{\\setlength{\\itemsep}{0pt}\\setlength{\\parskip}{0pt}}\n");
+        	writer.write("\\newcounter{none}\n\n"); 
+
+        	writer.write("\\begin{document}\n\n");
             writer.write("\\title{Banco de Preguntas}\n");
             writer.write("\\date{\\today}\n");
             writer.write("\\maketitle\n\n");
