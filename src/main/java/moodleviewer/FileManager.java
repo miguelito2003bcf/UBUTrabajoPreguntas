@@ -1,6 +1,8 @@
 package moodleviewer;
 
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import moodleviewer.model.Category;
@@ -53,6 +55,24 @@ public class FileManager {
     
     public static void exportLaTeX(Stage stage, Category currentRootCategory) {
         if (currentRootCategory == null) return;
+        
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Opciones de Exportación LaTeX");
+        alert.setHeaderText("¿Cómo deseas exportar el documento?");
+        alert.setContentText("Elige si quieres incluir las respuestas (para el profesor) o solo los enunciados (para los alumnos).");
+
+        ButtonType btnTeacher = new ButtonType("Con respuestas (Solucionario)");
+        ButtonType btnStudent = new ButtonType("Sin respuestas (Examen)");
+        ButtonType btnCancel = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(btnTeacher, btnStudent, btnCancel);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (!result.isPresent() || result.get() == btnCancel) {
+            return;
+        }
+        
+        boolean showAnswers = (result.get() == btnTeacher);
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Exportar a LaTeX");
@@ -61,13 +81,13 @@ public class FileManager {
 
         if (file != null) {
             try {
-                moodleviewer.parser.LaTeXExporter.exportToLaTeX(currentRootCategory, file);
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Archivo LaTeX exportado con éxito.");
-                alert.setHeaderText(null);
-                alert.showAndWait();
+                moodleviewer.parser.LaTeXExporter.exportToLaTeX(currentRootCategory, file, showAnswers);
+                Alert info = new Alert(Alert.AlertType.INFORMATION, "Archivo LaTeX exportado con éxito.");
+                info.setHeaderText(null);
+                info.showAndWait();
             } catch (Exception ex) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Error al exportar a LaTeX: " + ex.getMessage());
-                alert.showAndWait();
+                Alert err = new Alert(Alert.AlertType.ERROR, "Error al exportar a LaTeX: " + ex.getMessage());
+                err.showAndWait();
                 ex.printStackTrace();
             }
         }

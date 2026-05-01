@@ -20,6 +20,8 @@ public class TableManager {
         TableView<Question> table = main.getQuestionTableView();
         TreeView<Category> tree = main.getCategoryTreeView();
 
+        table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
         TableColumn<Question, String> nameColumn = new TableColumn<>("Nombre de la pregunta");
         nameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
         
@@ -67,6 +69,7 @@ public class TableManager {
 
             MenuItem deleteQuestionItem = new MenuItem("🗑️ Eliminar Pregunta(s)");
             deleteQuestionItem.setOnAction(event -> {
+                // Ahora esta lista sí puede capturar más de un elemento si el usuario usa Ctrl/Shift
                 List<Question> questionsToDelete = new ArrayList<>(table.getSelectionModel().getSelectedItems());
                 TreeItem<Category> selectedCategory = tree.getSelectionModel().getSelectedItem();
                 
@@ -74,7 +77,7 @@ public class TableManager {
 
                     Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
                     confirm.setTitle("Confirmar Eliminación");
-                    confirm.setHeaderText("¿Estás seguro de que deseas eliminar las preguntas seleccionadas?");
+                    confirm.setHeaderText("¿Estás seguro de que deseas eliminar las " + questionsToDelete.size() + " pregunta(s) seleccionada(s)?");
                     confirm.setContentText("Esta acción borrará las preguntas de la categoría actual.");
 
                     confirm.showAndWait().ifPresent(response -> {

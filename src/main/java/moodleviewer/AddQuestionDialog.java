@@ -22,7 +22,6 @@ public class AddQuestionDialog {
     private TextField defaultGradeField;
     private TextField penaltyField;
     private TextArea feedbackField;
-    private TextField idNumberField;
     private VBox specificSettingsContainer;
     private ComboBox<String> tfCorrectAnswerCombo;
     private TextArea tfTrueFeedback;
@@ -69,7 +68,6 @@ public class AddQuestionDialog {
 
         defaultGradeField = new TextField("1");
         penaltyField = new TextField("0.3333333");
-        idNumberField = new TextField(); 
         
         feedbackField = new TextArea();
         feedbackField.setPrefRowCount(3);
@@ -85,10 +83,8 @@ public class AddQuestionDialog {
         commonGrid.add(defaultGradeField, 1, 3);
         commonGrid.add(createMoodleLabel("Retroalimentación general"), 0, 4);
         commonGrid.add(feedbackField, 1, 4);
-        commonGrid.add(createMoodleLabel("Número de ID"), 0, 5);
-        commonGrid.add(idNumberField, 1, 5);
-        commonGrid.add(createMoodleLabel("Penalización por intento"), 0, 6);
-        commonGrid.add(penaltyField, 1, 6);
+        commonGrid.add(createMoodleLabel("Penalización por intento"), 0, 5);
+        commonGrid.add(penaltyField, 1, 5);
 
         specificSettingsContainer = new VBox(20);
 
@@ -198,7 +194,6 @@ public class AddQuestionDialog {
                 
                 if (newQ != null) {
                     newQ.setGeneralFeedback(genFeedback);
-                    try { newQ.getClass().getMethod("setIdnumber", String.class).invoke(newQ, idNumberField.getText()); } catch(Exception e){}
                 }
                 return newQ;
             }
@@ -298,13 +293,14 @@ public class AddQuestionDialog {
             }
 
         } else if (type.equals("Numérica")) {
-            Label titleRespuestas = new Label("Respuestas");
+            Label titleRespuestas = new Label("Respuesta");
             titleRespuestas.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1177d1;");
             
             specificSettingsContainer.getChildren().addAll(titleRespuestas, new Separator());
             
             numOptionsList = new ArrayList<>();
-            for (int i = 1; i <= 2; i++) {
+            // Generamos SOLO un panel para respuesta numérica, ya que el modelo no admite más.
+            for (int i = 1; i <= 1; i++) {
                 NumericalOptionUI opt = new NumericalOptionUI(i);
                 numOptionsList.add(opt);
                 specificSettingsContainer.getChildren().add(opt.getPanel());
@@ -434,7 +430,7 @@ public class AddQuestionDialog {
             panel = new VBox(10);
             panel.setStyle("-fx-background-color: #f1f3f5; -fx-padding: 15; -fx-border-color: #dee2e6; -fx-border-radius: 5;");
             
-            Label title = new Label("Respuesta " + index);
+            Label title = new Label("Respuesta Correcta");
             title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
 
             answerField = new TextField();
@@ -445,13 +441,13 @@ public class AddQuestionDialog {
             gradeCombo = new ComboBox<>(FXCollections.observableArrayList(
                 "Ninguno", "100%", "90%", "80%", "50%", "33.333%", "25%", "20%", "10%", "-10%", "-25%", "-33.333%", "-50%", "-100%"
             ));
-            gradeCombo.setValue(index == 1 ? "100%" : "Ninguno"); 
+            gradeCombo.setValue("100%"); 
 
             feedbackField = new TextArea();
             feedbackField.setPrefRowCount(3);
 
             GridPane grid = createMoodleGrid();
-            grid.add(createMoodleLabel("Respuesta " + index), 0, 0);
+            grid.add(createMoodleLabel("Valor numérico"), 0, 0);
             grid.add(ansErrorBox, 1, 0); 
             grid.add(createMoodleLabel("Calificación"), 0, 1);
             grid.add(gradeCombo, 1, 1);
