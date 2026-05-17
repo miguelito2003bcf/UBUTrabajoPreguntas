@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 
 import moodleviewer.model.Category;
 import moodleviewer.model.Question;
+import moodleviewer.model.ClozeQuestion;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -28,11 +29,13 @@ public class Main extends Application {
     private TableView<Question> questionTableView = new TableView<>();
     private WebView detailsWebView = new WebView();
     
+    // Componentes de control
     private Button openButton = new Button("Cargar XML de Moodle");
     private Button saveButton = new Button("Guardar Cambios XML");
     private Button addQuestionButton = new Button("➕ Añadir Pregunta");
     private Button exportLatexButton = new Button("Guardar Cambios LaTeX");
     private Button addCategoryButton = new Button("➕ Categoría");
+    private CheckBox clozeToggle = new CheckBox("Ver como el alumno (Renderizado)");
 
     private TextField searchCategoryField = new TextField();
     private TextField searchQuestionField = new TextField();
@@ -77,13 +80,31 @@ public class Main extends Application {
         saveButton.setDisable(true);
         saveButton.setOnAction(e -> FileManager.saveXML(stage, currentRootCategory));
 
+        // Lógica del Toggle para preguntas Cloze
+        clozeToggle.setVisible(false);
+        clozeToggle.setStyle("-fx-text-fill: #1177d1; -fx-font-weight: bold; -fx-padding: 5 0 5 10;");
+        clozeToggle.selectedProperty().addListener((obs, old, isSelected) -> {
+            ClozeQuestion.MODO_PREVIA_ALUMNO = isSelected;
+            Question current = questionTableView.getSelectionModel().getSelectedItem();
+            if (current != null) {
+                detailsWebView.getEngine().loadContent(current.getDetails());
+            }
+        });
+
         categoryTreeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             refreshQuestionTable();
             detailsWebView.getEngine().loadContent("");
+            clozeToggle.setVisible(false);
         });
 
         questionTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) detailsWebView.getEngine().loadContent(newVal.getDetails());
+            if (newVal != null) {
+                clozeToggle.setVisible(newVal instanceof ClozeQuestion);
+                detailsWebView.getEngine().loadContent(newVal.getDetails());
+            } else {
+                clozeToggle.setVisible(false);
+                detailsWebView.getEngine().loadContent("");
+            }
         });
     }
 
@@ -109,7 +130,6 @@ public class Main extends Application {
 
     private void showAddCategoryDialog() {
         if (currentRootCategory == null) return;
-
         TreeItem<Category> selectedItem = categoryTreeView.getSelectionModel().getSelectedItem();
         Category parentCategory = (selectedItem != null) ? selectedItem.getValue() : currentRootCategory;
 
@@ -121,25 +141,16 @@ public class Main extends Application {
         dialog.getDialogPane().getButtonTypes().addAll(btnAceptar, ButtonType.CANCEL);
 
         GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
+        grid.setHgap(10); grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
         TextField nameField = new TextField();
-        nameField.setPromptText("Ej: Tema 2 - Álgebra");
-
         ToggleGroup group = new ToggleGroup();
-        RadioButton rbRoot = new RadioButton("Como Categoría Principal (Raíz)");
+        RadioButton rbRoot = new RadioButton("Como Raíz");
         RadioButton rbSub = new RadioButton("Como subcategoría de: " + (selectedItem != null ? parentCategory.getName() : ""));
-        rbRoot.setToggleGroup(group);
-        rbSub.setToggleGroup(group);
+        rbRoot.setToggleGroup(group); rbSub.setToggleGroup(group);
 
-        if (selectedItem != null) {
-            rbSub.setSelected(true);
-        } else {
-            rbRoot.setSelected(true);
-            rbSub.setDisable(true);
-        }
+        if (selectedItem != null) rbSub.setSelected(true); else { rbRoot.setSelected(true); rbSub.setDisable(true); }
 
         grid.add(new Label("Ubicación:"), 0, 0);
         grid.add(new VBox(5, rbRoot, rbSub), 1, 0);
@@ -147,20 +158,15 @@ public class Main extends Application {
         grid.add(nameField, 1, 1);
 
         dialog.getDialogPane().setContent(grid);
-
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == btnAceptar && !nameField.getText().trim().isEmpty()) {
+        dialog.setResultConverter(db -> {
+            if (db == btnAceptar && !nameField.getText().trim().isEmpty()) {
                 Category newCat = new Category(nameField.getText().trim());
-                if (rbRoot.isSelected()) {
-                    currentRootCategory.getSubcategories().add(newCat);
-                } else {
-                    parentCategory.getSubcategories().add(newCat);
-                }
+                if (rbRoot.isSelected()) currentRootCategory.getSubcategories().add(newCat);
+                else parentCategory.getSubcategories().add(newCat);
                 applyCategoryFilter(searchCategoryField.getText());
             }
             return null;
         });
-
         dialog.showAndWait();
     }
 
@@ -170,11 +176,9 @@ public class Main extends Application {
             new Alert(Alert.AlertType.WARNING, "Por favor, selecciona una categoría.").showAndWait();
             return;
         }
-        
         Category targetCategory = selectedCategoryItem.getValue();
         AddQuestionDialog dialog = new AddQuestionDialog(targetCategory);
         Optional<Question> result = dialog.showAndWait();
-
         result.ifPresent(newQuestion -> {
             targetCategory.addQuestion(newQuestion);
             if (!typeContainsFilter(newQuestion.getType())) populateTypeFilterMenu(currentRootCategory);
@@ -198,14 +202,12 @@ public class Main extends Application {
         if (selectedNode != null && selectedNode.getValue() != null) {
             Category selectedCat = selectedNode.getValue();
             ObservableList<Question> obsList = FXCollections.observableArrayList(selectedCat.getQuestions());
-            
             FilteredList<Question> filteredData = new FilteredList<>(obsList, q -> {
                 String searchTxt = searchQuestionField.getText();
                 boolean matchesText = searchTxt == null || searchTxt.isEmpty() || q.getName().toLowerCase().contains(searchTxt.toLowerCase());
                 boolean matchesType = activeTypeFilters.isEmpty() || activeTypeFilters.contains(q.getType());
                 return matchesText && matchesType;
             });
-            
             SortedList<Question> sortedData = new SortedList<>(filteredData);
             sortedData.comparatorProperty().bind(questionTableView.comparatorProperty());
             questionTableView.setItems(sortedData);
@@ -219,12 +221,10 @@ public class Main extends Application {
         activeTypeFilters.clear(); 
         Set<String> uniqueTypes = new HashSet<>();
         collectTypesRecursively(rootCategory, uniqueTypes);
-        
         for (String type : uniqueTypes) {
             CheckMenuItem menuItem = new CheckMenuItem(type);
-            menuItem.setSelected(false); 
-            menuItem.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
-                if (isSelected) activeTypeFilters.add(type); else activeTypeFilters.remove(type);
+            menuItem.selectedProperty().addListener((obs, was, is) -> {
+                if (is) activeTypeFilters.add(type); else activeTypeFilters.remove(type);
                 refreshQuestionTable(); 
             });
             typeFilterMenu.getItems().add(menuItem);
@@ -253,6 +253,7 @@ public class Main extends Application {
     public Button getOpenButton() { return openButton; }
     public Button getSaveButton() { return saveButton; }
     public Button getExportLatexButton() { return exportLatexButton; }
+    public CheckBox getClozeToggle() { return clozeToggle; }
 
     public static void main(String[] args) { launch(args); }
 }

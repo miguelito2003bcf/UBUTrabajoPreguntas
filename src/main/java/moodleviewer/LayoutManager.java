@@ -20,7 +20,9 @@ public class LayoutManager {
 
         VBox leftPane = new VBox(5, categoryTopBar, main.getCategoryTreeView());
         VBox rightTopPane = new VBox(5, questionTopBar, main.getQuestionTableView()); 
-        VBox rightBottomPane = new VBox(5, main.getDetailsWebView());
+        
+        // El panel inferior derecho ahora contiene el CheckBox y el WebView
+        VBox rightBottomPane = new VBox(5, main.getClozeToggle(), main.getDetailsWebView());
 
         leftPane.setPadding(new Insets(5));
         rightTopPane.setPadding(new Insets(5));

@@ -26,13 +26,14 @@ public class LaTeXExporter {
             writer.write("\\usepackage{graphicx}\n");
             writer.write("\\usepackage[margin=2cm]{geometry}\n");
             writer.write("\\providecommand{\\pandocbounded}[1]{#1}\n");
-            writer.write("\\usepackage[export]{adjustbox}\n"); 
-            writer.write("\\setkeys{Gin}{max width=0.95\\linewidth,max height=.4\\textheight,keepaspectratio}\n\n");
+            
+            // Se ha eliminado adjustbox y setkeys para usar control local por imagen
             writer.write("\\usepackage{longtable, booktabs, array, calc}\n");
             writer.write("\\usepackage{textcomp}\n");
             writer.write("\\providecommand{\\tightlist}{\\setlength{\\itemsep}{0pt}\\setlength{\\parskip}{0pt}}\n");
             writer.write("\\usepackage{xcolor}\n");
             writer.write("\\colorlet{azul}{blue!40!black}\n");
+            
             writer.write("\\newenvironment{unaRespuesta}{\\begin{checkboxes}}{\\end{checkboxes}}\n");
             writer.write("\\newenvironment{unaRespuestaEnLinea}{\\begin{oneparcheckboxes}}{\\end{oneparcheckboxes}}\n");
             writer.write("\\newenvironment{variasRespuestas}{\\begin{checkboxes}\\checkboxchar{{\\Large$\\Box$}}}{\\end{checkboxes}}\n");

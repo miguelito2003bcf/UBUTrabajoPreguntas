@@ -9,6 +9,9 @@ import java.util.regex.Pattern;
 
 public class ClozeQuestion extends Question {
 	
+    // Flag estático para controlar el modo de visualización globalmente
+    public static boolean MODO_PREVIA_ALUMNO = false;
+
     private static final Pattern CLOZE_TOKEN_PAT = Pattern.compile(
         "\\{([0-9]*):" +
         "(NUMERICAL|NM" +
@@ -28,26 +31,32 @@ public class ClozeQuestion extends Question {
 
     @Override
     public String getDetails() {
-    	
         String baseText = processPluginFiles(text != null ? text : "");
         String header = super.getMoodleHeader();
+        
+        // Eliminamos el bloque de texto genérico del header para construir nuestra propia estructura
         String textDivToRemove = "<div style=\"font-size: 15px; margin-bottom: 25px; color: #212529; line-height: 1.5;\">" + baseText + "</div>";
         header = header.replace(textDivToRemove, "");
+        
         StringBuilder sb = new StringBuilder(header);
-        String highlightedText = highlightClozeSyntax(baseText);
-        String renderedText = renderCloze(baseText);
-        
-        sb.append("<div style=\"margin-bottom: 25px;\">")
-          .append("<div style=\"font-size: 14px; font-weight: bold; color: #495057; margin-bottom: 8px;\">Sintaxis Cloze:</div>")
-          .append("<div style=\"padding: 15px; background-color: #ffffff; border: 1px dashed #adb5bd; border-radius: 4px; font-size: 15px; color: #212529; line-height: 1.6;\">")
-          .append(highlightedText)
-          .append("</div></div>");
-        
-        sb.append("<div>")
-          .append("<div style=\"font-size: 14px; font-weight: bold; color: #495057; margin-bottom: 8px;\">Vista previa del alumno:</div>")
-          .append("<div style=\"padding: 15px; background-color: #fcfcfc; border: 1px solid #dee2e6; border-radius: 4px; font-size: 15px; color: #212529; line-height: 1.6;\">")
-          .append(renderedText)
-          .append("</div></div>");
+
+        if (!MODO_PREVIA_ALUMNO) {
+            // MODO SINTAXIS: Resaltado de etiquetas técnicas
+            String highlightedText = highlightClozeSyntax(baseText);
+            sb.append("<div style=\"margin-bottom: 25px;\">")
+              .append("<div style=\"font-size: 14px; font-weight: bold; color: #495057; margin-bottom: 8px;\">Sintaxis Cloze:</div>")
+              .append("<div style=\"padding: 15px; background-color: #ffffff; border: 1px dashed #adb5bd; border-radius: 4px; font-size: 15px; color: #212529; line-height: 1.6;\">")
+              .append(highlightedText)
+              .append("</div></div>");
+        } else {
+            // MODO VISTA PREVIA: Renderizado de componentes (inputs, selects...)
+            String renderedText = renderCloze(baseText);
+            sb.append("<div>")
+              .append("<div style=\"font-size: 14px; font-weight: bold; color: #495057; margin-bottom: 8px;\">Vista previa del alumno:</div>")
+              .append("<div style=\"padding: 15px; background-color: #fcfcfc; border: 1px solid #dee2e6; border-radius: 4px; font-size: 15px; color: #212529; line-height: 1.6;\">")
+              .append(renderedText)
+              .append("</div></div>");
+        }
         
         sb.append(getMoodleFooter());
         return sb.toString();
