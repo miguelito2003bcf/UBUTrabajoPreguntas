@@ -3,11 +3,20 @@ package moodleviewer.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase creada que representa una categoría del banco de preguntas de Moodle.
+ */
 public class Category {
+	
     private String name;
     private List<Question> questions;
     private List<Category> subcategories;
 
+    /**
+     * Construye una nueva categoría vacía con el nombre indicado.
+     * 
+     * @param name nombre de la categoría.
+     */
     public Category(String name) {
         this.name = name;
         this.questions = new ArrayList<>();

@@ -3,7 +3,6 @@ package moodleviewer.parser;
 import moodleviewer.model.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -12,8 +11,19 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 
+/**
+ * Clase creada como exportadora del árbol de categorías y preguntas al formato XML de Moodle.
+ * Realiza la operación inversa a XMLParser.
+ */
 public class XMLExporter {
 
+	/**
+	 * Exporta el árbol de categorías y preguntas a un fichero XML compatible con Moodle.
+	 * 
+	 * @param rootCategory categoría raíz del árbol a exportar.
+	 * @param file fichero de destino donde se escribirá el XML.
+	 * @throws Exception si ocurre algún error al construir el DOM o al escribir el fichero.
+	 */
     public static void exportMoodleXML(Category rootCategory, File file) throws Exception {
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
         doc.setXmlStandalone(true); 
@@ -31,6 +41,15 @@ public class XMLExporter {
         transformer.transform(new DOMSource(doc), new StreamResult(file));
     }
 
+    /**
+     * Serializa recursivamente una categoría y su contenido al DOM.
+     * 
+     * @param category categoría a serializar.
+     * @param currentPath ruta acumulada hasta la categoría padre.
+     * @param parentNode nodo DOM padre al que añadir los elementos generados.
+     * @param doc documento DOM en construcción.
+     * @throws Exception si ocurre algún error al manipular el DOM.
+     */
     private static void exportCategoryRecursive(Category category, String currentPath, Element parentNode, Document doc) throws Exception {
         String newPath = currentPath;
         if (!category.getName().equals("Banco de Preguntas")) {
@@ -51,6 +70,14 @@ public class XMLExporter {
         for (Category sub : category.getSubcategories()) exportCategoryRecursive(sub, newPath, parentNode, doc);
     }
 
+    /**
+     * Serializa una pregunta individual al DOM con sus atributos comunes y los específicos de su tipo.
+     * 
+     * @param q pregunta a serializar.
+     * @param parentNode nodo DOM padre.
+     * @param doc documento DOM en construcción.
+     * @throws Exception si ocurre algún error al manipular el DOM.
+     */
     private static void writeQuestion(Question q, Element parentNode, Document doc) throws Exception {
         Element qEl = doc.createElement("question");
         qEl.setAttribute("type", q.getType());
@@ -137,6 +164,13 @@ public class XMLExporter {
         parentNode.appendChild(qEl);
     }
 
+    /**
+     * Serializa una respuesta estándar como elemento respuesta en formato HTML.
+     * 
+     * @param a respuesta a serializar.
+     * @param parentNode elemento DOM padre.
+     * @param doc Documento DOM en construcción.
+     */
     private static void writeAnswer(Answer a, Element parentNode, Document doc) {
         Element ansEl = doc.createElement("answer");
         ansEl.setAttribute("fraction", a.getFraction() != null ? a.getFraction() : "0");
@@ -150,6 +184,14 @@ public class XMLExporter {
         parentNode.appendChild(ansEl);
     }
 
+    /**
+     * Serializa una respuesta de verdadero/falso usando el valor lógico en lugar del texto localizado.
+     * 
+     * @param a respuesta de verdadero/falso.
+     * @param tfValue true o false.
+     * @param parentNode elemento DOM padre.
+     * @param doc documento DOM en construcción.
+     */
     private static void writeTFAnswer(Answer a, String tfValue, Element parentNode, Document doc) {
         Element ansEl = doc.createElement("answer");
         ansEl.setAttribute("fraction", a.getFraction() != null ? a.getFraction() : "0");
@@ -165,12 +207,28 @@ public class XMLExporter {
         parentNode.appendChild(ansEl);
     }
 
+    /**
+     * Añade un elemento hijo con contenido de texto plano al elemento padre.
+     * 
+     * @param doc documento DOM.
+     * @param parent elemento padre.
+     * @param tagName nombre del elemento hijo a crear.
+     * @param textContent contenido de texto.
+     */
     private static void addTextNode(Document doc, Element parent, String tagName, String textContent) {
         Element el = doc.createElement(tagName);
         el.setTextContent(textContent != null ? textContent : "");
         parent.appendChild(el);
     }
 
+    /**
+     * Añade un elemento hijo con formato HTML y contenido CDATA al elemento padre.
+     * 
+     * @param doc documento DOM.
+     * @param parent elemento padre.
+     * @param tagName nombre del elemento contenedor.
+     * @param cdataContent contenido HTML a envolver en CDATA.
+     */
     private static void addCdataNode(Document doc, Element parent, String tagName, String cdataContent) {
         Element el = doc.createElement(tagName);
         el.setAttribute("format", "html");

@@ -1,18 +1,33 @@
 package moodleviewer.model;
 
+import moodleviewer.util.HtmlConstants;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase abstracta que representa una pregunta del banco de preguntas de Moodle.
+ * Define los atributos comunes, la infraestructura HTML compartida y los métodos 
+ * abstractos que cada subclase debe implementar.
+ */
 public abstract class Question {
+	
     protected String type;
     protected String name;
     protected String text;
     protected String defaultGrade;
     protected String penalty;
     protected String generalFeedback;
-    
     protected List<MoodleFile> files = new ArrayList<>();
 
+    /**
+     * Construye una pregunta con los atributos comunes a todos los tipos.
+     * 
+     * @param type tipo de Moodle.
+     * @param name nombre de la pregunta.
+     * @param text enunciado en HTML.
+     * @param defaultGrade calificación por defecto.
+     * @param penalty fracción de penalización.
+     */
     public Question(String type, String name, String text, String defaultGrade, String penalty) {
         this.type = type;
         this.name = name;
@@ -20,20 +35,25 @@ public abstract class Question {
         this.defaultGrade = defaultGrade;
         this.penalty = penalty;
     }
-
+    
     public String getType() { return type; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getText() { return text; }
     public String getDefaultGrade() { return defaultGrade; }
-    public String getPenalty() { return penalty; }
-    
+    public String getPenalty() { return penalty; }    
     public String getGeneralFeedback() { return generalFeedback; }
     public void setGeneralFeedback(String generalFeedback) { this.generalFeedback = generalFeedback; }
-
     public List<MoodleFile> getFiles() { return files; }
     public void setFiles(List<MoodleFile> files) { this.files = files; }
 
+    /**
+     * Resuelve las referencias @@PLUGINFILE@@ del HTML sustituyéndolas por URIs de datos Base64 inline, para que las
+     * imágenes se muestren en el WebView sin necesidad de acceso al servidor de Moodle.
+     * 
+     * @param html cadena HTML con posibles referencias @@PLUGINFILE@@
+     * @return HTML con las referencias sustituidas por URIs.
+     */
     public String processPluginFiles(String html) {
         if (html == null || html.isEmpty()) return "";
         if (files == null || files.isEmpty()) return html;
@@ -53,13 +73,22 @@ public abstract class Question {
         return processed;
     }
 
+    /**
+     * Genera el documento HTML completo con los detalles de esta pregunta, para ser cargado en el WebView del panel de detalle.
+     * 
+     * @return cadena con el documento HTML completo.
+     */
     public abstract String getDetails();
 
+    /**
+     * Genera la cabecera HTML común, con la configuración MathJax, estilos CSS, nombre y tipo de la pregunta y el enunciado resuelto.
+     * 
+     * @return cadena HTML desde el <html> hasta el inicio del área de respuestas.
+     */
     protected String getMoodleHeader() {
         String safeText = processPluginFiles(text != null ? text : "");
         
         return "<html><head><meta charset=\"UTF-8\">" +
-               
                "<script>" +
                "  MathJax = {" +
                "    tex: {" +
@@ -72,19 +101,24 @@ public abstract class Question {
                "<style>" +
                "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #343a40; padding: 20px; margin: 0; background-color: #f8f9fa; }" +
                "</style></head>" +
-               "<body style=\"padding: 20px; min-height: 100vh; box-sizing: border-box;\">" +
-               "  <div style=\"background-color: #fff; border: 1px solid #dee2e6; border-radius: 4px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,.05);\">" +
-               "    <div style=\"border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;\">" +
-               "      <strong style=\"color: #1177d1; font-size: 1.2rem;\">" + name + "</strong>" +
-               "      <span style=\"background-color: #6c757d; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;\">" + type.toUpperCase() + "</span>" +
+               "<body style=\"" + HtmlConstants.HTML_BODY + "\">" +
+               "  <div style=\"" + HtmlConstants.HTML_CARD + "\">" +
+               "    <div style=\"" + HtmlConstants.HEADER_FLEX + "\">" +
+               "      <strong style=\"" + HtmlConstants.TITLE + "\">" + name + "</strong>" +
+               "      <span style=\"" + HtmlConstants.BADGE + "\">" + type.toUpperCase() + "</span>" +
                "    </div>" +
-               "    <div style=\"font-size: 15px; margin-bottom: 25px; color: #212529; line-height: 1.5;\">" + safeText + "</div>";
+               "    <div style=\"" + HtmlConstants.TEXT_BASE + "\">" + safeText + "</div>";
     }
 
+    /**
+     * Genera el pie HTML común, con la retroalimentación general y el cierre de los elementos abiertos por la cabecera.
+     * 
+     * @return cadena HTML con la retroalimentación y el cierre del documento.
+     */
     protected String getMoodleFooter() {
         StringBuilder sb = new StringBuilder();
         if (generalFeedback != null && !generalFeedback.isEmpty()) {
-            sb.append("<div style=\"margin-top: 25px; padding: 15px; background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; color: #0c5460; font-size: 14px;\">")
+            sb.append("<div style=\"").append(HtmlConstants.FEEDBACK_GENERAL).append("\">")
               .append("<strong>Retroalimentación general:</strong><br>")
               .append(processPluginFiles(generalFeedback))
               .append("</div>");
@@ -92,6 +126,11 @@ public abstract class Question {
         sb.append("</div></body></html>");
         return sb.toString();
     }
-    
+
+    /**
+     * Método creado para cumplir con el patrón de diseño Visitor.
+     * 
+     * @param visitor visitante que procesará esta pregunta.
+     */
     public abstract void accept(QuestionVisitor visitor);
 }

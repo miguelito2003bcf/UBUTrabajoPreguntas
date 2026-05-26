@@ -8,8 +8,19 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase creada como parseadora del formato XML de exportación de bancos de preguntas de Moodle.
+ * Transforma un fichero XML de Moodle en una jerarquía de objetos categoría con sus preguntas anidadas.
+ */
 public class XMLParser {
 
+	/**
+	 * Parsea un fichero XML de Moodle y construye el árbol de categorías y preguntas.
+	 * 
+	 * @param xmlFile fichero XML de Moodle a parsear.
+	 * @return categoría raíz del árbol construido.
+	 * @throws Exception si el fichero no exsite o contiene errores estructurales.
+	 */
     public static Category parseMoodleXML(File xmlFile) throws Exception {
         Category rootCategory = new Category("Banco de Preguntas");
         Category currentCategory = rootCategory;
@@ -76,6 +87,14 @@ public class XMLParser {
         return rootCategory;
     }
 
+    /**
+     * Obtiene el contenido de texto de un elemento anidado en el XML.
+     * 
+     * @param parent elemento XML en el que buscar.
+     * @param outerTag nombre del elemento exterior.
+     * @param innerTag nombre del elemento interior cuyo texto se extrae.
+     * @return contenido de texto del elemento interior, o null si no existe.
+     */
     public static String getNestedText(Element parent, String outerTag, String innerTag) {
         NodeList outerList = parent.getElementsByTagName(outerTag);
         if (outerList.getLength() > 0) {
@@ -86,6 +105,14 @@ public class XMLParser {
         return null;
     }
 
+    /**
+     * Obtiene el contenido de texto de un elemento hijo directo de parent.
+     * Busca solo entre hijos directos para evitar capturas accidentales en niveles más profundos.
+     * 
+     * @param parent elemento XML en el que buscar.
+     * @param tag nombre del elemento hijo cuyo texto se extrae.
+     * @return contenido de texto del elemento hijo, o null si no existe.
+     */
     public static String getSimpleText(Element parent, String tag) {
         NodeList list = parent.getChildNodes();
         for (int i=0; i<list.getLength(); i++) {
@@ -94,6 +121,14 @@ public class XMLParser {
         return null;
     }
 
+    /**
+     * Localiza o crea la categoría correspondiente a una ruta completa dentro del árbol,
+     * creando los nodos intermedios que no existan.
+     * 
+     * @param root categoría raíz del árbol.
+     * @param fullPath ruta completa.
+     * @return categoría correspondiente al último segmento de la ruta.
+     */
     private static Category findOrCreateCategory(Category root, String fullPath) {
         if (fullPath == null || fullPath.isEmpty()) return root;
         String[] parts = fullPath.split("/");

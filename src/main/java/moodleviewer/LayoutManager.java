@@ -10,8 +10,19 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Region;
 
+/**
+ * Clase creada para construir y ensamblar la escena principal de la aplicación. Se encarga de organizar los componentes de la interfaz.
+ * Se encarga de separar en dos paneles de manera horizontal, y la parte de la derecha en otros dos partes.
+ */
 public class LayoutManager {
     
+	/**
+	 * Construye y devuelve la escena principal de la aplicación. Recupera todos los componentes de la instancia del main 
+	 * mediante sus getters y los organiza en la estructura de paneles.
+	 * 
+	 * @param main instancia de main que proporciona todos los componentes de la interfaz.
+	 * @return escena principal.
+	 */
     public static Scene buildScene(Main main) {
 
         HBox questionTopBar = new HBox(10, main.getSearchQuestionField(), main.getTypeFilterMenu(), main.getAddQuestionButton());
@@ -19,9 +30,7 @@ public class LayoutManager {
         HBox.setHgrow(main.getSearchCategoryField(), Priority.ALWAYS); 
 
         VBox leftPane = new VBox(5, categoryTopBar, main.getCategoryTreeView());
-        VBox rightTopPane = new VBox(5, questionTopBar, main.getQuestionTableView()); 
-        
-        // El panel inferior derecho ahora contiene el CheckBox y el WebView
+        VBox rightTopPane = new VBox(5, questionTopBar, main.getQuestionTableView());
         VBox rightBottomPane = new VBox(5, main.getClozeToggle(), main.getDetailsWebView());
 
         leftPane.setPadding(new Insets(5));

@@ -1,7 +1,6 @@
 package moodleviewer.parser;
 
 import moodleviewer.model.*;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -9,14 +8,26 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase creada como exportadora del banco de preguntas al formato LaTeX.
+ * Genera un fichero .tex compilable y una carpeta de imágenes adjunta. La conversión
+ * de cada pregunta se delega en la clase LaTeXExportVisitor.
+ */
 public class LaTeXExporter {
 
+	/**
+	 * Exporta el árbol completo de categorías y preguntas a un fichero LaTeX.
+	 * 
+	 * @param rootCategory categoría raíz del árbol a exportar.
+	 * @param file fichero .tex de destino.
+	 * @param showAnswers true para incluir las respuestas correctas
+	 * @throws IOException si ocurre algún error de escritura en el fichero.
+	 */
     public static void exportToLaTeX(Category rootCategory, File file, boolean showAnswers) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, java.nio.charset.StandardCharsets.UTF_8))) {
             
             String docClass = showAnswers ? "\\documentclass[12pt,a4paper,answers]{exam}\n" : "\\documentclass[12pt,a4paper]{exam}\n";
             writer.write(docClass);
-            
             writer.write("\\usepackage[T1]{fontenc}\n"); 
             writer.write("\\usepackage[utf8]{inputenc}\n");
             writer.write("\\usepackage{lmodern}\n"); 
@@ -24,16 +35,14 @@ public class LaTeXExporter {
             writer.write("\\usepackage{amsmath, amsfonts, amssymb}\n");
             writer.write("\\usepackage{enumitem}\n");
             writer.write("\\usepackage{graphicx}\n");
+            writer.write("\\setkeys{Gin}{width=0.45\\textwidth}\n");
             writer.write("\\usepackage[margin=2cm]{geometry}\n");
             writer.write("\\providecommand{\\pandocbounded}[1]{#1}\n");
-            
-            // Se ha eliminado adjustbox y setkeys para usar control local por imagen
             writer.write("\\usepackage{longtable, booktabs, array, calc}\n");
             writer.write("\\usepackage{textcomp}\n");
             writer.write("\\providecommand{\\tightlist}{\\setlength{\\itemsep}{0pt}\\setlength{\\parskip}{0pt}}\n");
             writer.write("\\usepackage{xcolor}\n");
             writer.write("\\colorlet{azul}{blue!40!black}\n");
-            
             writer.write("\\newenvironment{unaRespuesta}{\\begin{checkboxes}}{\\end{checkboxes}}\n");
             writer.write("\\newenvironment{unaRespuestaEnLinea}{\\begin{oneparcheckboxes}}{\\end{oneparcheckboxes}}\n");
             writer.write("\\newenvironment{variasRespuestas}{\\begin{checkboxes}\\checkboxchar{{\\Large$\\Box$}}}{\\end{checkboxes}}\n");
@@ -63,6 +72,16 @@ public class LaTeXExporter {
         }
     }
 
+    /**
+     * Recorre recursivamente el árbol de categorías exportando secciones y preguntas. Las categorías de primer nivel
+     * generan secciones y las más profundas subsecciones. Las subcategorías se ordenan alfabéticamente.
+     * 
+     * @param category categoría a exportar.
+     * @param writer escritor del fichero .tex.
+     * @param visitor visitante que serializa cada pregunta.
+     * @param depth profundidad actual.
+     * @throws IOException si ocurre algún error de escritura.
+     */
     private static void exportCategoryRecursive(Category category, BufferedWriter writer, LaTeXExportVisitor visitor, int depth) throws IOException {
         if (!category.getQuestions().isEmpty() && !category.getName().equals("Banco de Preguntas")) {
             if (depth == 1) {

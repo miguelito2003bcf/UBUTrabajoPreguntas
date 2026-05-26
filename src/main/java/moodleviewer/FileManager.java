@@ -8,12 +8,22 @@ import javafx.stage.Stage;
 import moodleviewer.model.Category;
 import moodleviewer.parser.XMLExporter;
 import moodleviewer.parser.XMLParser;
-
 import java.io.File;
 import java.util.Optional;
 
+/**
+ * Clase creada para gestionar las operaciones de apertura, guardado y exportacion de ficheros.
+ * Se centra en la lógica de diálogos de fichero y la gestión de errores.
+ */
 public class FileManager {
 
+	/**
+	 * Abre un diálogo de selección de fichero para cargar un XML de Moodle.
+	 * Parsea el fichero y devuelve la categoría raíz, o vacío si se cancela o falla.
+	 * 
+	 * @param stage ventana padre sobre la que se muestra el diálogo.
+	 * @return la cateogoría raíz si la carga fue exitosa.
+	 */
     public static Optional<Category> openXML(Stage stage) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos XML", "*.xml"));
@@ -31,6 +41,12 @@ public class FileManager {
         return Optional.empty();
     }
 
+    /**
+     * Abre un diálogo de guardado para exportar el árbol como XML de Moodle.
+     * 
+     * @param stage ventana padre.
+     * @param currentRootCategory categoría raíz del árbol a guardar.
+     */
     public static void saveXML(Stage stage, Category currentRootCategory) {
         if (currentRootCategory == null) return;
 
@@ -53,6 +69,13 @@ public class FileManager {
         }
     }
     
+    /**
+     * Muestra un diálogo de opciones de exportación LaTeX y luego el diálogo de guardado. Pregunta
+     * al usuario si desea el solucionario o el examen.
+     * 
+     * @param stage ventana padre.
+     * @param currentRootCategory categoría raíz del árbol a exportar.
+     */
     public static void exportLaTeX(Stage stage, Category currentRootCategory) {
         if (currentRootCategory == null) return;
         

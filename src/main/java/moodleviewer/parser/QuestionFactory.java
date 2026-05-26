@@ -6,8 +6,23 @@ import org.w3c.dom.NodeList;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase creada como fábrica de objetos Question a partie del DOM del XML de Moodle. 
+ * Implementa el patrón Factory Method.
+ */
 public class QuestionFactory {
 
+	/**
+	 * Crea e instancia el tipo de Question adecuado según el tipo Moodle indicado.
+	 * 
+	 * @param type tipo Moodle.
+	 * @param name nombre de la pregunta.
+	 * @param text enunciado en HTML.
+	 * @param grade calificación por defecto.
+	 * @param penalty fracción de penalización.
+	 * @param questionElement elemento DOM de pregunta del que se extraen los atributos específicos.
+	 * @return instancia concreta de Question.
+	 */
     public static Question createQuestion(String type, String name, String text, String grade, String penalty, Element questionElement) {
         
         switch (type) {

@@ -10,15 +10,22 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
 import moodleviewer.model.Category;
 import moodleviewer.model.Question;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Clase creada para configurar el comportamiento del árbol de categorías.
+ */
 public class TreeManager {
 
     private static TreeItem<Category> draggedCategoryNode = null;
 
+    /**
+     * Aplica la configuración completa al árbol de categorías de la aplicación.
+     * 
+     * @param main instancia de main que proporciona el árbol, la tabla y los métodos de refresco.
+     */
     public static void configure(Main main) {
         TreeView<Category> tree = main.getCategoryTreeView();
         TableView<Question> table = main.getQuestionTableView(); 
@@ -133,7 +140,7 @@ public class TreeManager {
                 });
             });
 
-            MenuItem editCatItem = new MenuItem("✏️ Renombrar");
+            MenuItem editCatItem = new MenuItem("Renombrar");
             editCatItem.setOnAction(e -> {
                 TextInputDialog dialog = new TextInputDialog(cell.getItem().getName());
                 dialog.setTitle("Renombrar");
@@ -144,7 +151,7 @@ public class TreeManager {
                 });
             });
 
-            MenuItem deleteCatItem = new MenuItem("🗑️ Eliminar Categoría");
+            MenuItem deleteCatItem = new MenuItem("Eliminar Categoría");
             deleteCatItem.setOnAction(event -> {
                 TreeItem<Category> treeItemToDelete = cell.getTreeItem();
                 TreeItem<Category> parentItem = treeItemToDelete.getParent();
@@ -179,6 +186,14 @@ public class TreeManager {
         });
     }
 
+    /**
+     * Comprueba si un destino es válido para el drop de una categoría arrastrada. Un destino es inválido
+     * si coincide con el origen, es su padre actual o es un descendiente de él.
+     * 
+     * @param source nodo que se está arrastrando.
+     * @param target nodo sobre el que se pretende soltar.
+     * @return true si el drop es válido, o false en caso contrario.
+     */
     private static boolean isValidDropTarget(TreeItem<Category> source, TreeItem<Category> target) {
         if (source == null || target == null || source == target) return false;
         if (source.getParent() == target) return false;

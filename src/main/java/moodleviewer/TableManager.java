@@ -52,7 +52,7 @@ public class TableManager {
             });
 
             ContextMenu questionMenu = new ContextMenu(); 
-            MenuItem editQuestionItem = new MenuItem("✏️ Editar Nombre");
+            MenuItem editQuestionItem = new MenuItem("Editar Nombre");
             editQuestionItem.setOnAction(event -> {
                 Question q = row.getItem();
                 if (q != null) {
@@ -67,9 +67,8 @@ public class TableManager {
                 }
             });
 
-            MenuItem deleteQuestionItem = new MenuItem("🗑️ Eliminar Pregunta(s)");
+            MenuItem deleteQuestionItem = new MenuItem("Eliminar Pregunta(s)");
             deleteQuestionItem.setOnAction(event -> {
-                // Ahora esta lista sí puede capturar más de un elemento si el usuario usa Ctrl/Shift
                 List<Question> questionsToDelete = new ArrayList<>(table.getSelectionModel().getSelectedItems());
                 TreeItem<Category> selectedCategory = tree.getSelectionModel().getSelectedItem();
                 

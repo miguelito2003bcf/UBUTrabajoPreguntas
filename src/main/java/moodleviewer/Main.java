@@ -14,36 +14,39 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
-
 import moodleviewer.model.Category;
 import moodleviewer.model.Question;
 import moodleviewer.model.ClozeQuestion;
-
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Clase creada como punto de entrada y controlador principal de la aplicación.
+ * Mantiene el estado global de la sesión y coordina los gestores especializados.
+ */
 public class Main extends Application {
 
     private TreeView<Category> categoryTreeView = new TreeView<>();
     private TableView<Question> questionTableView = new TableView<>();
     private WebView detailsWebView = new WebView();
-    
-    // Componentes de control
     private Button openButton = new Button("Cargar XML de Moodle");
     private Button saveButton = new Button("Guardar Cambios XML");
     private Button addQuestionButton = new Button("➕ Añadir Pregunta");
     private Button exportLatexButton = new Button("Guardar Cambios LaTeX");
     private Button addCategoryButton = new Button("➕ Categoría");
     private CheckBox clozeToggle = new CheckBox("Ver como el alumno (Renderizado)");
-
     private TextField searchCategoryField = new TextField();
     private TextField searchQuestionField = new TextField();
     private MenuButton typeFilterMenu = new MenuButton("Filtrar por Tipo");
-
     private Category currentRootCategory; 
     private Set<String> activeTypeFilters = new HashSet<>(); 
 
+    /**
+     * Punto de entrada de JavaFX. Inicializa los componentes y muestra la ventana principal.
+     *
+     * @param primaryStage ventana principal proporcionada por JavaFX.
+     */
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Editor Avanzado de Preguntas Moodle XML");
@@ -57,6 +60,11 @@ public class Main extends Application {
         primaryStage.show();
     }
 
+    /**
+     * Inicializa los componentes básicos y registra todos los listeners de interacción.
+     * 
+     * @param stage ventana principal.
+     */
     private void initBasicComponents(Stage stage) {
         searchCategoryField.setPromptText("🔍 Buscar categoría...");
         searchCategoryField.textProperty().addListener((obs, oldVal, newVal) -> applyCategoryFilter(newVal));
@@ -80,7 +88,6 @@ public class Main extends Application {
         saveButton.setDisable(true);
         saveButton.setOnAction(e -> FileManager.saveXML(stage, currentRootCategory));
 
-        // Lógica del Toggle para preguntas Cloze
         clozeToggle.setVisible(false);
         clozeToggle.setStyle("-fx-text-fill: #1177d1; -fx-font-weight: bold; -fx-padding: 5 0 5 10;");
         clozeToggle.selectedProperty().addListener((obs, old, isSelected) -> {
@@ -108,6 +115,11 @@ public class Main extends Application {
         });
     }
 
+    /**
+     * Carga un XML de Moodle y actualiza toda la interfaz con los datos leídos.
+     * 
+     * @param stage ventana padre para el diálogo de apertura de fichero.
+     */
     private void handleLoadXML(Stage stage) {
         FileManager.openXML(stage).ifPresent(root -> {
             currentRootCategory = root;
@@ -128,6 +140,10 @@ public class Main extends Application {
         });
     }
 
+    /**
+     * Muestra el diálogo para crear una nueva categoría en el banco. Permite elegir entre crearla como raíz
+     * o como subcategoría de la selección dada.
+     */
     private void showAddCategoryDialog() {
         if (currentRootCategory == null) return;
         TreeItem<Category> selectedItem = categoryTreeView.getSelectionModel().getSelectedItem();
@@ -170,6 +186,10 @@ public class Main extends Application {
         dialog.showAndWait();
     }
 
+    /**
+     * Muestra el diálogo para añadir una pregunta para la categoría seleccionada. Tras añadir la pregunta, actualiza
+     * el menú de tipos y refresca la tabla.
+     */
     private void showAddQuestionDialog() {
         TreeItem<Category> selectedCategoryItem = categoryTreeView.getSelectionModel().getSelectedItem();
         if (selectedCategoryItem == null) {
@@ -187,6 +207,12 @@ public class Main extends Application {
         });
     }
 
+    /**
+     * Aplica un filtro de texto al árbol de categorías. Si el texto está vacío, muestra el árbol completo
+     * sin filtrar.
+     * 
+     * @param searchText texto de búsqueda.
+     */
     public void applyCategoryFilter(String searchText) {
         if (currentRootCategory == null) return;
         if (searchText == null || searchText.trim().isEmpty()) {
@@ -197,6 +223,9 @@ public class Main extends Application {
         categoryTreeView.setRoot(filteredRoot);
     }
 
+    /**
+     * Actualiza la tabla de preguntas aplicando el filtro de texto y de tipo activos. Si no hay categoría seleccionada la tabla se vacía.
+     */
     public void refreshQuestionTable() {
         TreeItem<Category> selectedNode = categoryTreeView.getSelectionModel().getSelectedItem();
         if (selectedNode != null && selectedNode.getValue() != null) {
@@ -216,6 +245,12 @@ public class Main extends Application {
         }
     }
 
+    /**
+     * Rellena el menú de filtrado por tipo con todos los tipos presentes en el banco.
+     * Limpia los filtros activos al regenerar el menú para evitar estados inconsistentes.
+     * 
+     * @param rootCategory categoría raíz desde la que se recolectan los tipos.
+     */
     private void populateTypeFilterMenu(Category rootCategory) {
         typeFilterMenu.getItems().clear();
         activeTypeFilters.clear(); 
@@ -232,16 +267,28 @@ public class Main extends Application {
         typeFilterMenu.setDisable(false); 
     }
 
+    /**
+     * Recorre recursivamente el árbol acumulando todos los tipos de pregunta distintos.
+     * 
+     * @param cat categoría a explorar.
+     * @param typesSet conjunto acumulador de tipos.
+     */
     private void collectTypesRecursively(Category cat, Set<String> typesSet) {
         for (Question q : cat.getQuestions()) typesSet.add(q.getType());
         for (Category sub : cat.getSubcategories()) collectTypesRecursively(sub, typesSet);
     }
 
+    /**
+     * Comprueba si el menú de filtrado ya contiene un elemento para el tipo indicado.
+     *
+     * @param type tipo de pregunta a buscar.
+     * @return true si ya existe un MenuItem con ese texto.
+     */
     private boolean typeContainsFilter(String type) {
         for(MenuItem item : typeFilterMenu.getItems()) if (item.getText().equals(type)) return true;
         return false;
     }
-
+    
     public TreeView<Category> getCategoryTreeView() { return categoryTreeView; }
     public TableView<Question> getQuestionTableView() { return questionTableView; }
     public WebView getDetailsWebView() { return detailsWebView; }
@@ -255,5 +302,10 @@ public class Main extends Application {
     public Button getExportLatexButton() { return exportLatexButton; }
     public CheckBox getClozeToggle() { return clozeToggle; }
 
+    /**
+     * Método principal que lanza la aplicación JavaFX.
+     * 
+     * @param args argumentos de línea de comandos. (no utilizados)
+     */
     public static void main(String[] args) { launch(args); }
 }

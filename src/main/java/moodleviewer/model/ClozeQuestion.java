@@ -1,5 +1,6 @@
 package moodleviewer.model;
 
+import moodleviewer.util.HtmlConstants;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -7,9 +8,11 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Clase extendida de Question que representa una pregunta anidada (Cloze) de Moodle.
+ */
 public class ClozeQuestion extends Question {
 	
-    // Flag estático para controlar el modo de visualización globalmente
     public static boolean MODO_PREVIA_ALUMNO = false;
 
     private static final Pattern CLOZE_TOKEN_PAT = Pattern.compile(
@@ -25,35 +28,46 @@ public class ClozeQuestion extends Question {
         Pattern.DOTALL
     );
 
+    /**
+     * Construye una pregunta Cloze. Las subpreguntas se extraen dinámicamente del enunciado en
+     * el momento de la visualización.
+     * 
+     * @param type tipo de Moodle.
+     * @param name nombre de la pregunta.
+     * @param text enunciado completo con la sintaxis Cloze embebida.
+     * @param grade calificación por defecto.
+     * @param penalty fracción de penalización.
+     */
     public ClozeQuestion(String type, String name, String text, String grade, String penalty) {
         super(type, name, text, grade, penalty);
     }
 
+    /**
+     * Elimina el bloque de texto generado por getMoodleHeader y lo reemplaza con su propia representación,
+     * que varía según el modo de previsualización.
+     */
     @Override
     public String getDetails() {
         String baseText = processPluginFiles(text != null ? text : "");
         String header = super.getMoodleHeader();
         
-        // Eliminamos el bloque de texto genérico del header para construir nuestra propia estructura
-        String textDivToRemove = "<div style=\"font-size: 15px; margin-bottom: 25px; color: #212529; line-height: 1.5;\">" + baseText + "</div>";
+        String textDivToRemove = "<div style=\"" + HtmlConstants.TEXT_BASE + "\">" + baseText + "</div>";
         header = header.replace(textDivToRemove, "");
         
         StringBuilder sb = new StringBuilder(header);
 
         if (!MODO_PREVIA_ALUMNO) {
-            // MODO SINTAXIS: Resaltado de etiquetas técnicas
             String highlightedText = highlightClozeSyntax(baseText);
             sb.append("<div style=\"margin-bottom: 25px;\">")
-              .append("<div style=\"font-size: 14px; font-weight: bold; color: #495057; margin-bottom: 8px;\">Sintaxis Cloze:</div>")
-              .append("<div style=\"padding: 15px; background-color: #ffffff; border: 1px dashed #adb5bd; border-radius: 4px; font-size: 15px; color: #212529; line-height: 1.6;\">")
+              .append("<div style=\"").append(HtmlConstants.LABEL_BOLD).append(" margin-bottom: 8px;\">Sintaxis Cloze:</div>")
+              .append("<div style=\"").append(HtmlConstants.CLOZE_CODE_BLOCK).append("\">")
               .append(highlightedText)
               .append("</div></div>");
         } else {
-            // MODO VISTA PREVIA: Renderizado de componentes (inputs, selects...)
             String renderedText = renderCloze(baseText);
             sb.append("<div>")
-              .append("<div style=\"font-size: 14px; font-weight: bold; color: #495057; margin-bottom: 8px;\">Vista previa del alumno:</div>")
-              .append("<div style=\"padding: 15px; background-color: #fcfcfc; border: 1px solid #dee2e6; border-radius: 4px; font-size: 15px; color: #212529; line-height: 1.6;\">")
+              .append("<div style=\"").append(HtmlConstants.LABEL_BOLD).append(" margin-bottom: 8px;\">Vista previa del alumno:</div>")
+              .append("<div style=\"").append(HtmlConstants.CLOZE_RENDER_BLOCK).append("\">")
               .append(renderedText)
               .append("</div></div>");
         }
@@ -62,17 +76,29 @@ public class ClozeQuestion extends Question {
         return sb.toString();
     }
     
+    /**
+     * Método creado para cumplir con el patrón de diseño Visitor.
+     * 
+     * @param visitor visitante que procesará esta pregunta.
+     */
     @Override
     public void accept(QuestionVisitor visitor) {
         visitor.visit(this);
     }
 
+    /**
+     * Envuelve cada token Cloze con un subrayado de color azul para facilitar la revisión
+     * de la sintaxis por el profesor.
+     * 
+     * @param html enunciado HTML con tokens Cloze.
+     * @return HTML con los tokens Cloze resaltados visualmente. 
+     */
     private String highlightClozeSyntax(String html) {
         Matcher m = CLOZE_TOKEN_PAT.matcher(html);
         StringBuilder sb = new StringBuilder();
         while (m.find()) {
             String token = m.group(0);
-            String replacement = "<span style=\"background-color: #e9ecef; color: #0056b3; font-family: 'Courier New', monospace; padding: 2px 6px; border-radius: 4px; font-weight: bold;\">" 
+            String replacement = "<span style=\"" + HtmlConstants.CLOZE_HIGHLIGHT + "\">" 
                                + escapeHtmlText(token) 
                                + "</span>";
             m.appendReplacement(sb, Matcher.quoteReplacement(replacement));
@@ -81,6 +107,13 @@ public class ClozeQuestion extends Question {
         return sb.toString();
     }
 
+    /**
+     * Sustituye cada token Cloze por el widget HTML interactivo correspondiente simulando la interfaz
+     * que vería el alumno en Moodle.
+     * 
+     * @param html enunciado HTML con tokens Cloze.
+     * @return HTML con los tokens sustituidos.
+     */
     private String renderCloze(String html) {
         Matcher m = CLOZE_TOKEN_PAT.matcher(html);
         StringBuilder sb = new StringBuilder();
@@ -96,6 +129,13 @@ public class ClozeQuestion extends Question {
         return sb.toString();
     }
 
+    /**
+     * Construye el widget HTML apropiado para un subproblema Cloze según su tipo.
+     * 
+     * @param typeKey clave del tipo en mayúsculas.
+     * @param alts lista de alternativas parseadas.
+     * @return cadena HTML con el widget interactivo deshabilitado.
+     */
     private String buildClozeWidget(String typeKey, List<ClozeAlt> alts) {
         StringBuilder widget = new StringBuilder();
         
@@ -108,14 +148,25 @@ public class ClozeQuestion extends Question {
                   .append("' style='border:1px solid #ced4da; border-radius: 4px; padding:4px 8px; font-style:italic; color:#495057; background-color:#e9ecef;' />");
         }
         else if (typeKey.matches("MULTICHOICE|MC|MULTICHOICE_S|MCS")) {
-            widget.append("<select disabled style='border:1px solid #ced4da; border-radius:4px; padding:4px; background-color:#e9ecef;'>")
-                  .append("<option value=''>Selecciona...</option>");
+            
+        	widget.append("<select style=\"").append(HtmlConstants.INPUT_BASE).append(" width: auto; max-width: 600px; font-size: 15px; color: #495057; cursor: pointer;\">")
+                  .append("<option value=\"\" disabled selected>Elegir...</option>");
+            
             for (ClozeAlt a : alts) {
                 boolean correct = a.fraction == 1.0;
-                widget.append("<option ").append(correct ? "selected" : "").append(" style='").append(correct ? "color:#15803d;font-weight:bold;" : "color:#333;")
-                      .append("'>").append(correct ? "✓ " : "").append(a.text).append("</option>");
+                
+                String plainText = a.text != null ? a.text.replaceAll("<[^>]+>", "").trim() : "";
+                if (plainText.isEmpty()) {
+                    plainText = "[Imagen o contenido multimedia]";
+                }
+                
+                String formattedFraction = formatFraction(a.fraction);
+                
+                widget.append("<option ").append(correct ? "selected" : "").append(" style=\"").append(correct ? "color:#15803d; font-weight:bold;" : "color:#333;").append("\">")
+                      .append(correct ? "✓ " : "").append(plainText).append(" (").append(formattedFraction).append(")</option>");
             }
             widget.append("</select>");
+            
         }
         else if (typeKey.matches("MULTICHOICE_V|MCV|MULTICHOICE_VS|MCVS|MULTIRESPONSE|MR|MULTIRESPONSE_S|MRS")) {
             String inputType = typeKey.contains("MULTICHOICE") ? "radio" : "checkbox";
@@ -143,6 +194,12 @@ public class ClozeQuestion extends Question {
         return widget.toString();
     }
 
+    /**
+     * Parsea la cadena de alternativas de un token Cloze y devuelve una lista de ClozeAlt. 
+     * 
+     * @param raw cadena con las alternativas tal como aparece en la sintaxis Cloze.
+     * @return lista de alternativas parseadas.
+     */
     private static List<ClozeAlt> parseClozeAlternatives(String raw) {
         List<ClozeAlt> result = new ArrayList<>();
         String[] parts = raw.split("(?<!\\\\)~");
@@ -183,25 +240,55 @@ public class ClozeQuestion extends Question {
         return result;
     }
 
+    /**
+     * Formatea un valor de fracción decimal como porcentake legible. Si es entero no muestra
+     * decimales.
+     * 
+     * @param f fracción en rango (0.0, 1.0).
+     * @return cadena de porcentaje.
+     */
     private static String formatFraction(double f) {
         double pct = f * 100.0;
         if (pct == Math.floor(pct)) return (int) pct + "%";
         return String.format(Locale.US, "%.1f%%", pct);
     }
 
+    /**
+     * Escapa caracteres especiales HTML para uso seguro en atributos.
+     * 
+     * @param text texto a escapar.
+     * @return texto con &, ' y " escapados.
+     */
     private static String escapeHtmlAttr(String text) {
         return text.replace("&", "&amp;").replace("'", "&#39;").replace("\"", "&quot;");
     }
 
+    /**
+     * Escapa caracteres especiales HTML para uso seguro en contenido de texto.
+     * 
+     * @param text texto a escapar.
+     * @return texto con &, <, >, " y ' escapados.
+     */
     private static String escapeHtmlText(String text) {
         return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
                    .replace("\"", "&quot;").replace("'", "&#39;");
     }
 
+    /**
+     * Clase creada para trabajar con la fracción de puntuación y texto de respuesta de una pregunta Cloze. 
+     * Al tener esta clase podemos obtener objetos ClozeAlt en donde tenemos acceso a los dos valores.
+     */
     private static class ClozeAlt {
+    	
         final double fraction;
         final String text;
 
+        /**
+         * Construye un objeto ClozeAlt.
+         * 
+         * @param fraction calificación de la respuesta.
+         * @param text texto de la respuesta.
+         */
         ClozeAlt(double fraction, String text) {
             this.fraction = fraction;
             this.text = text;

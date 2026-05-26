@@ -1,9 +1,25 @@
 package moodleviewer.model;
+
+import moodleviewer.util.HtmlConstants;
 import java.util.List;
 
+/**
+ * Clase extendida de Question que representa una pregunta de emparejamiento de Moodle.
+ */
 public class MatchingQuestion extends Question {
+	
     private List<MatchingPair> pairs;
 
+    /**
+     * Construye una pregunta de emparejamiento con todos sus atributos.
+     * 
+     * @param type tipo de Moodle.
+     * @param name nombre de la pregunta.
+     * @param text enunciado general en HTML.
+     * @param grade calificación por defecto.
+     * @param penalty fracción de penalización.
+     * @param pairs lista de pares enunciado-respuesta.
+     */
     public MatchingQuestion(String type, String name, String text, String grade, String penalty, List<MatchingPair> pairs) {
         super(type, name, text, grade, penalty);
         this.pairs = pairs;
@@ -11,22 +27,24 @@ public class MatchingQuestion extends Question {
 
     public List<MatchingPair> getPairs() { return pairs; }
 
+    /**
+     * Genera una tabla HTML en la que cada fila muestra el enunciado de un par a la izaquierda y un desplegable con la 
+     * respuesta correcta preseleccionada a la derecha.
+     */
     @Override
     public String getDetails() {
         StringBuilder sb = new StringBuilder(getMoodleHeader());
         
-        sb.append("<table style=\"width: 100%; border-collapse: separate; border-spacing: 0 15px; font-size: 15px; color: #212529;\">");
+        sb.append("<table style=\"").append(HtmlConstants.TABLE_LAYOUT).append("\">");
         
         for (MatchingPair p : pairs) {
             sb.append("<tr>")
               .append("<td style=\"vertical-align: middle; width: 45%; text-align: right; padding-right: 20px;\">").append(processPluginFiles(p.getQuestionText())).append("</td>")
               .append("<td style=\"vertical-align: middle; width: 55%;\">")
-              .append("<select disabled style=\"padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; max-width: 250px; background-color: #f8f9fa;\">")
+              .append("<select disabled style=\"").append(HtmlConstants.INPUT_BASE).append(" width: 100%; max-width: 250px;\">")
               .append("<option>Elegir...</option>")
               .append("<option selected>").append(processPluginFiles(p.getAnswerText())).append("</option>")
-              .append("</select>")
-              .append("</td>")
-              .append("</tr>");
+              .append("</select></td></tr>");
         }
         sb.append("</table>");
         
@@ -34,6 +52,11 @@ public class MatchingQuestion extends Question {
         return sb.toString();
     }
     
+    /**
+     * Método creado para cumplir con el patrón de diseño Visitor.
+     * 
+     * @param visitor visitante que procesará esta pregunta.
+     */
     @Override
     public void accept(QuestionVisitor visitor) {
         visitor.visit(this);

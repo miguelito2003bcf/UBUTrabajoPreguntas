@@ -8,11 +8,16 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import moodleviewer.model.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Clase creada para generar un diálogo modal para añadir una nueva pregunta al banco de preguntas de Moodle.
+ * Se presenta como en dos secciones, una con los campos comunes a todos los tipos de pregunta y otra 
+ * parte dinámica que cambia según el tipo de preguntada seleccionada.
+ * Se busca seguir el estilo visual de Moodle.
+ */
 public class AddQuestionDialog {
 
     private Category targetCategory;
@@ -35,10 +40,22 @@ public class AddQuestionDialog {
     private List<ShortAnswerOptionUI> saOptionsList;
     private List<NumericalOptionUI> numOptionsList;
 
+    /**
+     * Construye el diálogo asociándolo a la categoría destino de la nueva pregunta.
+     *
+     * @param targetCategory categoría a la que se añadirá la pregunta creada.
+     */
     public AddQuestionDialog(Category targetCategory) {
         this.targetCategory = targetCategory;
     }
 
+    /**
+     * Muestra el diálogo de forma modal y espera a que el usuario lo cierre.
+     * Al aceptar, construye y devuelve la pregunta correspondiente al tipo seleccionado 
+     * con los datos introducidos.
+     * 
+     * @return depende si se confirma se devuelve la pregunta, y si se cancela un null.
+     */
     public Optional<Question> showAndWait() {
         Dialog<Question> dialog = new Dialog<>();
         dialog.setTitle("Añadir Nueva Pregunta");
@@ -203,6 +220,12 @@ public class AddQuestionDialog {
         return dialog.showAndWait();
     }
 
+    /**
+     * Construye y muestra el panel de configuración para el tipo de pregunta indicado,
+     * limpiando previamente el panel de cualquier configuración anterior.
+     * 
+     * @param type nombre del tipo de pregunta seleccionado.
+     */
     private void buildSpecificSettingsPanel(String type) {
         specificSettingsContainer.getChildren().clear(); 
 
@@ -299,7 +322,6 @@ public class AddQuestionDialog {
             specificSettingsContainer.getChildren().addAll(titleRespuestas, new Separator());
             
             numOptionsList = new ArrayList<>();
-            // Generamos SOLO un panel para respuesta numérica, ya que el modelo no admite más.
             for (int i = 1; i <= 1; i++) {
                 NumericalOptionUI opt = new NumericalOptionUI(i);
                 numOptionsList.add(opt);
@@ -313,6 +335,11 @@ public class AddQuestionDialog {
         }
     }
 
+    /**
+     * Crea un GridPane con el estilo de maquetación estándar del formulario de Moodle.
+     * 
+     * @return un gridPane configurado con el estilo de Moodle.
+     */
     private GridPane createMoodleGrid() {
         GridPane grid = new GridPane();
         grid.setHgap(20);
@@ -325,6 +352,12 @@ public class AddQuestionDialog {
         return grid;
     }
 
+    /**
+     * Crea una etiqueta con el estilo visual estándar del formulario de Moodle.
+     * 
+     * @param text texto a mostrar en la etiqueta.
+     * @return etiqueta configurada con el estilo de Moodle.
+     */
     private Label createMoodleLabel(String text) {
         Label label = new Label(text);
         label.setWrapText(true);
@@ -332,6 +365,10 @@ public class AddQuestionDialog {
         return label;
     }
 
+    /**
+     * Clase privada que sirve para crear ese extra que hablabamos anteriormente de aspectos especificos para el tipo de
+     * pregunta MultiChoice.
+     */
     private class MultichoiceOptionUI {
         VBox panel; TextArea answerField; ComboBox<String> gradeCombo; TextArea feedbackField;
 
@@ -366,6 +403,10 @@ public class AddQuestionDialog {
         public VBox getPanel() { return panel; }
     }
 
+    /**
+     * Clase privada que sirve para crear ese extra que hablabamos anteriormente de aspectos especificos para el tipo de
+     * pregunta MatchingPair.
+     */
     private class MatchingPairUI {
         VBox panel; TextArea questionField; TextField answerField;
 
@@ -391,6 +432,10 @@ public class AddQuestionDialog {
         public VBox getPanel() { return panel; }
     }
 
+    /**
+     * Clase privada que sirve para crear ese extra que hablabamos anteriormente de aspectos especificos para el tipo de
+     * pregunta ShortAnswer.
+     */
     private class ShortAnswerOptionUI {
         VBox panel; TextField answerField; ComboBox<String> gradeCombo; TextArea feedbackField;
 
@@ -423,6 +468,10 @@ public class AddQuestionDialog {
         public VBox getPanel() { return panel; }
     }
 
+    /**
+     * Clase privada que sirve para crear ese extra que hablabamos anteriormente de aspectos especificos para el tipo de
+     * pregunta Numerical.
+     */
     private class NumericalOptionUI {
         VBox panel; TextField answerField; TextField errorField; ComboBox<String> gradeCombo; TextArea feedbackField;
 

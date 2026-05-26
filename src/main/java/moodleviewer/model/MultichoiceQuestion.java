@@ -1,12 +1,30 @@
 package moodleviewer.model;
+
+import moodleviewer.util.HtmlConstants;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase extendida de Question que representa una pregunta opcióm múltiple de Moodle.
+ */
 public class MultichoiceQuestion extends Question {
+	
     private boolean singleAnswer;
     private boolean shuffleAnswers;
     private List<Answer> answers;
 
+    /**
+     * Construye una pregunta de opción múltiple con todos sus atributos.
+     * 
+     * @param type tipo de Moodle.
+     * @param name nombre de la pregunta.
+     * @param text enunciado en HTML.
+     * @param grade calificación por defecto.
+     * @param penalty fracción de penalización.
+     * @param single true si solo admite una respuesta correcta.
+     * @param shuffle true si las opciones deben barajarse.
+     * @param answers lista de opciones de respuesta.
+     */
     public MultichoiceQuestion(String type, String name, String text, String grade, String penalty, boolean single, boolean shuffle, List<Answer> answers) {
         super(type, name, text, grade, penalty);
         this.singleAnswer = single;
@@ -18,18 +36,19 @@ public class MultichoiceQuestion extends Question {
     public boolean isShuffleAnswers() { return shuffleAnswers; }
     public List<Answer> getAnswers() { return answers; }
 
+    /**
+     * Genera un desplegable con todas las opciones y sus porcentajes de calificación. Las opciones con fracción
+     * positiva se consideran correctas y se listan también en un bloque de respuestas correctas al pie del panel.
+     */
     @Override
     public String getDetails() {
         StringBuilder sb = new StringBuilder(getMoodleHeader());
         
-        sb.append("<div style=\"margin-bottom: 15px; font-size: 14px; font-weight: bold; color: #333;\">Seleccione una").append(isSingleAnswer() ? ":" : " o más de una:").append("</div>");
+        sb.append("<div style=\"").append(HtmlConstants.LABEL_BOLD).append("\">Seleccione una").append(isSingleAnswer() ? ":" : " o más de una:").append("</div>");
         
         List<String> correctAnswers = new ArrayList<>();
-        
         sb.append("<div style=\"margin-left: 5px;\">");
-        
-        // Creamos el desplegable real
-        sb.append("<select style=\"padding: 10px; border: 1px solid #ced4da; border-radius: 4px; width: 100%; max-width: 600px; background-color: #ffffff; font-size: 15px; color: #495057; cursor: pointer;\">");
+        sb.append("<select style=\"").append(HtmlConstants.INPUT_BASE).append(" width: 100%; max-width: 600px; font-size: 15px; color: #495057; cursor: pointer;\">");
         sb.append("<option value=\"\" disabled selected>Haz clic para ver las opciones y puntuaciones...</option>");
         
         for (Answer a : answers) {
@@ -39,15 +58,12 @@ public class MultichoiceQuestion extends Question {
                     fractionVal = Double.parseDouble(a.getFraction());
                 }
             } catch (NumberFormatException e) {
-                // Ignorar error de parseo y mantener a 0
             }
             
-            // Si es positiva, es correcta (total o parcialmente)
             if (fractionVal > 0) {
                 correctAnswers.add(processPluginFiles(a.getText()));
             }
             
-            // Formatear la fracción a porcentaje limpio (ej. 33.333 -> 33.3%, 100.0 -> 100%)
             String formattedFraction;
             if (fractionVal == Math.floor(fractionVal)) {
                 formattedFraction = String.format("%.0f%%", fractionVal);
@@ -55,21 +71,17 @@ public class MultichoiceQuestion extends Question {
                 formattedFraction = String.format("%.1f%%", fractionVal).replace(",", ".");
             }
             
-            // Limpiamos las etiquetas HTML para que se vea bien dentro del <option>
             String plainText = a.getText() != null ? a.getText().replaceAll("<[^>]+>", "").trim() : "";
             if (plainText.isEmpty()) {
                 plainText = "[Imagen o contenido multimedia]";
             }
             
-            // Añadimos solo el porcentaje limpio al final de la opción
             sb.append("<option>").append(plainText).append(" (").append(formattedFraction).append(")</option>");
         }
-        sb.append("</select>");
-        sb.append("</div>");
+        sb.append("</select></div>");
         
-        // Mantenemos la visualización completa de las respuestas correctas abajo
         if (!correctAnswers.isEmpty()) {
-            sb.append("<div style=\"margin-top: 30px; padding: 15px; background-color: #fcf8e3; border: 1px solid #faebcc; border-radius: 4px; font-size: 14px; color: #8a6d3b;\">")
+            sb.append("<div style=\"").append(HtmlConstants.FEEDBACK_WARNING).append("\">")
               .append("La(s) respuesta(s) correcta(s):<br><ul style=\"margin-bottom: 0;\">");
             for (String ca : correctAnswers) {
                 sb.append("<li style=\"margin-top: 5px;\">").append(ca).append("</li>");
@@ -81,6 +93,11 @@ public class MultichoiceQuestion extends Question {
         return sb.toString();
     }
     
+    /**
+     * Método creado para cumplir con el patrón de diseño Visitor.
+     * 
+     * @param visitor visitante que procesará esta pregunta.
+     */
     @Override
     public void accept(QuestionVisitor visitor) {
         visitor.visit(this);

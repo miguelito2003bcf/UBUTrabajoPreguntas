@@ -1,10 +1,27 @@
 package moodleviewer.model;
+
+import moodleviewer.util.HtmlConstants;
 import java.util.List;
 
+/**
+ * Clase extendida de Question que representa una pregunta de respuesta corta de Moodle.
+ */
 public class ShortAnswerQuestion extends Question {
+	
     private boolean caseSensitive;
     private List<Answer> answers;
 
+    /**
+     * Construye una pregunta de respuesta corta con todos sus atributos.
+     * 
+     * @param type tipo Moodle.
+     * @param name nombre de la pregunta.
+     * @param text enunciado en HTML.
+     * @param grade calificación por defecto.
+     * @param penalty fracción de penalización.
+     * @param caseSensitive true si la comparación distingue entre mayúsculas y minúsculas.
+     * @param answers lista de respuestas aceptadas con sus fracciones.
+     */
     public ShortAnswerQuestion(String type, String name, String text, String grade, String penalty, boolean caseSensitive, List<Answer> answers) {
         super(type, name, text, grade, penalty);
         this.caseSensitive = caseSensitive;
@@ -14,13 +31,17 @@ public class ShortAnswerQuestion extends Question {
     public boolean isCaseSensitive() { return caseSensitive; }
     public List<Answer> getAnswers() { return answers; }
 
+    /**
+     * Muestra un campo de texto deshabilitado que representa la zona de respuesta del alumno,
+     * junto a un bloque resaltado con la respuesta correcta.
+     */
     @Override
     public String getDetails() {
         StringBuilder sb = new StringBuilder(getMoodleHeader());
         
-        sb.append("<div style=\"display: flex; align-items: center; margin-bottom: 20px; font-size: 15px; color: #212529;\">")
+        sb.append("<div style=\"").append(HtmlConstants.FLEX_ROW).append("\">")
           .append("<strong style=\"margin-right: 15px;\">Respuesta:</strong>")
-          .append("<input type=\"text\" disabled style=\"padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 300px; background-color: #f8f9fa;\">")
+          .append("<input type=\"text\" disabled style=\"").append(HtmlConstants.INPUT_BASE).append(" width: 300px;\">")
           .append("</div>");
           
         String correctAnswer = "";
@@ -32,7 +53,7 @@ public class ShortAnswerQuestion extends Question {
         }
         
         if (!correctAnswer.isEmpty()) {
-            sb.append("<div style=\"margin-top: 30px; padding: 15px; background-color: #fcf8e3; border: 1px solid #faebcc; border-radius: 4px; font-size: 14px; color: #8a6d3b;\">")
+            sb.append("<div style=\"").append(HtmlConstants.FEEDBACK_WARNING).append("\">")
               .append("La respuesta correcta es: <strong>").append(correctAnswer).append("</strong>")
               .append("</div>");
         }
@@ -41,6 +62,11 @@ public class ShortAnswerQuestion extends Question {
         return sb.toString();
     }
     
+    /**
+     * Método creado para cumplir con el patrón de diseño Visitor.
+     * 
+     * @param visitor visitante que procesará esta pregunta.
+     */
     @Override
     public void accept(QuestionVisitor visitor) {
         visitor.visit(this);
