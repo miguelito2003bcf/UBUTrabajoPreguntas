@@ -28,40 +28,128 @@ public class TreeManager {
      */
     public static void configure(Main main) {
         TreeView<Category> tree = main.getCategoryTreeView();
-        TableView<Question> table = main.getQuestionTableView(); 
+        tree.setCellFactory(tv -> new CategoryTreeCell(main));
+    }
+    
+    /**
+     * Expande o contrae recursivamente un TreeItem y todos sus descendientes.
+     * 
+     * @param item el nodo a expandir/contraer.
+     * @param expand true para expandir o false para contraer.
+     */
+    private static void expandAll(TreeItem<?> item, boolean expand) {
+        if (item != null && !item.isLeaf()) {
+            item.setExpanded(expand);
+            for (TreeItem<?> child : item.getChildren()) {
+                expandAll(child, expand);
+            }
+        }
+    }
+    
+    /**
+     * Cuenta de forma recursiva el número total de preguntas que hay en una categoría y en todas
+     * sus subcategorías descendientes.
+     * 
+     * @param category categoría base desde la que empezar a contar.
+     * @return número total de preguntas en la rama.
+     */
+    private static int countTotalQuestions(Category category) {
+        if (category == null) return 0;
+        
+        int count = category.getQuestions().size();
+        for (Category subcategory : category.getSubcategories()) {
+            count += countTotalQuestions(subcategory);
+        }
+        return count;
+    }
 
-        tree.setCellFactory(tv -> {
-            TreeCell<Category> cell = new TreeCell<Category>() {
-                @Override
-                protected void updateItem(Category item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty || item == null) {
-                        setText(null);
-                    } else {
-                        setText(item.getName() + " (" + item.getQuestions().size() + ")");
-                    }
-                }
-            };
+    /**
+     * Comprueba si un destino es válido para el drop de una categoría arrastrada. Un destino es inválido
+     * si coincide con el origen, es su padre actual o es un descendiente de él.
+     * 
+     * @param source nodo que se está arrastrando.
+     * @param target nodo sobre el que se pretende soltar.
+     * @return true si el drop es válido, o false en caso contrario.
+     */
+    private static boolean isValidDropTarget(TreeItem<Category> source, TreeItem<Category> target) {
+        if (source == null || target == null || source == target) return false;
+        if (source.getParent() == target) return false;
+        
+        TreeItem<Category> temp = target;
+        while (temp != null) {
+            if (temp == source) return false; 
+            temp = temp.getParent();
+        }
+        return true; 
+    }
+    
+    /**
+     * Clase interna que define cómo se visualiza y cómo se comporta cada celda del árbol.
+     */
+    private static class CategoryTreeCell extends TreeCell<Category> {
+    	
+        private Main main;
+        private TreeView<Category> tree;
+        private TableView<Question> table;
 
-            cell.setOnDragDetected(event -> {
-                if (!cell.isEmpty() && cell.getTreeItem().getParent() != null) {
-                    draggedCategoryNode = cell.getTreeItem();
-                    Dragboard db = cell.startDragAndDrop(TransferMode.MOVE);
+        /**
+         * Construye una nueva celda para el árbol de categorías.
+         * 
+         * @param main instancia para acceder a los componentes globales.
+         */
+        public CategoryTreeCell(Main main) {
+            this.main = main;
+            this.tree = main.getCategoryTreeView();
+            this.table = main.getQuestionTableView();
+            
+            configurarEventos();
+            configurarMenuContextual();
+        }
+
+        /**
+         * Actualiza el contenido visual de la celda cada vez que JavaFX la redibuja.
+         * Muestra el nombre de la categoría junto con el conteo de preguntas.
+         * 
+         * @param item la categoría asociada a esta celda.
+         * @param empty indica si la celda está vacía.
+         */
+        @Override
+        protected void updateItem(Category item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setText(null);
+            } else {
+                int directQuestions = item.getQuestions().size();
+                int totalQuestions = countTotalQuestions(item);
+                setText(item.getName() + " (" + totalQuestions + " | " + directQuestions + ")");
+            }
+        }
+
+        /**
+         * Configura los manejadores de eventos interactivos para la celda. Esto incluye el inicio y
+         * recepción de operaciones Drag & Drop para mover preguntas y categorías, junto con el atajo para
+         * contraer o expandir la rama completa.
+         */
+        private void configurarEventos() {
+            this.setOnDragDetected(event -> {
+                if (!this.isEmpty() && this.getTreeItem().getParent() != null) {
+                    draggedCategoryNode = this.getTreeItem();
+                    Dragboard db = this.startDragAndDrop(TransferMode.MOVE);
                     ClipboardContent content = new ClipboardContent();
                     content.putString("MOVER_CATEGORIA");
                     db.setContent(content);
                     
                     SnapshotParameters params = new SnapshotParameters();
                     params.setFill(Color.TRANSPARENT);
-                    db.setDragView(cell.snapshot(params, null));
+                    db.setDragView(this.snapshot(params, null));
                     event.consume();
                 }
             });
 
-            cell.setOnDragOver(event -> {
-                if (!cell.isEmpty() && event.getDragboard().hasString()) {
+            this.setOnDragOver(event -> {
+                if (!this.isEmpty() && event.getDragboard().hasString()) {
                     String dragType = event.getDragboard().getString();
-                    TreeItem<Category> targetItem = cell.getTreeItem();
+                    TreeItem<Category> targetItem = this.getTreeItem();
 
                     if ("MOVER_PREGUNTAS".equals(dragType)) {
                         event.acceptTransferModes(TransferMode.MOVE);
@@ -72,11 +160,11 @@ public class TreeManager {
                 event.consume();
             });
 
-            cell.setOnDragDropped(event -> {
+            this.setOnDragDropped(event -> {
                 boolean success = false;
-                if (!cell.isEmpty() && event.getDragboard().hasString()) {
+                if (!this.isEmpty() && event.getDragboard().hasString()) {
                     String dragType = event.getDragboard().getString();
-                    Category destCategory = cell.getItem();
+                    Category destCategory = this.getItem();
 
                     if ("MOVER_PREGUNTAS".equals(dragType)) {
                         List<Question> draggedQuestions = new ArrayList<>(table.getSelectionModel().getSelectedItems());
@@ -127,37 +215,54 @@ public class TreeManager {
                 draggedCategoryNode = null;
             });
 
+            this.setOnMouseClicked(event -> {
+                if (event.getButton() == javafx.scene.input.MouseButton.PRIMARY && event.isControlDown()) {
+                    TreeItem<Category> clickedItem = this.getTreeItem();
+                    if (clickedItem != null && !this.isEmpty()) {
+                        boolean newState = !clickedItem.isExpanded();
+                        expandAll(clickedItem, newState);
+                        event.consume();
+                    }
+                }
+            });
+        }
+
+        /**
+         * Configura y asocia un menú contextual a la celda. Proporciona las opciones de añadir una subcategoría,
+         * renombrar la categoría actual o eliminarla, gestionando la reubicación de sus preguntas si fuese necesario.
+         */
+        private void configurarMenuContextual() {
             ContextMenu categoryMenu = new ContextMenu();
+            
             MenuItem addCatItem = new MenuItem("➕ Añadir Subcategoría");
             addCatItem.setOnAction(e -> {
                 TextInputDialog dialog = new TextInputDialog();
                 dialog.setTitle("Nueva Categoría");
-                dialog.setHeaderText("Crear dentro de: " + cell.getItem().getName());
+                dialog.setHeaderText("Crear dentro de: " + this.getItem().getName());
                 dialog.setContentText("Nombre:");
                 dialog.showAndWait().ifPresent(name -> {
-                    cell.getItem().addSubcategory(new Category(name));
+                    this.getItem().addSubcategory(new Category(name));
                     main.applyCategoryFilter(main.getSearchCategoryField().getText());
                 });
             });
 
             MenuItem editCatItem = new MenuItem("Renombrar");
             editCatItem.setOnAction(e -> {
-                TextInputDialog dialog = new TextInputDialog(cell.getItem().getName());
+                TextInputDialog dialog = new TextInputDialog(this.getItem().getName());
                 dialog.setTitle("Renombrar");
                 dialog.setHeaderText("Nuevo nombre:");
                 dialog.showAndWait().ifPresent(newName -> {
-                    cell.getItem().setName(newName);
+                    this.getItem().setName(newName);
                     tree.refresh();
                 });
             });
 
             MenuItem deleteCatItem = new MenuItem("Eliminar Categoría");
             deleteCatItem.setOnAction(event -> {
-                TreeItem<Category> treeItemToDelete = cell.getTreeItem();
+                TreeItem<Category> treeItemToDelete = this.getTreeItem();
                 TreeItem<Category> parentItem = treeItemToDelete.getParent();
 
-                if (parentItem != null && parentItem.getParent() != null) { 
-                    
+                if (parentItem != null && parentItem.getParent() != null) {
                     Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
                     confirm.setTitle("Confirmar Eliminación");
                     confirm.setHeaderText("¿Estás seguro de que deseas eliminar la categoría '" + treeItemToDelete.getValue().getName() + "'?");
@@ -169,7 +274,7 @@ public class TreeManager {
                             Category parentCat = parentItem.getValue();
                             parentCat.getQuestions().addAll(catToDelete.getQuestions());
                             parentCat.getSubcategories().addAll(catToDelete.getSubcategories());
-                            parentCat.getSubcategories().remove(catToDelete); 
+                            parentCat.getSubcategories().remove(catToDelete);
                             
                             main.applyCategoryFilter(main.getSearchCategoryField().getText());
                         }
@@ -181,28 +286,7 @@ public class TreeManager {
             });
             
             categoryMenu.getItems().addAll(addCatItem, editCatItem, deleteCatItem);
-            cell.contextMenuProperty().bind(Bindings.when(cell.emptyProperty()).then((ContextMenu) null).otherwise(categoryMenu));
-            return cell;
-        });
-    }
-
-    /**
-     * Comprueba si un destino es válido para el drop de una categoría arrastrada. Un destino es inválido
-     * si coincide con el origen, es su padre actual o es un descendiente de él.
-     * 
-     * @param source nodo que se está arrastrando.
-     * @param target nodo sobre el que se pretende soltar.
-     * @return true si el drop es válido, o false en caso contrario.
-     */
-    private static boolean isValidDropTarget(TreeItem<Category> source, TreeItem<Category> target) {
-        if (source == null || target == null || source == target) return false;
-        if (source.getParent() == target) return false;
-        
-        TreeItem<Category> temp = target;
-        while (temp != null) {
-            if (temp == source) return false; 
-            temp = temp.getParent();
+            this.contextMenuProperty().bind(Bindings.when(this.emptyProperty()).then((ContextMenu) null).otherwise(categoryMenu));
         }
-        return true; 
     }
 }

@@ -14,6 +14,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Clase creada como visitante que serializa cada tipo de pregunta de Moodle al formato LaTeX.
@@ -21,6 +23,7 @@ import java.util.regex.Pattern;
  */
 public class LaTeXExportVisitor implements QuestionVisitor {
     
+	private static final Logger LOGGER = Logger.getLogger(LaTeXExportVisitor.class.getName());
     private final BufferedWriter writer;
     private final File imagesDir;
     private final String imagesFolderName;
@@ -56,13 +59,17 @@ public class LaTeXExportVisitor implements QuestionVisitor {
             
             for (Answer a : q.getAnswers()) {
                 boolean isCorrect = a.getFraction() != null && Double.parseDouble(a.getFraction()) > 0;
-                String processedText = processTextForLatex(q, a.getText());
                 
-                if (isCorrect) writer.write("  \\CorrectChoice " + processedText + "\n");
-                else writer.write("  \\choice " + processedText + "\n");
+                String processedText = processTextForLatex(q, a.getText()).replaceAll("\\\\\\\\\\s*$", "").trim();
+                String scoreBadge = showAnswers ? formatLaTeXScore(a.getFraction()) : "";
+                
+                if (isCorrect) writer.write("  \\CorrectChoice " + processedText + scoreBadge + "\n");
+                else writer.write("  \\choice " + processedText + scoreBadge + "\n");
             }
             writer.write("\\end{" + envName + "}\n\n\\vspace{0.5cm}\n");
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) { 
+        	LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); 
+        }
     }
 
     /**
@@ -76,13 +83,15 @@ public class LaTeXExportVisitor implements QuestionVisitor {
         try {
             writeQuestionTitle(q);
             boolean isTrueCorrect = "100".equals(q.getTrueAnswer().getFraction());
+            String trueBadge = showAnswers ? formatLaTeXScore(q.getTrueAnswer().getFraction()) : "";
+            String falseBadge = showAnswers ? formatLaTeXScore(q.getFalseAnswer().getFraction()) : "";
             
             writer.write("\\begin{unaRespuesta}\n");
-            writer.write((isTrueCorrect ? "  \\CorrectChoice " : "  \\choice ") + "Verdadero\n");
-            writer.write((!isTrueCorrect ? "  \\CorrectChoice " : "  \\choice ") + "Falso\n");
+            writer.write((isTrueCorrect ? "  \\CorrectChoice " : "  \\choice ") + "Verdadero" + trueBadge + "\n");
+            writer.write((!isTrueCorrect ? "  \\CorrectChoice " : "  \\choice ") + "Falso" + falseBadge + "\n");
             writer.write("\\end{unaRespuesta}\n\n\\vspace{0.5cm}\n");
             
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) { LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); }
     }
 
     /**
@@ -99,16 +108,16 @@ public class LaTeXExportVisitor implements QuestionVisitor {
             if (showAnswers) {
                 List<String> correctAnswers = new ArrayList<>();
                 for (Answer a : q.getAnswers()) {
-                    if ("100".equals(a.getFraction())) {
-                        correctAnswers.add(processTextForLatex(q, a.getText()));
-                    }
+                    
+                	String scoreBadge = formatLaTeXScore(a.getFraction());
+                    correctAnswers.add(processTextForLatex(q, a.getText()) + scoreBadge);
                 }
                 writer.write("\\vspace{0.3cm}\n\\noindent \\textbf{Respuesta esperada:} \\fcolorbox{azul}{blue!5}{\\textcolor{azul}{\\textbf{" + String.join(" / ", correctAnswers) + "}}}\n\n");
             } else {
                 writer.write("\\vspace{1.5cm}\n\n");
             }
             writer.write("\\vspace{0.5cm}\n");
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) { LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); }
     }
 
     /**
@@ -122,14 +131,17 @@ public class LaTeXExportVisitor implements QuestionVisitor {
         try {
             writeQuestionTitle(q);
             if (showAnswers) {
+            	
                 String tolText = (q.getTolerance() != null && !q.getTolerance().equals("0") && !q.getTolerance().isEmpty()) 
                         ? " (margen de error $\\pm$" + escapeLatex(q.getTolerance()) + ")" : "";
-                writer.write("\\vspace{0.3cm}\n\\noindent \\textbf{Respuesta correcta:} \\fcolorbox{azul}{blue!5}{\\textcolor{azul}{\\textbf{" + processTextForLatex(q, q.getAnswer().getText()) + tolText + "}}}\n\n");
+                String scoreBadge = formatLaTeXScore(q.getAnswer().getFraction());
+                
+                writer.write("\\vspace{0.3cm}\n\\noindent \\textbf{Respuesta correcta:} \\fcolorbox{azul}{blue!5}{\\textcolor{azul}{\\textbf{" + processTextForLatex(q, q.getAnswer().getText()) + tolText + scoreBadge + "}}}\n\n");
             } else {
                 writer.write("\\vspace{1.5cm}\n\n");
             }
             writer.write("\\vspace{0.5cm}\n");
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) { LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); }
     }
 
     /**
@@ -144,16 +156,26 @@ public class LaTeXExportVisitor implements QuestionVisitor {
             writeQuestionTitle(q);
             writer.write("\\begin{emparejar}\n");
             char letter = 'A';
+            int numPairs = q.getPairs().size();
+            String pairFraction = numPairs > 0 ? String.valueOf(100.0 / numPairs) : "0";
+            String scoreBadge = showAnswers ? formatLaTeXScore(pairFraction) : "";
+
             for (MatchingPair p : q.getPairs()) {
+            	
+                String qLatex = processTextForLatex(q, p.getQuestionText()).replaceAll("\\\\\\\\\\s*$", "").replace("\n", " ").trim();
+                String aLatex = processTextForLatex(q, p.getAnswerText()).replaceAll("\\\\\\\\\\s*$", "").replace("\n", " ").trim();
+                
                 if (showAnswers) {
-                    writer.write("  \\cgoCorrectChoice{" + letter + "} " + processTextForLatex(q, p.getQuestionText()) + " \\dotfill \\fcolorbox{azul}{blue!5}{\\textcolor{azul}{\\textbf{" + processTextForLatex(q, p.getAnswerText()) + "}}}\n");
+                    writer.write("  \\cgoCorrectChoice{" + letter + "} " + qLatex + " \\dotfill \\fcolorbox{azul}{blue!5}{\\textcolor{azul}{\\textbf{" + aLatex + scoreBadge + "}}}\n");
                 } else {
-                    writer.write("  \\cgoCorrectChoice{} " + processTextForLatex(q, p.getQuestionText()) + " \\dotfill \\rule{4cm}{0.4pt}\n");
+                    writer.write("  \\cgoCorrectChoice{} " + qLatex + " \\dotfill \\rule{4cm}{0.4pt}\n");
                 }
                 letter++;
             }
             writer.write("\\end{emparejar}\n\n\\vspace{0.5cm}\n");
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) { 
+        	LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); 
+        }
     }
 
     /**
@@ -166,7 +188,7 @@ public class LaTeXExportVisitor implements QuestionVisitor {
         try {
             writeQuestionTitle(q);
             writer.write("\\vspace{1cm}\n\n");
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) { LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); }
     }
     
     /**
@@ -179,7 +201,7 @@ public class LaTeXExportVisitor implements QuestionVisitor {
         try {
             writeQuestionTitle(q);
             writer.write("\\vspace{3cm}\n\n");
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) { LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); }
     }
 
     /**
@@ -366,7 +388,11 @@ public class LaTeXExportVisitor implements QuestionVisitor {
      * @return cadena LaTeX resultante, o el HTML original si pandoc no está disponible.
      */
     private String convertHtmlToLatexWithPandoc(String htmlText) {
-        ProcessBuilder pb = new ProcessBuilder("pandoc", "-f", "html+tex_math_dollars+tex_math_single_backslash", "-t", "latex");
+    	
+    	String os = System.getProperty("os.name").toLowerCase();
+        String pandocPath = os.contains("win") ? "C:\\Program Files\\Pandoc\\pandoc.exe" : "/usr/bin/pandoc";
+        
+        ProcessBuilder pb = new ProcessBuilder(pandocPath, "-f", "html+tex_math_dollars+tex_math_single_backslash", "-t", "latex");
         pb.redirectErrorStream(true);
         StringBuilder latex = new StringBuilder();
         try {
@@ -378,6 +404,9 @@ public class LaTeXExportVisitor implements QuestionVisitor {
                 String line; while ((line = pr.readLine()) != null) latex.append(line).append("\n");
             }
             process.waitFor();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return htmlText;
         } catch (Exception e) { return htmlText; } 
         return latex.toString().trim();
     }
@@ -453,5 +482,40 @@ public class LaTeXExportVisitor implements QuestionVisitor {
     public static String escapeLatex(String text) {
         if (text == null) return "";
         return text.replace("%", "\\%").replace("_", "\\_").replace("#", "\\#").replace("&", "\\&").replace("$", "\\$");
+    }
+    
+    /**
+     * Genera la etiqueta de puntuación formateada para LaTeX a partir de la fracción de Moodle.
+     * Aplica formato de texto en negrita, color azul para puntuaciones positivas y rojo para negativas.
+     * 
+     * @param fractionStr cadena con el valor de la fracción.
+     * @return cadena formateada con macros de LaTeX para estilo y color.
+     */
+    private String formatLaTeXScore(String fractionStr) {
+        if (fractionStr == null || fractionStr.isEmpty() || "0".equals(fractionStr)) {
+            return "";
+        }
+        try {
+            double val = Double.parseDouble(fractionStr);
+            String formattedNumber;
+            
+            if (val == Math.floor(val)) {
+                formattedNumber = String.format("%.0f", val);
+            } else {
+                formattedNumber = String.format(java.util.Locale.US, "%.1f", val);
+            }
+            
+            if (val > 0) {
+                return " \\textbf{\\textcolor{azul}{(+" + formattedNumber + "\\%)}}";
+            } else {
+                return " \\textbf{\\textcolor{red}{(" + formattedNumber + "\\%)}}";
+            }
+        } catch (NumberFormatException e) {
+            if (fractionStr.contains("-")) {
+                return " \\textbf{\\textcolor{red}{(" + escapeLatex(fractionStr) + "\\%)}}";
+            } else {
+                return " \\textbf{\\textcolor{azul}{(" + escapeLatex(fractionStr) + "\\%)}}";
+            }
+        }
     }
 }

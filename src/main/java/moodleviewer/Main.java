@@ -14,10 +14,12 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 import moodleviewer.model.Category;
 import moodleviewer.model.Question;
 import moodleviewer.model.ClozeQuestion;
 import java.util.HashSet;
+import java.io.File;
 import java.util.Optional;
 import java.util.Set;
 
@@ -40,6 +42,7 @@ public class Main extends Application {
     private TextField searchQuestionField = new TextField();
     private MenuButton typeFilterMenu = new MenuButton("Filtrar por Tipo");
     private Category currentRootCategory; 
+    private Label fileNameLabel = new Label("Ningún archivo cargado");
     private Set<String> activeTypeFilters = new HashSet<>(); 
 
     /**
@@ -74,6 +77,7 @@ public class Main extends Application {
         HBox.setHgrow(searchQuestionField, Priority.ALWAYS); 
 
         typeFilterMenu.setDisable(true); 
+        fileNameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 14px;");
         
         addQuestionButton.setDisable(true);
         addQuestionButton.setOnAction(e -> showAddQuestionDialog());
@@ -121,8 +125,17 @@ public class Main extends Application {
      * @param stage ventana padre para el diálogo de apertura de fichero.
      */
     private void handleLoadXML(Stage stage) {
-        FileManager.openXML(stage).ifPresent(root -> {
-            currentRootCategory = root;
+        Optional<Pair<Category, File>> resultado = FileManager.openXML(stage);
+
+        if (resultado.isPresent()) {
+        	
+            Pair<Category, File> pair = resultado.get();
+            
+            currentRootCategory = pair.getKey();
+            File loadedFile = pair.getValue(); 
+            
+            fileNameLabel.setText("Archivo actual: " + loadedFile.getName());
+
             searchCategoryField.setText("");
             searchQuestionField.setText("");
             populateTypeFilterMenu(currentRootCategory);
@@ -137,7 +150,7 @@ public class Main extends Application {
             addQuestionButton.setDisable(false); 
             addCategoryButton.setDisable(false); 
             exportLatexButton.setDisable(false);
-        });
+        }
     }
 
     /**
@@ -254,12 +267,21 @@ public class Main extends Application {
     private void populateTypeFilterMenu(Category rootCategory) {
         typeFilterMenu.getItems().clear();
         activeTypeFilters.clear(); 
+        updateFilterButtonStyle();
+
         Set<String> uniqueTypes = new HashSet<>();
         collectTypesRecursively(rootCategory, uniqueTypes);
+        
         for (String type : uniqueTypes) {
             CheckMenuItem menuItem = new CheckMenuItem(type);
             menuItem.selectedProperty().addListener((obs, was, is) -> {
-                if (is) activeTypeFilters.add(type); else activeTypeFilters.remove(type);
+                if (is) {
+                    activeTypeFilters.add(type); 
+                } else {
+                    activeTypeFilters.remove(type);
+                }
+                
+                updateFilterButtonStyle();
                 refreshQuestionTable(); 
             });
             typeFilterMenu.getItems().add(menuItem);
@@ -289,6 +311,19 @@ public class Main extends Application {
         return false;
     }
     
+    /**
+     * Actualiza el estilo visual del botón de filtrado para indicar si hay filtros activos.
+     */
+    private void updateFilterButtonStyle() {
+        if (activeTypeFilters.isEmpty()) {
+            typeFilterMenu.setStyle(""); 
+            typeFilterMenu.setText("Filtrar por Tipo");
+        } else {
+        	typeFilterMenu.setStyle("-fx-background-color: #dc3545; -fx-border-color: #c82333; -fx-text-fill: white; -fx-font-weight: bold;");
+            typeFilterMenu.setText("Filtrar por Tipo (" + activeTypeFilters.size() + ")");
+        }
+    }
+    
     public TreeView<Category> getCategoryTreeView() { return categoryTreeView; }
     public TableView<Question> getQuestionTableView() { return questionTableView; }
     public WebView getDetailsWebView() { return detailsWebView; }
@@ -301,6 +336,7 @@ public class Main extends Application {
     public Button getSaveButton() { return saveButton; }
     public Button getExportLatexButton() { return exportLatexButton; }
     public CheckBox getClozeToggle() { return clozeToggle; }
+    public Label getFileNameLabel() { return fileNameLabel; }
 
     /**
      * Método principal que lanza la aplicación JavaFX.

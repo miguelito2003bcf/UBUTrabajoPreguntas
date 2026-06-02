@@ -16,13 +16,12 @@ import javafx.scene.layout.Region;
  */
 public class LayoutManager {
     
-	/**
-	 * Construye y devuelve la escena principal de la aplicación. Recupera todos los componentes de la instancia del main 
-	 * mediante sus getters y los organiza en la estructura de paneles.
-	 * 
-	 * @param main instancia de main que proporciona todos los componentes de la interfaz.
-	 * @return escena principal.
-	 */
+    /**
+     * Construye y devuelve la escena principal de la aplicación. Recupera todos los componentes de la instancia del main 
+     * mediante sus getters y los organiza en la estructura de paneles.
+     * * @param main instancia de main que proporciona todos los componentes de la interfaz.
+     * @return escena principal.
+     */
     public static Scene buildScene(Main main) {
 
         HBox questionTopBar = new HBox(10, main.getSearchQuestionField(), main.getTypeFilterMenu(), main.getAddQuestionButton());
@@ -50,10 +49,20 @@ public class LayoutManager {
         mainSplitPane.getItems().addAll(leftPane, rightSplitPane);
         mainSplitPane.setDividerPositions(0.3f);
         
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
+        Region spacer1 = new Region();
+        HBox.setHgrow(spacer1, Priority.ALWAYS);
+        
+        Region spacer2 = new Region();
+        HBox.setHgrow(spacer2, Priority.ALWAYS);
 
-        ToolBar toolBar = new ToolBar(main.getOpenButton(), spacer, main.getSaveButton(), main.getExportLatexButton());
+        ToolBar toolBar = new ToolBar(
+                main.getOpenButton(), 
+                spacer1, 
+                main.getFileNameLabel(), 
+                spacer2, 
+                main.getSaveButton(), 
+                main.getExportLatexButton()
+        );
 
         BorderPane root = new BorderPane();
         root.setTop(toolBar);

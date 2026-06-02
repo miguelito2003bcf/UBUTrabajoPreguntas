@@ -9,22 +9,27 @@ import moodleviewer.model.Category;
 import moodleviewer.parser.XMLExporter;
 import moodleviewer.parser.XMLParser;
 import java.io.File;
+import javafx.util.Pair;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Clase creada para gestionar las operaciones de apertura, guardado y exportacion de ficheros.
  * Se centra en la lógica de diálogos de fichero y la gestión de errores.
  */
 public class FileManager {
+	
+	private static final Logger LOGGER = Logger.getLogger(FileManager.class.getName());
 
 	/**
 	 * Abre un diálogo de selección de fichero para cargar un XML de Moodle.
-	 * Parsea el fichero y devuelve la categoría raíz, o vacío si se cancela o falla.
+	 * Parsea el fichero y devuelve un par con la categoría raíz y el archivo, o vacío si se cancela o falla.
 	 * 
 	 * @param stage ventana padre sobre la que se muestra el diálogo.
-	 * @return la cateogoría raíz si la carga fue exitosa.
+	 * @return un Pair con la categoría raíz y el archivo si la carga fue exitosa.
 	 */
-    public static Optional<Category> openXML(Stage stage) {
+	public static Optional<Pair<Category, File>> openXML(Stage stage) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos XML", "*.xml"));
         File file = fileChooser.showOpenDialog(stage);
@@ -32,7 +37,7 @@ public class FileManager {
         if (file != null) {
             try {
                 Category root = XMLParser.parseMoodleXML(file);
-                return Optional.of(root);
+                return Optional.of(new Pair<>(root, file));
             } catch (Exception ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Error al leer el archivo XML: " + ex.getMessage());
                 alert.showAndWait();
@@ -111,7 +116,7 @@ public class FileManager {
             } catch (Exception ex) {
                 Alert err = new Alert(Alert.AlertType.ERROR, "Error al exportar a LaTeX: " + ex.getMessage());
                 err.showAndWait();
-                ex.printStackTrace();
+                LOGGER.log(Level.SEVERE, "Excepción durante la exportación del archivo LaTeX", ex);
             }
         }
     }
