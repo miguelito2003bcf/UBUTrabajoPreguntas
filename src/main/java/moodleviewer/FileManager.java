@@ -69,7 +69,7 @@ public class FileManager {
             } catch (Exception ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Error al guardar el archivo XML: " + ex.getMessage());
                 alert.showAndWait();
-                ex.printStackTrace();
+                LOGGER.log(Level.SEVERE, "Excepción durante la exportación del archivo LaTeX", ex);
             }
         }
     }

@@ -433,7 +433,7 @@ public class LaTeXExportVisitor implements QuestionVisitor {
                        .replace("XXMRCORRECTXX", "\\CorrectChoice ")
                        .replace("XXMRCHOICEXX", "\\choice ");
 
-        result = result.replaceAll("(\\\\includegraphics\\[.*?\\]\\{.*?\\}~)\\s*\\n", "$1\\\\newline");
+        result = result.replaceAll("(\\\\includegraphics\\[[^\\]\\n]*\\]\\{[^}\\n]*\\}~)\\s*\\n", "$1\\\\newline");
         result = result.replaceAll("(?m)(^\\s*(?:\\\\CorrectChoice|\\\\choice).*?)\\\\\\\\\\s*$", "$1");
         result = result.replaceAll("(?m)^\\s*\\\\\\\\\\s*$", "");
         result = result.replaceAll("\\\\begin\\{longtable\\}\\[.*?\\]", "\\\\begin{tabular}")
