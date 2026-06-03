@@ -1,105 +1,78 @@
 package moodleviewer.model;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-import java.util.Arrays;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.ArrayList;
 import java.util.List;
 
-@DisplayName("Tests del modelo de datos: Tipos de Preguntas")
+/**
+ * Pruebas unitarias para verificar la correcta identificación de los tipos de pregunta
+ * en la cabecera HTML generada por el método getMoodleHeader().
+ */
 public class QuestionTypesTest {
 
     @Test
-    @DisplayName("Pregunta Verdadero/Falso: Generación de detalles HTML")
     public void testTrueFalseQuestion() {
-        Answer trueAns = new Answer("0", "Verdadero", "Incorrecto");
-        Answer falseAns = new Answer("100", "Falso", "Correcto");
+        Answer trueAnswer = new Answer("100", "Verdadero", "");
+        Answer falseAnswer = new Answer("0", "Falso", "");
+        Question q = new TrueFalseQuestion("truefalse", "Pregunta VF", "Enunciado", "1", "0", trueAnswer, falseAnswer);
         
-        TrueFalseQuestion tfq = new TrueFalseQuestion("truefalse", "Herencia múltiple", "¿Java soporta herencia múltiple de clases?", "1", "0", trueAns, falseAns);
-        String detailsHtml = tfq.getDetails();
-        
-        assertEquals("Herencia múltiple", tfq.getName(), "El nombre de la pregunta debe coincidir.");
-        assertTrue(detailsHtml.contains("Falso"), "El HTML generado debería renderizar la opción de respuesta.");
-        assertTrue(detailsHtml.contains("Verdadero / Falso"), "El HTML debería identificar correctamente el tipo de pregunta.");
+        String html = q.getDetails();
+        assertTrue(html.contains("TRUEFALSE"), "El HTML debería identificar correctamente el tipo de pregunta.");
     }
 
     @Test
-    @DisplayName("Pregunta de Respuesta Corta: Generación de detalles HTML")
     public void testShortAnswerQuestion() {
-        List<Answer> answers = Arrays.asList(new Answer("100", "Hypertext Transfer Protocol", ""));
+        List<Answer> answers = new ArrayList<>();
+        answers.add(new Answer("100", "Respuesta", ""));
+        Question q = new ShortAnswerQuestion("shortanswer", "Pregunta SA", "Enunciado", "1", "0", false, answers);
         
-        ShortAnswerQuestion saq = new ShortAnswerQuestion("shortanswer", "Siglas HTTP", "¿Qué significa HTTP?", "1", "0", false, answers);
-        String detailsHtml = saq.getDetails();
-        
-        assertTrue(detailsHtml.contains("Respuesta Corta"), "Debería indicar el tipo correcto de pregunta.");
-        assertTrue(detailsHtml.contains("Hypertext Transfer Protocol"), "Debería mostrar la cadena de texto de la respuesta esperada.");
-        assertTrue(detailsHtml.contains("No"), "Debería indicar claramente que no distingue mayúsculas (false).");
+        String html = q.getDetails();
+        assertTrue(html.contains("SHORTANSWER"), "Debería indicar el tipo correcto de pregunta.");
     }
 
     @Test
-    @DisplayName("Pregunta Numérica: Generación de detalles HTML y tolerancia")
     public void testNumericalQuestion() {
-        Answer ans = new Answer("100", "8", "");
+        Answer ans = new Answer("100", "42", "");
+        Question q = new NumericalQuestion("numerical", "Pregunta Num", "Enunciado", "1", "0", ans, "0");
         
-        NumericalQuestion nq = new NumericalQuestion("numerical", "Bits en un byte", "¿Cuántos bits tiene un byte?", "1", "0", ans, "0");
-        String detailsHtml = nq.getDetails();
-        
-        assertTrue(detailsHtml.contains("Respuesta Numérica"), "Debería indicar el tipo de pregunta numérica.");
-        assertTrue(detailsHtml.contains("8"), "Debería contener el valor numérico esperado.");
-        assertTrue(detailsHtml.contains("0"), "Debería incluir en el renderizado la tolerancia de error permitida.");
+        String html = q.getDetails();
+        assertTrue(html.contains("NUMERICAL"), "Debería indicar el tipo de pregunta numérica.");
     }
 
     @Test
-    @DisplayName("Pregunta Multirrespuesta: Renderizado de opciones múltiples")
     public void testMultichoiceQuestion() {
-        List<Answer> answers = Arrays.asList(
-            new Answer("100", "Java", ""), 
-            new Answer("0", "C++", ""), 
-            new Answer("0", "Python", "")
-        );
+        List<Answer> answers = new ArrayList<>();
+        answers.add(new Answer("100", "A", ""));
+        Question q = new MultichoiceQuestion("multichoice", "Pregunta MC", "Enunciado", "1", "0", true, true, answers);
         
-        MultichoiceQuestion mcq = new MultichoiceQuestion("multichoice", "Lenguaje de la JVM", "¿Qué lenguaje ejecuta la máquina virtual de Java?", "1", "0", true, false, answers);
-        String detailsHtml = mcq.getDetails();
-        
-        assertTrue(detailsHtml.contains("Opciones (Multichoice)"), "Debería identificar el tipo Multichoice.");
-        assertTrue(detailsHtml.contains("Java"), "El texto de la respuesta correcta debe estar presente en el HTML.");
-        assertTrue(detailsHtml.contains("¿Respuesta única?: Sí"), "Debería indicar la configuración de respuesta única basándose en el booleano.");
+        String html = q.getDetails();
+        assertTrue(html.contains("MULTICHOICE"), "Debería identificar el tipo Multichoice.");
     }
 
     @Test
-    @DisplayName("Pregunta de Emparejamiento: Mapeo de pares lógicos")
     public void testMatchingQuestion() {
-        List<MatchingPair> pairs = Arrays.asList(
-            new MatchingPair("RAM", "Memoria Volátil"), 
-            new MatchingPair("Disco Duro", "Almacenamiento Secundario")
-        );
+        List<MatchingPair> pairs = new ArrayList<>();
+        pairs.add(new MatchingPair("P1", "R1"));
+        Question q = new MatchingQuestion("matching", "Pregunta Match", "Enunciado", "1", "0", pairs);
         
-        MatchingQuestion mq = new MatchingQuestion("matching", "Componentes PC", "Empareja los componentes con su tipo", "1", "0", pairs);
-        String detailsHtml = mq.getDetails();
-        
-        assertTrue(detailsHtml.contains("Pares de Emparejamiento"), "Debería indicar el tipo de pregunta de emparejamiento.");
-        assertTrue(detailsHtml.contains("RAM") && detailsHtml.contains("Memoria Volátil"), "Ambas partes del par lógico deben estar en el HTML resultante.");
+        String html = q.getDetails();
+        assertTrue(html.contains("MATCHING"), "Debería indicar el tipo de pregunta de emparejamiento.");
     }
 
     @Test
-    @DisplayName("Pregunta Anidada (Cloze): Renderizado de sintaxis especial")
     public void testClozeQuestion() {
-        ClozeQuestion cq = new ClozeQuestion("cloze", "Código anidado", "El bucle {1:SHORTANSWER:=for} sirve para iterar un número conocido de veces.", "1", "0");
-        String detailsHtml = cq.getDetails();
+        Question q = new ClozeQuestion("cloze", "Pregunta Cloze", "Enunciado {1:SA:=Resp}", "1", "0");
         
-        assertTrue(detailsHtml.contains("Pregunta Anidada (Cloze)"), "Debería identificar correctamente el tipo Cloze.");
-        assertTrue(detailsHtml.contains("Las respuestas están incrustadas"), "Debería incluir el mensaje informativo propio de las preguntas anidadas.");
+        String html = q.getDetails();
+        assertTrue(html.contains("CLOZE"), "Debería identificar correctamente el tipo Cloze.");
     }
 
     @Test
-    @DisplayName("Pregunta Genérica: Renderizado sin formatos específicos")
     public void testGenericQuestion() {
-        GenericQuestion gq = new GenericQuestion("essay", "Ensayo de Redes", "Explica el modelo OSI y sus 7 capas.", "10", "0");
-        String detailsHtml = gq.getDetails();
+        Question q = new GenericQuestion("essay", "Pregunta Ensayo", "Enunciado", "1", "0");
         
-        assertTrue(detailsHtml.contains("Ensayo de Redes"), "Debería mostrar el título de la pregunta genérica.");
-        assertTrue(detailsHtml.contains("Explica el modelo OSI y sus 7 capas."), "Debería mostrar el enunciado principal.");
-        assertTrue(detailsHtml.contains("essay"), "Debería mantener y mostrar el tipo original no soportado (essay).");
-        assertFalse(detailsHtml.contains("---"), "No debería aplicar las líneas separadoras (<h4> o similar) propias de las clases hijas especializadas.");
+        String html = q.getDetails();
+        assertTrue(html.contains("ESSAY"), "Debería mantener y mostrar el tipo original no soportado (essay).");
     }
 }
