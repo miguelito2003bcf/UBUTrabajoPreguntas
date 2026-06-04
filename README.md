@@ -33,3 +33,8 @@ Sigue estos pasos para clonar el repositorio, compilar el proyecto y lanzar la a
    mvn javafx:run
 
    *Nota: La primera ejecución descargará automáticamente las dependencias de JavaFX desde Maven Central y las almacenará en tu caché local.*
+
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=miguelito2003bcf_UBUTrabajoPreguntas&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=miguelito2003bcf_UBUTrabajoPreguntas)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=miguelito2003bcf_UBUTrabajoPreguntas&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=miguelito2003bcf_UBUTrabajoPreguntas)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=miguelito2003bcf_UBUTrabajoPreguntas&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=miguelito2003bcf_UBUTrabajoPreguntas)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=miguelito2003bcf_UBUTrabajoPreguntas&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=miguelito2003bcf_UBUTrabajoPreguntas)
