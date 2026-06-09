@@ -1,0 +1,3974 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 0  -->
+  <question type="category">
+    <category>
+      <text>$module$/top/1. Documentos similares</text>
+    </category>
+    <info format="html">
+      <text></text>
+    </info>
+    <idnumber></idnumber>
+  </question>
+
+<!-- question: 10124517  -->
+  <question type="multichoice">
+    <name>
+      <text>Q01</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>¿Cómo se define matemáticamente la similaridad de Jaccard entre dos conjuntos A y B?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>La cardinalidad de la intersección de los conjuntos dividida por la cardinalidad de su unión.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La cardinalidad de la unión de los conjuntos dividida por la cardinalidad de su intersección.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>El producto de las cardinalidades de los conjuntos dividido por la raíz cuadrada de sus dimensiones.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La diferencia entre el tamaño de la unión y el tamaño de la intersección de los dos conjuntos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>El número de elementos que pertenecen exclusivamente a uno de los conjuntos respecto al total.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>La raíz cuadrada de la hipotenusa de un triángulo rectángulo escaleno.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124518  -->
+  <question type="multichoice">
+    <name>
+      <text>Q02</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>El proceso para identificar elementos similares en grandes volúmenes de datos sigue una serie de pasos lógicos. ¿Cuál es el orden correcto de las etapas principales descritas en el material?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Shingling, Minhashing y Locality Sensitive Hashing (LSH).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Minhashing, Shingling y Locality Sensitive Hashing (LSH).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Shingling, Locality Sensitive Hashing (LSH) y Minhashing.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Agrupación, Shingling y Resolución de entidades.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Vectorización booleana, Resolución de entidades y Jaccard.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Recolección de basura, Cocción a fuego lento y Enfriamiento.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124519  -->
+  <question type="multichoice">
+    <name>
+      <text>Q03</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La técnica de Shingling permite transformar documentos en conjuntos. Si aplicamos 2-shingles de palabras a la frase «En un lugar de la Mancha», ¿cuál sería el conjunto resultante?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>{«En un», «un lugar», «lugar de», «de la», «la Mancha»}</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>{«En», «un», «lugar», «de», «la», «Mancha»}</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>{«En un lugar», «un lugar de», «lugar de la», «de la Mancha»}</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>{«En», «un lugar de», «la Mancha»}</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>{«En un», «lugar de», «la Mancha»}</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>{«Pan con tomate», «Jamón ibérico»}</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124520  -->
+  <question type="multichoice">
+    <name>
+      <text>Q04</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>En el modelado de documentos, la elección del tamaño del shingle (valor k) es crítica. Según las fuentes, ¿qué valor de k es razonable para documentos de tamaño medio como artículos de investigación?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>3 o 4</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>1 o 2</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Entre 10 y 15</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Exactamente 50</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Cualquier valor superior a 100</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Un número complejo imaginario.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124521  -->
+  <question type="multichoice">
+    <name>
+      <text>Q05</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Para gestionar grandes colecciones de conjuntos, se asume una representación matricial booleana. ¿Qué representa cada fila y cada columna en esta matriz característica?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Las filas representan los elementos del conjunto universal y las columnas representan los conjuntos (documentos).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Las filas representan los documentos y las columnas representan los elementos del conjunto universal.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Las filas representan las funciones de hash y las columnas representan las firmas resultantes.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Las filas representan la similaridad de Jaccard y las columnas representan la distancia euclídea.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Las filas representan los libros de Amazon y las columnas representan las categorías literarias.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Las filas representan los días de la semana y las columnas representan los signos del zodiaco.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124522  -->
+  <question type="multichoice">
+    <name>
+      <text>Q06</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>El Minhashing se utiliza para comprimir los vectores característicos de los documentos en firmas más pequeñas. ¿Cuál es la propiedad clave que relaciona las firmas minhash con la similaridad de Jaccard?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>La probabilidad de que dos columnas tengan el mismo valor de minhash es igual a su similaridad de Jaccard.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia de Hamming entre dos firmas es inversamente proporcional a su similaridad de Jaccard.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>El valor de la firma minhash es siempre la mitad de la cardinalidad de la unión de los conjuntos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La firma minhash elimina todos los falsos positivos generados por el proceso de shingling.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La suma de los valores de la firma minhash debe ser igual a 1 para ser válida.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>La firma minhash otorga superpoderes de telepatía al analista de datos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124523  -->
+  <question type="multichoice">
+    <name>
+      <text>Q07</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>En la práctica, realizar permutaciones aleatorias de miles de millones de filas para el minhashing es inviable. ¿Cómo resuelve este problema el algoritmo de «Minhashing rápido»?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Simula las permutaciones aplicando funciones de hash a los números de fila originales.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Utiliza una base de datos relacional para reordenar físicamente las filas antes del cálculo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Ignora las filas que contienen ceros para reducir el espacio de búsqueda en un 50%.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Divide la matriz característica en bloques de 100 filas y procesa solo el primer bloque.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Reemplaza las funciones de hash por multiplicaciones de matrices densas de gran tamaño.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Pide amablemente a las filas que se muevan solas de posición.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124524  -->
+  <question type="multichoice">
+    <name>
+      <text>Q08</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Locality Sensitive Hashing (LSH) se emplea para evitar el problema del coste computacional cuadrático. ¿Cuál es el objetivo principal de esta técnica?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Identificar pares candidatos de firmas similares sin tener que comparar todos los pares posibles.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Eliminar definitivamente todos los falsos negativos del proceso de identificación.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Aumentar el tamaño de las firmas para que contengan más información detallada del texto.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Garantizar que solo los documentos idénticos al 100% sean asignados a la misma cubeta.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Transformar documentos de texto en imágenes para aplicar reconocimiento de patrones.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Generar una lista de reproducción aleatoria en Spotify basada en el texto del documento.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124525  -->
+  <question type="multichoice">
+    <name>
+      <text>Q09</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>En la implementación de LSH mediante bandas, se dividen las firmas en «b» bandas con «r» filas cada una. ¿Qué sucede si elegimos un valor de «b» muy alto y un valor de «r» pequeño?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Aumenta la probabilidad de que documentos con baja similaridad sean seleccionados como pares candidatos (umbral bajo).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Se vuelve mucho más difícil que dos firmas terminen en la misma cubeta (umbral alto).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La función de probabilidad de LSH pierde su forma característica en S y se vuelve lineal.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Se eliminan por completo los falsos positivos, aunque aumentan los falsos negativos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>El sistema requiere mucha menos memoria RAM pero el tiempo de ejecución se duplica.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Las bandas de música de los años 80 vuelven a estar de moda.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124526  -->
+  <question type="multichoice">
+    <name>
+      <text>Q10</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Toda medida de distancia d(x, y) debe cumplir ciertos axiomas matemáticos. ¿Cuál de las siguientes afirmaciones describe la «desigualdad triangular»?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>La distancia directa entre x e y no puede ser mayor que la suma de las distancias pasando por un punto intermedio z.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia entre x e y debe ser siempre igual a la distancia entre y y x.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia de un punto a sí mismo debe ser siempre el valor máximo posible.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Si la distancia entre x e y es cero, entonces x e y deben ser necesariamente vectores de bits.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia debe ser un número real negativo si los puntos están en cuadrantes opuestos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Un triángulo siempre tiene tres lados, a menos que sea un círculo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124527  -->
+  <question type="multichoice">
+    <name>
+      <text>Q11</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La similaridad de Jaccard y la distancia de Jaccard son conceptos duales. ¿Cuál es la relación correcta entre ambos según las fuentes?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>La distancia de Jaccard es igual a 1 menos la similaridad de Jaccard.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia de Jaccard es la raíz cuadrada de la similaridad de Jaccard.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La similaridad de Jaccard es el logaritmo natural de la distancia de Jaccard.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>No existe relación matemática fija entre ambos conceptos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia de Jaccard es siempre el doble de la similaridad para conjuntos dispersos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>La distancia de Jaccard se mide en años luz y la similaridad en kilogramos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124528  -->
+  <question type="multichoice">
+    <name>
+      <text>Q12</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Dentro de las distancias euclídeas, la norma L1 es muy conocida. ¿Con qué otro nombre se denomina habitualmente a esta distancia?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Distancia de Manhattan.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Distancia de Chebychev.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Distancia de Minkowski.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Distancia de Levenshtein.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Distancia de Jaccard.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Distancia de «vuelo de pájaro».</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124529  -->
+  <question type="multichoice">
+    <name>
+      <text>Q13</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La distancia de edición se utiliza para medir la separación entre cadenas de caracteres. ¿Cuál es su definición básica según el texto?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>El mínimo número de inserciones y eliminaciones necesarias para transformar una cadena en otra.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>El número de caracteres comunes multiplicado por el número de caracteres distintos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La longitud de la cadena más larga menos la longitud de la cadena más corta.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>El ángulo formado por los vectores de frecuencia de caracteres de ambas cadenas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La suma de los valores ASCII de todos los caracteres que no coinciden en posición.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>El tiempo que tarda un editor en corregir las erratas de un libro de texto.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124530  -->
+  <question type="multichoice">
+    <name>
+      <text>Q14</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La distancia de Hamming es fundamental en el estudio de vectores de bits. ¿En qué consiste específicamente?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>En el número de componentes (posiciones) en los que difieren dos vectores de la misma longitud.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>En la suma de los valores booleanos de la intersección de dos vectores.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>En el cálculo del coseno del ángulo que forman dos vectores en un espacio denso.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>En el número de operaciones de edición necesarias para que dos vectores tengan el mismo peso.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>En la mayor de las diferencias absolutas entre las componentes de los vectores.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>En el número de octetos que se pueden comprar con un vector de bits.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124531  -->
+  <question type="multichoice">
+    <name>
+      <text>Q16</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La técnica de LSH puede generar errores en la identificación. ¿Cómo se define un «falso positivo» en este contexto?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Documentos que son identificados como similares por el algoritmo, pero que en realidad no lo son.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Documentos que son similares, pero que el algoritmo no logra identificar como tales.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Documentos que tienen una firma minhash de tamaño superior al esperado.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Documentos que no contienen ningún shingle en común con el conjunto universal.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Documentos que han sido plagiados pero cuya fuente original ha sido borrada.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Documentos escritos en distintos idiomas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124532  -->
+  <question type="multichoice">
+    <name>
+      <text>Q17</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La distancia coseno es una métrica no euclídea muy útil en ciertos contextos. ¿Qué propiedad de los vectores mide principalmente esta distancia?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>El ángulo que separa a los vectores, tratándolos como direcciones.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La longitud física (magnitud) de los vectores en un plano bidimensional.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>El número de componentes enteras que son iguales a cero en ambos vectores.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La diferencia entre el valor máximo y el valor mínimo de las componentes del vector.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La suma de los cuadrados de las diferencias de las componentes.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>La velocidad a la que el coseno se transforma en un seno.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124533  -->
+  <question type="multichoice">
+    <name>
+      <text>Q18</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>En los sistemas de recomendación, se puede aplicar la técnica de identificar elementos similares. Si Netflix considera una película como el «conjunto de usuarios que la han valorado positivamente», ¿qué permite hacer esta técnica?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Agrupar películas de un mismo tipo basándose en la similitud de sus conjuntos de usuarios.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Calcular el presupuesto necesario para producir una secuela de dicha película.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Identificar qué usuarios han compartido su contraseña ilegalmente con otros.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Reducir la resolución de la imagen para ahorrar ancho de banda en la transmisión.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Predecir el nombre del próximo actor que ganará un premio Oscar.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Hacer palomitas de maíz automáticamente a través de la conexión Wi-Fi.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124534  -->
+  <question type="multichoice">
+    <name>
+      <text>Q19</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La resolución de entidades es un problema clásico en la gestión de datos. ¿Cuál es su objetivo principal?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Identificar registros de información diferentes que puedan referirse a la misma persona física.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Cifrar la información personal para cumplir con las leyes de protección de datos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Eliminar todos los registros que no tengan una foto de perfil asociada.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Traducir automáticamente nombres de usuarios de un idioma a otro en redes sociales.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Contar el número total de servidores necesarios para alojar una base de datos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Resolver el misterio de la existencia de fantasmas en el centro de datos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124535  -->
+  <question type="multichoice">
+    <name>
+      <text>Q20</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>El modelo «bolsa de palabras» es una forma de representar documentos. ¿Qué característica principal define a este modelo?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Se ignora la gramática y el orden de aparición de las palabras, tratándolas como un multiconjunto.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Se mantiene estrictamente el orden de las palabras para preservar el sentido semántico.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Solo se consideran los nombres propios y se eliminan todos los verbos y adjetivos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Cada documento se representa mediante un único número entero que es su código hash.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Se agrupan las palabras por su longitud en caracteres de forma ascendente.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Las palabras se guardan físicamente en una bolsa de tela reciclada.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124536  -->
+  <question type="multichoice">
+    <name>
+      <text>Q21</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>¿Cuál es la función de los «tókenes» en el proceso de shingling?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Son el resultado de aplicar una función de hash sobre los shingles para reducir el tamaño de los conjuntos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Son monedas virtuales que los usuarios deben pagar para acceder a los documentos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Son etiquetas gramaticales que indican si una palabra es un sustantivo o un verbo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Son pequeñas imágenes que se insertan en el documento para detectar copias visuales.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Son los caracteres de puntuación que se eliminan para limpiar el texto original.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Son fichas de casino que se usan para apostar sobre la similaridad de los textos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124537  -->
+  <question type="multichoice">
+    <name>
+      <text>Q22</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Al decidir cómo modelar los shingles, se deben tomar varias decisiones. ¿Qué son las «stop words»?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Palabras vacías como artículos, pronombres o preposiciones que a menudo se ignoran.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Palabras que activan filtros de censura en los motores de búsqueda de internet.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Palabras que indican el final de un párrafo o de un documento completo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Palabras que aparecen menos de dos veces en toda la colección de documentos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Palabras que tienen más de diez sílabas y dificultan el cálculo del hash.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Señales de tráfico que aparecen dentro de los libros de autoescuela.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124538  -->
+  <question type="multichoice">
+    <name>
+      <text>Q24</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La distancia de Chebychev (norma L infinito) tiene una forma particular de cálculo. ¿Cómo se determina?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Es la mayor de las distancias (diferencias absolutas) entre todas las dimensiones.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Es la raíz cuadrada del producto de las diferencias de todas las dimensiones.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Es la suma total de las diferencias elevadas al cuadrado dividida por n (el número de dimensiones).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Es la distancia en línea recta entre los dos puntos en un espacio tridimensional.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Es el valor promedio de las diferencias absolutas de todas las dimensiones.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Es la distancia que recorre una ficha de ajedrez cuando el tablero está inclinado.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124539  -->
+  <question type="multichoice">
+    <name>
+      <text>Q25</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La distancia de Minkowski (norma Lr) es una generalización de otras distancias. ¿Qué sucede cuando el parámetro r tiende a infinito?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>La distancia tiende a convertirse en la norma L infinito (distancia de Chebychev).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia tiende a cero para cualquier par de puntos del espacio.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia se vuelve idéntica a la similaridad de Jaccard para conjuntos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia deja de cumplir el axioma de la desigualdad triangular.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia solo puede calcularse para vectores con componentes negativas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>El universo se colapsa en una singularidad de densidad infinita.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124540  -->
+  <question type="multichoice">
+    <name>
+      <text>Q26</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>¿Cómo se define la sub-secuencia común más larga (LCS, longest common sequence) entre dos cadenas?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Es la cadena más larga que es simultáneamente subsecuencia de ambas cadenas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Es la cadena resultante de concatenar todos los caracteres que son iguales en la misma posición.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Es la palabra más larga del diccionario que aparece en ambos documentos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Es el número total de caracteres que se repiten al menos una vez en cada cadena.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Es el prefijo común más largo que comparten las dos cadenas desde el inicio.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Es una serie de televisión muy larga que nadie termina de ver.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124541  -->
+  <question type="multichoice">
+    <name>
+      <text>Q28</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>En la familia LSH para la distancia euclídea, se utiliza una fórmula con un vector aleatorio $$\mathbf{a}$$, un parámetro $$w$$ y una constante $$\mathbf{b}$$. ¿Qué representa $$w$$?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>La anchura de cada cubeta en las que se aplicarán las instancias.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>El número total de funciones de hash que componen la firma.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia máxima permitida para considerar dos puntos como candidatos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>El peso asignado a la dimensión más importante del vector.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La probabilidad de que ocurra una colisión accidental de hash.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>La letra inicial de la palabra «Waffle».</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124542  -->
+  <question type="multichoice">
+    <name>
+      <text>Q29</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>¿Qué característica define a la «Construcción-O» (OR) en la amplificación de familias LSH?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Se identifica a los elementos como candidatos si $$h_i(x) = h_i(y)$$ para AL MENOS UNA de las funciones combinadas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Se identifica a los elementos como candidatos solo si TODAS las funciones combinadas coinciden.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Se requiere que la suma de los valores de hash sea un número impar.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Se eliminan las funciones que dan resultados idénticos para ahorrar tiempo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Se invierte el resultado del hash para encontrar los elementos más alejados.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Es la suma de los valores de hash de dos elementos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124543  -->
+  <question type="multichoice">
+    <name>
+      <text>Q31</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Una propiedad distintiva de los espacios euclídeos es la densidad de sus puntos. Según lo visto en el tema, ¿qué implica que un espacio euclídeo sea «denso»?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Que dados dos puntos cualesquiera, el punto medio entre ambos también es un punto del espacio.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que la matriz característica resultante siempre tendrá más unos que ceros en sus columnas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que el número de dimensiones es infinito y los vectores no pueden representarse gráficamente.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que la distancia entre dos puntos nunca puede ser un número entero o racional.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que no existe una noción razonable de promedio para agrupar los puntos en clústeres.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Que los puntos están tan apretados que el espacio explota si se añade uno más.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124544  -->
+  <question type="multichoice">
+    <name>
+      <text>Q32</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>El modelo de «bolsa de palabras» se diferencia significativamente del uso de k-shingles. ¿Cuál es una característica propia del modelo de bolsa de palabras mencionada en el texto?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Representa el documento como un multiconjunto donde se mantiene el control del número de repeticiones de cada palabra.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Considera secuencias de palabras consecutivas como una entidad indivisible para preservar el orden.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Utiliza funciones de minhash para reducir el espacio de almacenamiento a un tamaño $$O(kn)$$ (donde n es la dimensión).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Garantiza que la gramática del documento original se mantenga intacta tras la vectorización.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Sustituye cada palabra por un token de 32 bits para evitar colisiones en el conjunto universal.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Consiste en meter los documentos físicos en una bolsa de conserjería para pesarlos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124578  -->
+  <question type="multichoice">
+    <name>
+      <text>Q33</text>
+    </name>
+    <questiontext format="html">
+      <text>La similaridad de Jaccard es una medida de cercanía, pero no es una distancia per se. ¿Cuál es el rango de valores posible para la distancia de Jaccard definida como $$1 - \text{SIM}(A, B)$$?</text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Entre 0 y 1.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Entre -1 y 1.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Entre 0 e infinito.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Cualquier número real mayor que 1.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Entre -1 y 0.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Entre $$-\pi$$ y $$\pi$$ dado que mide en radianes.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124546  -->
+  <question type="multichoice">
+    <name>
+      <text>Q34</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Al explicar la intuición tras el minhashing, se analizan los tipos de filas en la matriz característica. ¿Por qué la probabilidad de que dos columnas reciban el mismo valor de minhash es igual a $$a/(a+b+c)$$?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Porque es la probabilidad de encontrar una fila con un 1 en ambas columnas antes de encontrar una fila con un 1 en solo una de ellas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Porque las filas de tipo $$d$$ (ambas columnas tienen un cero) se eliminan automáticamente del conjunto universal de shingles.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Porque el algoritmo de minhashing rápido requiere que la matriz sea densa en un 90% para funcionar.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Porque el número de permutaciones debe ser siempre igual a la suma de las filas de tipo $$b$$ y $$c$$.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Porque la función de hash garantiza que los ceros se conviertan en unos tras la primera iteración.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Porque hay que normalizar el ratio de unos en la columna.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124547  -->
+  <question type="multichoice">
+    <name>
+      <text>Q36</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Para justificar el uso de LSH, se menciona el reto de comparar un millón de documentos. ¿Cuántas comparaciones aproximadamente se requerirían si se hiciera de forma explícita todos contra todos?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Aproximadamente 500.000 millones ($$n^2/2$$).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Exactamente un millón ($$n$$).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Unos diez mil millones de comparaciones por cada banda de firmas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Dos millones de comparaciones si los documentos son artículos de investigación.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La mitad del conjunto universal de tókenes elevado a la potencia $$k$$ (el tamaño del $$k$$-shingle utilizado).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Siete comparaciones, si se hacen con muchas ganas y café.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124548  -->
+  <question type="multichoice">
+    <name>
+      <text>Q37</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>En el análisis probabilístico de LSH por bandas, se calcula la probabilidad de que un par sea candidato. ¿Cómo se expresa la probabilidad de que las firmas NO coincidan en al menos una fila de una banda de $$r$$ filas?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>$$1 - s^r$$</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>$$s / r$$</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>$$(1 - s)^b$$</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>$$s^r / b$$</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>$$1 - (1 - s)^b$$</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>La probabilidad de que el gato de Schrödinger esté de vacaciones.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124549  -->
+  <question type="multichoice">
+    <name>
+      <text>Q38</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La distancia de edición se puede definir formalmente mediante el concepto de LCS. ¿Qué significa «LCS» en este contexto?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Sub-secuencia común más larga (Longest Common Subsequence).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Similitud Coseno Lineal (Linear Cosine Similarity).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Escalado de Caracteres Locales (Local Character Scaling).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Búsqueda de Cubetas por Segmentos (Linked Column Search).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Suma de Errores Logarítmicos (Logarithmic Correction Sum).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Shingles localmente condensados (Locally Condensed Shingles).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124550  -->
+  <question type="multichoice">
+    <name>
+      <text>Q39</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Existen variantes en la definición de la distancia de edición. ¿Qué ocurre si se permite la operación de «sustitución» en lugar de solo inserción y eliminación?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>La distancia entre «abc» y «adc» pasaría de ser 2 a ser 1.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La similaridad de Jaccard de los documentos aumentaría exponencialmente.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia de Hamming pasaría a ser obligatoriamente negativa.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>El número de shingles por documento se reduciría a la mitad.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>No sería posible calcular la sub-secuencia común más larga (LCS).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Se reducen los riesgos de lesión por esfuerzo repetitivo (RSI).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124551  -->
+  <question type="multichoice">
+    <name>
+      <text>Q41</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>En la familia LSH para la distancia euclídea, se analiza la probabilidad de colisión basándose en ángulos. ¿Qué sucede con la probabilidad si el ángulo theta entre el vector que une los puntos y el vector aleatorio a es de 90 grados?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>La probabilidad de que los puntos caigan en el mismo segmento será 1.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La probabilidad será exactamente 1/3 independientemente de la distancia.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La probabilidad será 0 porque el producto interior se vuelve infinito.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La probabilidad será igual al ancho de la cubeta dividido por la constante b.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La probabilidad será de 1/2 si la distancia es superior a 2w (w es la anchura del bucket).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Al ser el vector aleatorio no hay forma de poder establecer una cota para la probabilidad.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124552  -->
+  <question type="multichoice">
+    <name>
+      <text>Q42</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Para la distancia coseno, se define una familia LSH basada en vectores aleatorios $$v_f$$. ¿Bajo qué condición se considera que $$f(x) = f(y)$$?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Si los productos interiores de ($$v_f * x$$) y ($$v_f * y$$) tienen el mismo signo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Si la longitud de los vectores $$x$$ e $$y$$ es idéntica tras la proyección.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Si el ángulo entre $$x$$ e $$y$$ es un múltiplo exacto de 180 grados.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Si ambos vectores pertenecen a un espacio euclídeo de una sola dimensión.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Si la suma de los componentes booleanos de $$x$$ es mayor que la de y.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Si los vectores se saludan cortésmente al cruzarse en el origen.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124553  -->
+  <question type="multichoice">
+    <name>
+      <text>Q43</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Tras obtener las firmas mediante minhashing, ¿cómo se estima la similaridad de Jaccard entre los conjuntos originales?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Calculando el porcentaje de filas en la matriz de firmas en las que las dos columnas coinciden.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Sumando todos los valores enteros de la firma y dividiéndolos por el número de bandas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Calculando la distancia de Manhattan entre los vectores característicos de las firmas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Buscando el valor máximo de la firma y restándole el valor mínimo de la columna original.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Multiplicando el número de ceros de la firma por el valor de $$k$$ de los shingles.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Lanzando una moneda al aire por cada fila y contando las caras.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124554  -->
+  <question type="multichoice">
+    <name>
+      <text>Q44</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>El espacio de almacenamiento de los shingles se describe como $$O(kn)$$. ¿Qué factor permite que, en la práctica, este espacio sea menor del esperado?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Que no se consideran los duplicados, ya que se trabaja con conjuntos y no con multiconjuntos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que el valor de n se reduce a la mitad al eliminar las vocales acentuadas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que el minhashing comprime los caracteres en bits de paridad redundante.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que el uso de stop words elimina el 99% de los shingles de cualquier documento.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que la matriz característica es siempre densa, lo que ahorra punteros de memoria.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Que los shingles se guardan en un agujero negro digital que no ocupa memoria.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124555  -->
+  <question type="multichoice">
+    <name>
+      <text>Q45</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Al definir las familias LSH, se mencionan tres condiciones de eficiencia. ¿Qué requiere la segunda condición sobre las funciones de la familia?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Que sean estadísticamente independientes entre ellas para poder estimar probabilidades conjuntas multiplicando las individuales.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que el tiempo de ejecución sea proporcional al cuadrado del número de documentos de referencia.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que todas las funciones de la familia den siempre la misma respuesta para evitar la dispersión.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que sean capaces de transformar distancias euclídeas en distancias de Jaccard automáticamente.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que solo puedan utilizarse en lenguajes de programación funcionales como Scala.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Que las funciones se lleven bien entre ellas y no se peleen por los recursos del sistema.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124556  -->
+  <question type="multichoice">
+    <name>
+      <text>Q46</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La comprobación de la desigualdad triangular para la distancia de Jaccard utiliza un argumento probabilístico basado en minhash. Si $$h(x) != h(y)$$, ¿qué debe ocurrir necesariamente respecto a un tercer punto $$z$$?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Que al menos uno de los dos, $$h(x)$$ o $$h(y),$$ tiene que ser distinto de $$h(z)$$.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que $$h(z)$$ debe ser igual a la suma de $$h(x)$$ y $$h(y)$$ para mantener el equilibrio.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que la distancia entre $$x$$ y $$z$$ debe ser exactamente 0.5 para que el axioma se cumpla.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que el punto $$z$$ debe estar fuera del conjunto universal para no interferir.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que $$h(z)$$ debe ser un número primo mayor que el número de bandas $$b$$.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Que el punto $$z$$ se siente ofendido por no ser igual a los demás.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124557  -->
+  <question type="multichoice">
+    <name>
+      <text>Q47</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>En el estudio de las normas $$L_p$$, la norma $$L$$ infinito ($$L_\infty$$) se asocia a la distancia de Chebychev. ¿Cómo se define matemáticamente esta distancia entre dos vectores?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Como la mayor de las diferencias absolutas entre las componentes de los vectores en todas las dimensiones.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Como la suma de las raíces cuadradas de las diferencias de todas las dimensiones.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Como el producto de las diferencias absolutas dividido por el número total de dimensiones.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Como la distancia más corta posible recorriendo solo los ejes principales de un hipercubo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Como el valor promedio de los cuadrados de las distancias en cada dimensión.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Como la distancia que hay entre un tablero de ajedrez y el infinito.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124558  -->
+  <question type="multichoice">
+    <name>
+      <text>Q48</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Al analizar la distancia de Minkowski ($$L_r$$), se explica el comportamiento del parámetro $$r$$. ¿Qué sucede a medida que el valor de $$r$$ aumenta?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>La mayor de las diferencias entre componentes domina la suma, aproximándose a la norma $$L$$ infinito ($$L_\infty$$).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia total disminuye hasta llegar a ser siempre cero para $$r$$ mayor que 100.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La desigualdad triangular deja de cumplirse y la función deja de ser una distancia válida.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>El cálculo se vuelve proporcional a la similaridad de Jaccard de los vectores booleanos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia de Manhattan ($$L_1$$) se convierte en el límite superior del cálculo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>El ordenador se pone a contar ovejas para intentar resolver la potencia $$r$$-ésima.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124559  -->
+  <question type="multichoice">
+    <name>
+      <text>Q49</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>El algoritmo de minhashing rápido procesa las filas de la matriz booleana en orden. ¿A qué valor se inicializan todas las entradas de la matriz de firmas $$M_s$$ antes de empezar?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>A un número muy grande (infinito).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Al valor del primer shingle encontrado en el documento.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>A cero.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>A un número aleatorio entre 1 y el número de funciones de hash.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Al valor de $$k$$ utilizado para los shingles de palabras.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>A la fecha de cumpleaños del programador.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124560  -->
+  <question type="multichoice">
+    <name>
+      <text>Q50</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La resolución de entidades es una aplicación clave mencionada en el texto. ¿Por qué es un problema difícil en Big Data?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Porque los registros pueden tener datos incompletos o inconsistentes (ej. falta el teléfono en unos y el lugar de nacimiento en otros).</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Porque la ley prohíbe comparar nombres de personas utilizando funciones de hash de 32 bits.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Porque las personas suelen cambiar de nombre cada vez que se registran en una red social distinta.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Porque requiere comparar el ADN físico de los usuarios con sus fotos de perfil.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Porque el número de personas en el mundo es superior al número total de tókenes posibles.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Porque las entidades son incorpóreas y es muy difícil atraparlas con un algoritmo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124561  -->
+  <question type="multichoice">
+    <name>
+      <text>Q51</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Al discutir la formación de shingles, se mencionan los niveles de caracteres y palabras. ¿Qué otro nombre reciben los shingles de caracteres en la literatura?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>$$k$$-gramas o $$n$$-gramas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Vectores de bits dispersos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Bloques de firmas comprimidas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Matrices de adyacencia de texto.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Subcadenas de Jaccard aleatorias.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Telegramas digitales de alta velocidad.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124562  -->
+  <question type="multichoice">
+    <name>
+      <text>Q53</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>En la definición formal de una familia $$(d_1, d_2, p_1, p_2)$$-sensible, ¿qué restricción existe para los pares cuya distancia está entre $$d_1$$ y $$d_2$$?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Nada se dice en la definición sobre lo que ocurre en esa zona intermedia.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La probabilidad de colisión debe ser exactamente el promedio entre $$p_1$$ y $$p_2$$.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Las funciones de hash deben devolver obligatoriamente un valor nulo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia debe redondearse al valor $$d_1$$ o $$d_2$$ más cercano antes del cálculo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Los pares son descartados automáticamente por el algoritmo de LSH.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Esa zona está protegida por un campo de fuerza invisible.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124563  -->
+  <question type="multichoice">
+    <name>
+      <text>Q54</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La «Construcción-Y» (AND) se utiliza para amplificar familias LSH. Si combinamos $$r$$ funciones independientes, ¿cuál es la nueva probabilidad de colisión $$p'$$ para un par?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>$$p' = p^r$$</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>$$p' = p * r$$</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>$$p' = 1 - (1 - p)^r$$</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>$$p' = p / r$$</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>$$p' = r^p$$</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>$$p' =$$ La probabilidad de que te toque la lotería dos veces seguidas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124564  -->
+  <question type="multichoice">
+    <name>
+      <text>Q55</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La «Construcción-O» (OR) busca aumentar las probabilidades de colisión. ¿Cómo se comporta esta construcción respecto a $$p_1$$ y $$p_2$$?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Aumenta ambas probabilidades, acercando $$p_1$$ a 1.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Disminuye $$p_2$$ hasta que llega a ser exactamente cero.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Mantiene $$p_1$$ constante mientras reduce $$p_2$$ de forma logarítmica.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Convierte la distancia de Jaccard en una distancia de Hamming.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Solo funciona si el número de bandas $$b$$ es un número par.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Hace que las probabilidades se pongan a bailar la conga.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124565  -->
+  <question type="multichoice">
+    <name>
+      <text>Q56</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La distancia coseno se basa en el ángulo entre vectores. ¿En qué rango de grados se encuentra siempre este ángulo según el texto?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Entre 0 y 180 grados.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Entre -90 y 90 grados.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Entre 0 y 360 grados.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Exactamente a 45 grados si los vectores son similares.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Entre 0 y 1 radianes solamente.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Entre la temperatura de ebullición y la de congelación del agua.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124566  -->
+  <question type="multichoice">
+    <name>
+      <text>Q57</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Al aplicar una función de hash sobre los shingles para obtener tókenes, existe el riesgo de colisiones. ¿Qué implicación tiene una colisión en este contexto?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Que dos shingles distintos se compriman al mismo token, haciendo que documentos diferentes parezcan compartir elementos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que el tamaño del documento aumente hasta superar el límite de $$2^{32}$$ tókenes.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que la similaridad de Jaccard pase a ser negativa debido al error de redondeo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que el algoritmo de LSH ignore todas las bandas de ese documento concreto.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que sea necesario repetir todo el proceso de shingling usando $$k+1$$ palabras.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Que dos camiones de datos choquen en la autopista de la información.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124567  -->
+  <question type="multichoice">
+    <name>
+      <text>Q58</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>En la comprobación de las propiedades de la distancia de Jaccard, ¿qué ocurre si calculamos $$d(x, y)$$ cuando $$x$$ e $$y$$ son conjuntos idénticos?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>La intersección es igual a la unión, la similaridad es 1 y por tanto la distancia es 0.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La intersección es vacía, lo que hace que la distancia sea infinita.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>El valor resultante depende del número de funciones minhash utilizadas en la firma.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La distancia es 1 porque no hay diferencia entre los elementos de los conjuntos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Se produce un error de división por cero en el algoritmo de Jaccard.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Los dos conjuntos se fusionan en un solo elemento y desaparecen del universo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124568  -->
+  <question type="multichoice">
+    <name>
+      <text>Q59</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>LSH define los «pares candidatos». Según la definición vista en el material del tema, ¿cuándo se selecciona un par de firmas como par candidato?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Si son asignadas a la misma cubeta por al menos una función de hash.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Si su similaridad de Jaccard exacta es calculada en menos de un segundo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Si aparecen en el mismo documento de referencia en la matriz característica.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Si el número de filas de tipo «a» es mayor que el número de filas de tipo «d».</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Si han pasado por al menos 100 permutaciones aleatorias sin cambiar su valor.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Si el par de firmas decide irse a cenar juntas y se llevan bien.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124569  -->
+  <question type="multichoice">
+    <name>
+      <text>Q60</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>El procedimiento completo para obtener pares similares incluye un paso opcional al final. ¿En qué consiste?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Recuperar los propios documentos y verificar la similaridad real para descartar falsos positivos producidos por el azar.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Borrar todas las firmas minhash para liberar espacio en el disco duro del servidor.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Cambiar el valor de k y volver a empezar todo el proceso desde el Shingling.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Publicar los resultados en una red social para que los usuarios voten si son similares.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Aplicar una distancia de Manhattan sobre las cubetas de LSH para confirmar el ángulo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Hacer una fiesta para celebrar que el algoritmo ha terminado de trabajar.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124579  -->
+  <question type="multichoice">
+    <name>
+      <text>xQ15</text>
+    </name>
+    <questiontext format="html">
+      <text>Para que una familia de funciones $$(d_1, d_2, p_1, p_2)$$-sensible sea considerada «localmente sensible» (LSH), debe cumplir ciertas condiciones de probabilidad. Si $$d(x,y) \leq d_1$$, ¿cuál debe ser la probabilidad de que $$h(x) = h(y)$$?</text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Al menos $$p_1$$.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Exactamente cero.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Como máximo $$p_2$$.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Siempre igual a 1.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Un valor aleatorio entre $$p_1$$ y $$p_2$$.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>La probabilidad de que llueva sopa mañana.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124571  -->
+  <question type="multichoice">
+    <name>
+      <text>xQ23</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>En una matriz característica dispersa, la mayoría de las filas son de tipo «d». ¿Qué significa que una fila sea de tipo «d» para dos columnas $$C_1$$ y $$C_2$$?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Que ambas columnas tienen un 0 en esa fila.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que ambas columnas tienen un 1 en esa fila.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que la primera columna tiene un 1 y la segunda un 0.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que la primera columna tiene un 0 y la segunda un 1.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que la fila ha sido eliminada por el proceso de minhashing rápido.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Que la fila contiene la letra D repetida infinitas veces.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124572  -->
+  <question type="multichoice">
+    <name>
+      <text>xQ27</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Para amplificar una familia localmente sensible, se puede usar la «Construcción-Y» (AND). Si combinamos $$r$$ funciones, ¿cuál es la nueva probabilidad de que $$h(x) = h(y)$$?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>$$p$$ elevado a la potencia $$r$$.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>$$p$$ multiplicado por $$r$$.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>$$1$$ menos $$p$$ elevado a la $$r$$.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>La raíz $$r$$-ésima de $$p$$.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>$$p$$ dividido por $$r$$ más uno.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Un número elegido al azar por un dado de veinte caras.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124573  -->
+  <question type="multichoice">
+    <name>
+      <text>xQ30</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La biblioteca MLlib de Spark incluye una implementación de LSH para la distancia euclídea. ¿Cuál es su nombre técnico?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Bucketed Random Projection.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Jaccard Minhash Forest.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Cosine Angular Clustering.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Euclidean Bit Slicing.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Manhattan Grid Hashing.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Lanzamiento de Proyectiles Aleatorios.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124574  -->
+  <question type="multichoice">
+    <name>
+      <text>xQ35</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Las «stop words» o palabras vacías son un factor a considerar en el modelado. Según las fuentes, ¿cuál es una estrategia beneficiosa mencionada para tratar estas palabras?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Utilizarlas como referencia para construir shingles, por ejemplo, almacenando shingles que comienzan por una palabra vacía.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Sustituirlas todas por el carácter nulo para que el valor de minhash sea siempre cero.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Contarlas por separado y sumarlas a la diagonal principal de la matriz de firmas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Duplicarlas en el texto para aumentar artificialmente la similaridad de Jaccard entre documentos cortos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Traducirlas a un idioma neutral antes de aplicar el proceso de shingling de caracteres.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Gritarlas en voz alta para que el servidor de datos se asuste y trabaje más rápido.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124575  -->
+  <question type="multichoice">
+    <name>
+      <text>xQ40</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>Aunque la distancia de Hamming se usa comúnmente para vectores de bits, el texto aclara una propiedad de sus componentes. ¿Cuál es?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>Que en principio los vectores pueden tener componentes de cualquier conjunto, no solo ceros y unos.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que los vectores deben ser obligatoriamente de distinta longitud para que la desigualdad triangular se cumpla.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que solo puede aplicarse a documentos que hayan pasado previamente por un filtrado de stop words.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que la suma de sus componentes debe ser siempre un número primo.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Que fue inventada por el tercer ganador del premio Nobel de Química.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Que los bits deben ser de chocolate para que la distancia sea dulce.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+<!-- question: 10124576  -->
+  <question type="multichoice">
+    <name>
+      <text>xQ52</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text>La implementación de LSH en la biblioteca MLlib de Spark para la distancia euclídea tiene una particularidad respecto a la fórmula teórica. ¿Cuál es?</text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>false</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+    <answer fraction="100" format="moodle_auto_format">
+      <text>No utiliza la constante aleatoria «b» que se suma al producto interior en la fórmula base.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Solo permite trabajar con una única banda independientemente del número de filas.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Sustituye la distancia euclídea por la distancia de Manhattan para ahorrar CPU.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Exige que los vectores de entrada sean obligatoriamente de tres dimensiones.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-80" format="moodle_auto_format">
+      <text>Calcula la similaridad de Jaccard en lugar de la distancia euclídea por defecto.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="-100" format="moodle_auto_format">
+      <text>Viene con una suscripción gratuita a una revista de álgebra lineal.</text>
+      <feedback format="moodle_auto_format">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+</quiz>
