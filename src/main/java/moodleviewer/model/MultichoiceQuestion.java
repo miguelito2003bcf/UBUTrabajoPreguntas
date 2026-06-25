@@ -40,7 +40,7 @@ public class MultichoiceQuestion extends Question {
         
         sb.append("<div style=\"").append(HtmlConstants.LABEL_BOLD).append("\">Opciones:</div>");
         sb.append("<div style=\"").append(HtmlConstants.FLEX_ROW).append("\">")
-          .append("<select disabled style=\"").append(HtmlConstants.INPUT_BASE).append(" width: 100%;\">");
+          .append("<select disabled style=\"").append(HtmlConstants.MULTICHOICE_SELECT).append("\">");
         
         List<String> correctAnswers = new ArrayList<>();
         

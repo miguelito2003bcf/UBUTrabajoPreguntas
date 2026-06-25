@@ -13,15 +13,24 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import moodleviewer.commands.CommandManager;
 import moodleviewer.model.Category;
+import moodleviewer.parser.GIFTParser.GiftImportResult;
+import moodleviewer.parser.GIFTParser.GiftParseIssue;
+import moodleviewer.util.CategoryMerger;
 import moodleviewer.util.I18n;
 import javafx.util.Pair;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import java.io.File;
+import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,39 +46,193 @@ public class FileManager {
     private final FileIOService ioService;
 
     /**
+     * Resultado de una operación de apertura unificada: la categoría raíz resultante y si la
+     * operación sustituyó el banco anterior (false) o lo combinó con el existente (true).
+     * Se distingue para que la interfaz sepa si debe tratar el resultado como "documento nuevo"
+     * (limpiar historial de deshacer/rehacer, resetear el archivo de trabajo) o como una
+     * modificación del documento actual (mantener historial, marcar como modificado).
+     *
+     * @param rootCategory categoría raíz resultante tras la operación.
+     * @param file fichero físico que se acaba de abrir (el recién elegido, no el ya existente).
+     * @param wasMerge true si el contenido se combinó con el banco que ya estaba cargado;
+     *                 false si sustituyó por completo cualquier banco anterior.
+     */
+    public record OpenResult(Category rootCategory, File file, boolean wasMerge) {}
+
+    /**
      * Inicializa el gestor de archivos vinculándolo a una instancia limpia de los servicios de Entrada/Salida.
      */
     public FileManager() {
         this.ioService = new FileIOService();
     }
 
-    /**
-     * Muestra un selector de archivos para importar un banco XML y delega su lectura en el servicio.
-     * * @param stage Ventana contenedora principal sobre la que se ancla el diálogo.
-     * @return Un contenedor opcional con la estructura procesada y su archivo asociado en disco.
-     */
-    public Optional<Pair<Category, File>> openMoodleXML(Stage stage) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(I18n.get("file.ext.xml"));
-        fileChooser.getExtensionFilters().add(
-            new FileChooser.ExtensionFilter(I18n.get("file.ext.xml"), "*.xml")
-        );
+    // =====================================================================
+    //                 APERTURA UNIFICADA (XML + GIFT EN UNO)
+    // =====================================================================
 
-        File file = fileChooser.showOpenDialog(stage);
+    /**
+     * Punto de entrada único para abrir un banco de preguntas, sea XML o GIFT: el selector de
+     * archivos acepta ambos formatos a la vez y el formato real se detecta por la extensión
+     * del fichero elegido.
+     *
+     * Si no hay ningún banco cargado todavía ({@code currentRoot} es null o no tiene ni
+     * preguntas ni subcategorías), el fichero se abre directamente sin preguntar nada.
+     * Si ya hay un banco cargado con contenido, se pregunta al usuario si quiere SUSTITUIRLO
+     * por el nuevo o COMBINAR ambos (el nuevo se añade como rama(s) nueva(s) bajo la raíz
+     * del banco actual, ver {@link CategoryMerger}).
+     *
+     * @param stage ventana contenedora principal sobre la que se ancla el diálogo.
+     * @param currentRoot categoría raíz actualmente cargada, o null si no hay ninguna.
+     * @return el resultado de la operación, o vacío si el usuario cancela el selector de
+     *         archivos o el diálogo de sustituir/combinar.
+     */
+    public Optional<OpenResult> openOrMergeBank(Stage stage, Category currentRoot) {
+        File file = chooseBankFileToOpen(stage);
         if (file == null) {
             return Optional.empty();
         }
 
+        boolean hasExistingBank = currentRoot != null
+                && (!currentRoot.getQuestions().isEmpty() || !currentRoot.getSubcategories().isEmpty());
+
+        if (!hasExistingBank) {
+            return loadBankReplacing(stage, file);
+        }
+
+        Optional<Boolean> mergeChoice = askReplaceOrMerge(file);
+        if (mergeChoice.isEmpty()) {
+            return Optional.empty();
+        }
+
+        if (mergeChoice.get()) {
+            return loadBankMerging(stage, file, currentRoot);
+        } else {
+            return loadBankReplacing(stage, file);
+        }
+    }
+
+    private File chooseBankFileToOpen(Stage stage) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(I18n.get("file.title.openBank"));
+        fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter(I18n.get("file.ext.bank"), "*.xml", "*.txt"),
+            new FileChooser.ExtensionFilter(I18n.get("file.ext.xml"), "*.xml"),
+            new FileChooser.ExtensionFilter(I18n.get("file.ext.gift"), "*.txt")
+        );
+        return fileChooser.showOpenDialog(stage);
+    }
+
+    /**
+     * Pregunta al usuario si el banco recién elegido debe sustituir al que ya está cargado
+     * o combinarse con él.
+     *
+     * @return true si el usuario eligió combinar, false si eligió sustituir, vacío si canceló.
+     */
+    private Optional<Boolean> askReplaceOrMerge(File newFile) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(I18n.get("file.dlg.replaceOrMerge.title"));
+        alert.setHeaderText(I18n.get("file.dlg.replaceOrMerge.header", newFile.getName()));
+        alert.setContentText(I18n.get("file.dlg.replaceOrMerge.content"));
+
+        ButtonType btnMerge = new ButtonType(I18n.get("file.dlg.replaceOrMerge.btnMerge"), ButtonBar.ButtonData.YES);
+        ButtonType btnReplace = new ButtonType(I18n.get("file.dlg.replaceOrMerge.btnReplace"), ButtonBar.ButtonData.NO);
+        ButtonType btnCancel = new ButtonType(I18n.get("file.dlg.replaceOrMerge.btnCancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(btnMerge, btnReplace, btnCancel);
+
+        Optional<ButtonType> choice = alert.showAndWait();
+        if (choice.isEmpty() || choice.get() == btnCancel) {
+            return Optional.empty();
+        }
+        return Optional.of(choice.get() == btnMerge);
+    }
+
+    /**
+     * Carga el fichero detectando su formato por extensión, sustituyendo cualquier banco anterior.
+     */
+    private Optional<OpenResult> loadBankReplacing(Stage stage, File file) {
         try {
-            Category rootCategory = ioService.loadBankFromXML(file);
-            return Optional.of(new Pair<>(rootCategory, file));
+            Category rootCategory;
+            if (isGiftFile(file)) {
+                GiftImportResult result = ioService.loadBankFromGIFTWithReport(file);
+                reportGiftIssuesIfAny(stage, result.issues());
+                rootCategory = result.rootCategory();
+            } else {
+                rootCategory = ioService.loadBankFromXML(file);
+            }
+            return Optional.of(new OpenResult(rootCategory, file, false));
         } catch (Exception ex) {
-            Alert err = new Alert(Alert.AlertType.ERROR, I18n.get("file.err.readXml", ex.getMessage()));
+            Alert err = new Alert(Alert.AlertType.ERROR, I18n.get("file.err.readBank", ex.getMessage()));
             err.showAndWait();
-            LOGGER.log(Level.SEVERE, "Excepción controlada al importar el archivo XML", ex);
+            LOGGER.log(Level.SEVERE, "Excepción controlada al importar un banco de preguntas", ex);
             return Optional.empty();
         }
     }
+
+    /**
+     * Carga el fichero detectando su formato por extensión y lo combina dentro del banco
+     * actualmente cargado, marcando el documento como modificado (la fusión vive solo en
+     * memoria hasta que el usuario guarde explícitamente).
+     */
+    private Optional<OpenResult> loadBankMerging(Stage stage, File file, Category currentRoot) {
+        try {
+            Category importedRoot;
+            if (isGiftFile(file)) {
+                GiftImportResult result = ioService.loadBankFromGIFTWithReport(file);
+                reportGiftIssuesIfAny(stage, result.issues());
+                importedRoot = result.rootCategory();
+            } else {
+                importedRoot = ioService.loadBankFromXML(file);
+            }
+
+            int added = CategoryMerger.merge(currentRoot, importedRoot);
+            CommandManager.getInstance().markAsDirty();
+            showSuccessNotification(stage, I18n.get("file.info.mergedBank", added));
+            return Optional.of(new OpenResult(currentRoot, file, true));
+        } catch (Exception ex) {
+            Alert err = new Alert(Alert.AlertType.ERROR, I18n.get("file.err.readBank", ex.getMessage()));
+            err.showAndWait();
+            LOGGER.log(Level.SEVERE, "Excepción controlada al fusionar un banco de preguntas", ex);
+            return Optional.empty();
+        }
+    }
+
+    private boolean isGiftFile(File file) {
+        return file.getName().toLowerCase(Locale.ROOT).endsWith(".txt");
+    }
+
+    /**
+     * Si la importación GIFT ha encontrado bloques de pregunta que no pudo interpretar,
+     * muestra un aviso detallando cuáles fueron y por qué, sin impedir que el resto de la
+     * importación (que sí tuvo éxito) se utilice con normalidad.
+     */
+    private void reportGiftIssuesIfAny(Stage stage, List<GiftParseIssue> issues) {
+        if (issues == null || issues.isEmpty()) return;
+
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(I18n.get("gift.issues.title"));
+        alert.setHeaderText(I18n.get("gift.issues.header", issues.size()));
+
+        StringBuilder details = new StringBuilder();
+        for (GiftParseIssue issue : issues) {
+            details.append(I18n.get("gift.issues.line", issue.startLine()))
+                   .append(" — ").append(issue.reason()).append("\n")
+                   .append("   \"").append(issue.blockPreview()).append("\"\n\n");
+        }
+
+        TextArea textArea = new TextArea(details.toString());
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setPrefSize(560, 260);
+
+        VBox content = new VBox(8, new Label(I18n.get("gift.issues.info")), textArea);
+        alert.getDialogPane().setContent(content);
+        alert.getDialogPane().setPrefSize(600, 360);
+        alert.showAndWait();
+    }
+
+    // =====================================================================
+    //                          GUARDADO / EXPORTACIÓN
+    // =====================================================================
 
     /**
      * Almacena de manera persistente los cambios en el archivo XML actual o solicita una nueva ubicación de guardado.
@@ -113,6 +276,11 @@ public class FileManager {
         try {
             ioService.saveBankToXML(categoryToExport, file);
             showSuccessNotification(stage, I18n.get("file.info.savedXml"));
+            // Solo una exportación COMPLETA del banco actual representa "el documento está guardado":
+            // una exportación parcial es una foto derivada, no el propio documento de trabajo.
+            if (!isPartialExport) {
+                CommandManager.getInstance().markAsSaved();
+            }
             return isPartialExport ? Optional.empty() : Optional.of(file);
         } catch (Exception ex) {
             Alert err = new Alert(Alert.AlertType.ERROR, I18n.get("file.err.saveXml", ex.getMessage()));
@@ -201,38 +369,6 @@ public class FileManager {
         }
     }
 
-    // =====================================================================
-    //                   NUEVOS MÉTODOS PARA FORMATO GIFT
-    // =====================================================================
-
-    /**
-     * Muestra un selector de archivos para importar un banco en formato GIFT (.txt).
-     * * @param stage Ventana contenedora principal.
-     * @return Un contenedor opcional con la estructura procesada y su archivo asociado en disco.
-     */
-    public Optional<Pair<Category, File>> openGIFT(Stage stage) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Abrir archivo GIFT");
-        fileChooser.getExtensionFilters().add(
-            new FileChooser.ExtensionFilter("Formato Moodle GIFT (*.txt)", "*.txt")
-        );
-
-        File file = fileChooser.showOpenDialog(stage);
-        if (file == null) {
-            return Optional.empty();
-        }
-
-        try {
-            Category rootCategory = ioService.loadBankFromGIFT(file);
-            return Optional.of(new Pair<>(rootCategory, file));
-        } catch (Exception ex) {
-            Alert err = new Alert(Alert.AlertType.ERROR, "Fallo al leer el archivo GIFT:\n" + ex.getMessage());
-            err.showAndWait();
-            LOGGER.log(Level.SEVERE, "Excepción controlada al importar el archivo GIFT", ex);
-            return Optional.empty();
-        }
-    }
-
     /**
      * Inicia el proceso de exportación a formato de texto plano GIFT.
      * * @param stage Ventana contenedora principal.
@@ -254,9 +390,9 @@ public class FileManager {
         }
 
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Guardar como Moodle GIFT");
+        fileChooser.setTitle(I18n.get("file.title.exportGift"));
         fileChooser.getExtensionFilters().add(
-            new FileChooser.ExtensionFilter("Formato Moodle GIFT (*.txt)", "*.txt")
+            new FileChooser.ExtensionFilter(I18n.get("file.ext.gift"), "*.txt")
         );
 
         File file = fileChooser.showSaveDialog(stage);
@@ -266,9 +402,9 @@ public class FileManager {
 
         try {
             ioService.exportToGIFT(categoryToExport, file);
-            showSuccessNotification(stage, "El banco de preguntas se ha exportado correctamente en formato GIFT.");
+            showSuccessNotification(stage, I18n.get("file.info.savedGift"));
         } catch (Exception ex) {
-            Alert err = new Alert(Alert.AlertType.ERROR, "Error al exportar a formato GIFT:\n" + ex.getMessage());
+            Alert err = new Alert(Alert.AlertType.ERROR, I18n.get("file.err.saveGift", ex.getMessage()));
             err.showAndWait();
             LOGGER.log(Level.SEVERE, "Fallo estructural en el proceso de exportación GIFT", ex);
         }

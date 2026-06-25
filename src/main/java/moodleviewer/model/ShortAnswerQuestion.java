@@ -41,7 +41,7 @@ public class ShortAnswerQuestion extends Question {
     public List<Answer> getAnswers() { return answers; }
 
     /**
-     * Muestra un campo de texto deshabilitado que representa la zona de respuesta del alumno,
+     * Muestra un campo de texto deshabilitada que representa la zona de respuesta del alumno,
      * junto a un bloque resaltado con la respuesta correcta.
      */
     @Override
@@ -49,7 +49,7 @@ public class ShortAnswerQuestion extends Question {
         StringBuilder sb = new StringBuilder(getMoodleHeader());
         
         sb.append("<div style=\"").append(HtmlConstants.FLEX_ROW).append("\">")
-          .append("<strong style=\"margin-right: 15px;\">Respuesta:</strong>")
+          .append("<strong style=\"").append(HtmlConstants.LABEL_INLINE_BOLD).append("\">Respuesta:</strong>")
           .append("<input type=\"text\" disabled style=\"").append(HtmlConstants.INPUT_BASE).append(" width: 300px;\">")
           .append("</div>");
           

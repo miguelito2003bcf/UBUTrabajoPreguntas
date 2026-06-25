@@ -207,9 +207,11 @@ public class QuestionValidator {
     /**
      * Comprueba si una pregunta contiene imágenes embebidas, bien como ficheros adjuntos
      * (@@PLUGINFILE@@ ya resueltos en archivos) o referenciadas directamente en su HTML
-     * (incluyendo el texto de sus respuestas, cuando el tipo de pregunta las tiene).
+     * (incluyendo el texto de sus respuestas, cuando el tipo de pregunta las tiene). Expuesto
+     * como público porque también lo reutiliza {@code DashboardDialog} para mostrar cuántas
+     * preguntas del banco contienen imágenes, fuera del contexto de validación pre-exportación.
      */
-    private static boolean questionContainsImages(Question q) {
+    public static boolean questionContainsImages(Question q) {
         if (q.getFiles() != null && !q.getFiles().isEmpty()) {
             return true;
         }

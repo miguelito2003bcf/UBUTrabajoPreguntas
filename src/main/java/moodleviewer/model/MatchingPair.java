@@ -30,4 +30,22 @@ public class MatchingPair {
 
     public String getQuestionText() { return questionText; }
     public String getAnswerText() { return answerText; }
+
+    /**
+     * Permite sustituir el texto del enunciado tras la construcción. Pensado para los
+     * importadores (ej. {@code GIFTParser}), que necesitan reescribir imágenes Base64
+     * incrustadas como referencias {@code @@PLUGINFILE@@} una vez extraído el fichero
+     * a {@link MoodleFile}.
+     *
+     * @param questionText nuevo texto del enunciado.
+     */
+    public void setQuestionText(String questionText) { this.questionText = questionText; }
+
+    /**
+     * Permite sustituir el texto de la respuesta tras la construcción, por el mismo
+     * motivo que {@link #setQuestionText(String)}.
+     *
+     * @param answerText nuevo texto de la respuesta.
+     */
+    public void setAnswerText(String answerText) { this.answerText = answerText; }
 }

@@ -68,7 +68,7 @@ public class ClozeQuestion extends Question {
 
         if (!MODO_PREVIA_ALUMNO) {
             String highlightedText = highlightClozeSyntax(baseText);
-            sb.append("<div style=\"margin-bottom: 25px;\">")
+            sb.append("<div style=\"").append(HtmlConstants.CLOZE_SECTION_WRAPPER).append("\">")
               .append("<div style=\"").append(HtmlConstants.LABEL_BOLD).append(" margin-bottom: 8px;\">Sintaxis Cloze:</div>")
               .append("<div style=\"").append(HtmlConstants.CLOZE_CODE_BLOCK).append("\">")
               .append(highlightedText)
@@ -155,11 +155,11 @@ public class ClozeQuestion extends Question {
             
             int size = Math.max(10, Math.min(correct.length() + 6, 40));
             widget.append("<input type='text' disabled size='").append(size).append("' placeholder='").append(escapeHtmlAttr(correct))
-                  .append("' style='border:1px solid #ced4da; border-radius: 4px; padding:4px 8px; font-style:italic; color:#495057; background-color:#e9ecef;' />");
+                  .append("' style='").append(HtmlConstants.CLOZE_TEXT_INPUT).append("' />");
         }
         else if (typeKey.matches("MULTICHOICE|MC|MULTICHOICE_S|MCS")) {
             
-        	widget.append("<select style=\"").append(HtmlConstants.INPUT_BASE).append(" width: auto; max-width: 600px; font-size: 15px; color: #495057; cursor: pointer;\">")
+        	widget.append("<select style=\"").append(HtmlConstants.CLOZE_SELECT).append("\">")
                   .append("<option value=\"\" disabled selected>Elegir...</option>");
             
             for (ClozeAlt a : alts) {
@@ -171,8 +171,9 @@ public class ClozeQuestion extends Question {
                 }
                 
                 String formattedFraction = formatFraction(a.fraction);
+                String optionStyle = correct ? HtmlConstants.CLOZE_OPTION_CORRECT : HtmlConstants.CLOZE_OPTION_DEFAULT;
                 
-                widget.append("<option ").append(correct ? "selected" : "").append(" style=\"").append(correct ? "color:#15803d; font-weight:bold;" : "color:#333;").append("\">")
+                widget.append("<option ").append(correct ? "selected" : "").append(" style=\"").append(optionStyle).append("\">")
                       .append(correct ? "✓ " : "").append(plainText).append(" (").append(formattedFraction).append(")</option>");
             }
             widget.append("</select>");
@@ -180,22 +181,22 @@ public class ClozeQuestion extends Question {
         }
         else if (typeKey.matches("MULTICHOICE_V|MCV|MULTICHOICE_VS|MCVS|MULTIRESPONSE|MR|MULTIRESPONSE_S|MRS")) {
             String inputType = typeKey.contains("MULTICHOICE") ? "radio" : "checkbox";
-            widget.append("<span style='display:inline-block; vertical-align:top; border:1px dashed #ccc; padding:5px; border-radius:4px;'>");
+            widget.append("<span style='").append(HtmlConstants.CLOZE_OPTIONS_WRAPPER_VERTICAL).append("'>");
             for (ClozeAlt a : alts) {
                 boolean correct = a.fraction > 0;
-                widget.append("<label style='display:block; margin-bottom:2px;'><input type='").append(inputType).append("' disabled ")
-                      .append(correct ? "checked" : "").append("> <small style='color:#c00;'>(").append(formatFraction(a.fraction)).append(")</small> ")
+                widget.append("<label style='").append(HtmlConstants.CLOZE_OPTION_LABEL_VERTICAL).append("'><input type='").append(inputType).append("' disabled ")
+                      .append(correct ? "checked" : "").append("> <small style='").append(HtmlConstants.CLOZE_FRACTION_LABEL).append("'>(").append(formatFraction(a.fraction)).append(")</small> ")
                       .append(a.text).append("</label>");
             }
             widget.append("</span>");
         }
         else if (typeKey.matches("MULTICHOICE_H|MCH|MULTICHOICE_HS|MCHS|MULTIRESPONSE_H|MRH|MULTIRESPONSE_HS|MRHS")) {
             String inputType = typeKey.contains("MULTICHOICE") ? "radio" : "checkbox";
-            widget.append("<span style='display:inline-block; vertical-align:top; border:1px dashed #ccc; padding:2px 8px; border-radius:4px;'>");
+            widget.append("<span style='").append(HtmlConstants.CLOZE_OPTIONS_WRAPPER_HORIZONTAL).append("'>");
             for (ClozeAlt a : alts) {
                 boolean correct = a.fraction > 0;
-                widget.append("<label style='margin-right:15px;'><input type='").append(inputType).append("' disabled ")
-                      .append(correct ? "checked" : "").append("> <small style='color:#c00;'>(").append(formatFraction(a.fraction)).append(")</small> ")
+                widget.append("<label style='").append(HtmlConstants.CLOZE_OPTION_LABEL_HORIZONTAL).append("'><input type='").append(inputType).append("' disabled ")
+                      .append(correct ? "checked" : "").append("> <small style='").append(HtmlConstants.CLOZE_FRACTION_LABEL).append("'>(").append(formatFraction(a.fraction)).append(")</small> ")
                       .append(a.text).append("</label>");
             }
             widget.append("</span>");

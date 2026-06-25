@@ -48,8 +48,8 @@ public class TrueFalseQuestion extends Question {
         
         sb.append("<div style=\"").append(HtmlConstants.LABEL_BOLD).append("\">Seleccione una:</div>");
         sb.append("<div style=\"margin-left: 5px;\">");
-        sb.append("<div style=\"").append(HtmlConstants.FLEX_ROW_START).append("\"><input type=\"radio\" disabled style=\"margin-top: 5px; margin-right: 12px; transform: scale(1.2);\"><div>Verdadero</div></div>");
-        sb.append("<div style=\"").append(HtmlConstants.FLEX_ROW_START).append("\"><input type=\"radio\" disabled style=\"margin-top: 5px; margin-right: 12px; transform: scale(1.2);\"><div>Falso</div></div>");
+        sb.append("<div style=\"").append(HtmlConstants.FLEX_ROW_START).append("\"><input type=\"radio\" disabled style=\"").append(HtmlConstants.RADIO_OPTION).append("\"><div>Verdadero</div></div>");
+        sb.append("<div style=\"").append(HtmlConstants.FLEX_ROW_START).append("\"><input type=\"radio\" disabled style=\"").append(HtmlConstants.RADIO_OPTION).append("\"><div>Falso</div></div>");
         sb.append("</div>");
         
         String correctAnswer = "100".equals(trueAnswer.getFraction()) ? "Verdadero" : "Falso";

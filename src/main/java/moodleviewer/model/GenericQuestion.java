@@ -39,7 +39,7 @@ public class GenericQuestion extends Question {
         StringBuilder sb = new StringBuilder(getMoodleHeader());
         
         sb.append("<div style=\"").append(HtmlConstants.LABEL_BOLD).append("\">Respuesta:</div>");
-        sb.append("<div style=\"").append(HtmlConstants.INPUT_BASE).append(" height: 150px; display: flex; align-items: center; justify-content: center; color: #6c757d; font-style: italic;\">")
+        sb.append("<div style=\"").append(HtmlConstants.ESSAY_PLACEHOLDER).append("\">")
           .append("[ Área de editor de texto para el ensayo del alumno ]")
           .append("</div>");
         

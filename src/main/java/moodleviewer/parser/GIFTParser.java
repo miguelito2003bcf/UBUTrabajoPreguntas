@@ -23,17 +23,63 @@ public class GIFTParser {
     private static final Pattern TITLE_PATTERN = Pattern.compile("^::(.*?)::(.*)", Pattern.DOTALL);
     private static final Pattern DATA_IMAGE_PATTERN = Pattern.compile("(?i)^data:image/([a-zA-Z]+);base64,(.*)");
 
+    /**
+     * Representa un bloque de texto GIFT que no pudo convertirse en una pregunta válida,
+     * junto con la línea aproximada donde empieza en el fichero original y el motivo del fallo.
+     * Se usa para que un fallo aislado en una pregunta no aborte la importación completa del
+     * archivo: el resto de preguntas válidas se siguen cargando con normalidad.
+     *
+     * @param startLine línea (1-indexada) aproximada en la que comienza el bloque dentro del fichero.
+     * @param blockPreview primeras palabras del bloque, para que el usuario pueda identificarlo.
+     * @param reason mensaje descriptivo del error que impidió procesar el bloque.
+     */
+    public record GiftParseIssue(int startLine, String blockPreview, String reason) {}
+
+    /**
+     * Resultado completo de una importación GIFT: el árbol de categorías construido con todas
+     * las preguntas que se pudieron interpretar correctamente, y la lista de bloques que fallaron
+     * (vacía si el archivo se importó sin ningún problema).
+     */
+    public record GiftImportResult(Category rootCategory, List<GiftParseIssue> issues) {}
+
+    /**
+     * Sobrecarga de compatibilidad que devuelve solo el árbol de categorías, descartando
+     * silenciosamente la lista de bloques fallidos. Mantenida porque FileIOService y otros
+     * puntos del proyecto ya dependen de esta firma; para tener visibilidad de los fallos de
+     * importación, usar {@link #parseGIFTWithReport(File)}.
+     *
+     * @throws Exception si el propio fichero no se puede leer (no se refiere a errores de
+     *                    sintaxis en preguntas individuales, que ahora se recogen como issues).
+     */
     public static Category parseGIFT(File file) throws Exception {
+        return parseGIFTWithReport(file).rootCategory();
+    }
+
+    /**
+     * Carga y procesa un banco de preguntas desde un archivo GIFT, capturando los fallos
+     * de sintaxis de bloques individuales en vez de abortar toda la importación. Si una
+     * pregunta concreta está mal formada, se registra como {@link GiftParseIssue} y se continúa
+     * con el resto del archivo con total normalidad.
+     *
+     * @param file archivo GIFT de origen.
+     * @return un {@link GiftImportResult} con el árbol resultante y los bloques que fallaron.
+     * @throws Exception si el propio fichero no se puede abrir o leer.
+     */
+    public static GiftImportResult parseGIFTWithReport(File file) throws Exception {
         Category rootCategory = new Category("Banco de Preguntas");
         Category currentCategory = rootCategory;
+        List<GiftParseIssue> issues = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(file, java.nio.charset.StandardCharsets.UTF_8))) {
             String line;
             StringBuilder block = new StringBuilder();
+            int lineNumber = 0;
+            int blockStartLine = 1;
 
             while ((line = br.readLine()) != null) {
+                lineNumber++;
                 String trimmed = line.trim();
-                
+
                 if (trimmed.startsWith("$CATEGORY:")) {
                     String path = trimmed.substring(10).trim();
                     currentCategory = findOrCreateCategory(rootCategory, path);
@@ -44,18 +90,37 @@ public class GIFTParser {
 
                 if (trimmed.isEmpty()) {
                     if (block.length() > 0) {
-                        processQuestionBlock(block.toString(), currentCategory);
+                        processQuestionBlockSafely(block.toString(), currentCategory, blockStartLine, issues);
                         block.setLength(0);
                     }
+                    blockStartLine = lineNumber + 1;
                 } else {
+                    if (block.length() == 0) blockStartLine = lineNumber;
                     block.append(line).append("\n");
                 }
             }
             if (block.length() > 0) {
-                processQuestionBlock(block.toString(), currentCategory);
+                processQuestionBlockSafely(block.toString(), currentCategory, blockStartLine, issues);
             }
         }
-        return rootCategory;
+        return new GiftImportResult(rootCategory, issues);
+    }
+
+    /**
+     * Envuelve {@link #processQuestionBlock} en un try/catch para que cualquier excepción
+     * inesperada al interpretar UN bloque (sintaxis corrupta, índices fuera de rango, formato
+     * numérico inválido, etc.) no aborte la lectura del resto del fichero. El bloque problemático
+     * se descarta y se añade como aviso a la lista de issues.
+     */
+    private static void processQuestionBlockSafely(String block, Category currentCategory, int startLine, List<GiftParseIssue> issues) {
+        try {
+            processQuestionBlock(block, currentCategory);
+        } catch (Exception ex) {
+            String preview = block.trim().replaceAll("\\s+", " ");
+            if (preview.length() > 80) preview = preview.substring(0, 80) + "...";
+            String reason = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
+            issues.add(new GiftParseIssue(startLine, preview, reason));
+        }
     }
 
     private static void processQuestionBlock(String block, Category currentCategory) {
@@ -206,11 +271,9 @@ public class GIFTParser {
         } else if (q instanceof NumericalQuestion nq) {
             nq.getAnswer().setText(extractInlineImages(nq.getAnswer().getText(), q));
         } else if (q instanceof MatchingQuestion mq) {
-            // MatchingPair no expone setters; si en el futuro se necesita sanear imágenes
-            // embebidas dentro de sus textos, habría que añadirle setQuestionText/setAnswerText.
             for (MatchingPair p : mq.getPairs()) {
-                extractInlineImages(p.getQuestionText(), q);
-                extractInlineImages(p.getAnswerText(), q);
+                p.setQuestionText(extractInlineImages(p.getQuestionText(), q));
+                p.setAnswerText(extractInlineImages(p.getAnswerText(), q));
             }
         }
     }

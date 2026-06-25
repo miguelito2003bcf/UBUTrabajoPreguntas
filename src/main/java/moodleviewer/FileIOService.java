@@ -16,6 +16,7 @@ import moodleviewer.parser.XMLParser;
 import moodleviewer.parser.LaTeXExporter;
 import moodleviewer.parser.GIFTExportVisitor;
 import moodleviewer.parser.GIFTParser;
+import moodleviewer.parser.GIFTParser.GiftImportResult;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -97,6 +98,24 @@ public class FileIOService {
             throw new IllegalArgumentException("El archivo GIFT de origen no existe o es nulo.");
         }
         return GIFTParser.parseGIFT(file);
+    }
+
+    /**
+     * Carga un banco de preguntas desde un archivo GIFT exponiendo además los bloques de texto
+     * que no se pudieron interpretar como preguntas válidas, en vez de abortar toda la
+     * importación ante el primer error de sintaxis. Útil para que la interfaz pueda avisar al
+     * usuario de qué preguntas concretas no se importaron y por qué, mientras carga con
+     * normalidad el resto del archivo.
+     *
+     * @param file Archivo GIFT de origen.
+     * @return resultado con la categoría raíz y la lista de bloques fallidos (vacía si no hubo problemas).
+     * @throws Exception Si el archivo no es accesible o no se puede leer.
+     */
+    public GiftImportResult loadBankFromGIFTWithReport(File file) throws Exception {
+        if (file == null || !file.exists()) {
+            throw new IllegalArgumentException("El archivo GIFT de origen no existe o es nulo.");
+        }
+        return GIFTParser.parseGIFTWithReport(file);
     }
 
     /**

@@ -48,9 +48,9 @@ public class MatchingQuestion extends Question {
         
         for (MatchingPair p : pairs) {
             sb.append("<tr>")
-              .append("<td style=\"vertical-align: middle; width: 45%; text-align: right; padding-right: 20px;\">").append(processPluginFiles(p.getQuestionText())).append("</td>")
-              .append("<td style=\"vertical-align: middle; width: 55%;\">")
-              .append("<select disabled style=\"").append(HtmlConstants.INPUT_BASE).append(" width: 100%; max-width: 250px;\">")
+              .append("<td style=\"").append(HtmlConstants.MATCHING_CELL_QUESTION).append("\">").append(processPluginFiles(p.getQuestionText())).append("</td>")
+              .append("<td style=\"").append(HtmlConstants.MATCHING_CELL_ANSWER).append("\">")
+              .append("<select disabled style=\"").append(HtmlConstants.MATCHING_SELECT).append("\">")
               .append("<option>Elegir...</option>")
               .append("<option selected>").append(processPluginFiles(p.getAnswerText())).append("</option>")
               .append("</select></td></tr>");

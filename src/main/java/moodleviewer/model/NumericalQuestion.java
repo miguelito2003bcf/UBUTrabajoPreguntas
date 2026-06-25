@@ -48,7 +48,7 @@ public class NumericalQuestion extends Question {
         StringBuilder sb = new StringBuilder(getMoodleHeader());
         
         sb.append("<div style=\"").append(HtmlConstants.FLEX_ROW).append("\">")
-          .append("<strong style=\"margin-right: 15px;\">Respuesta:</strong>")
+          .append("<strong style=\"").append(HtmlConstants.LABEL_INLINE_BOLD).append("\">Respuesta:</strong>")
           .append("<input type=\"text\" disabled style=\"").append(HtmlConstants.INPUT_BASE).append(" width: 150px;\">")
           .append("</div>");
           

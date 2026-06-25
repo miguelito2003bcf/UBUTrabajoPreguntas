@@ -26,7 +26,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
-import javafx.util.Pair;
 import moodleviewer.model.Category;
 import moodleviewer.model.Question;
 import moodleviewer.model.ClozeQuestion;
@@ -56,18 +55,17 @@ public class Main extends Application {
     
     private FileManager fileManager = new FileManager();
     
-    private Button openButton = new Button(I18n.get("main.btn.loadXml"));
-    // --- NUEVOS BOTONES GIFT ---
-    private Button openGiftButton = new Button("Abrir GIFT");
-    
+    // Botón único de apertura: acepta XML y GIFT, y decide sustituir/combinar según el estado actual.
+    private Button openBankButton = new Button(I18n.get("main.btn.openBank"));
+
     private Button saveButton = new Button(I18n.get("main.btn.saveXml"));
     private Button addQuestionButton = new Button(I18n.get("main.btn.addQuestion"));
     private Button exportLatexButton = new Button(I18n.get("main.btn.saveLatex"));
-    // --- NUEVOS BOTONES GIFT ---
-    private Button exportGiftButton = new Button("Exportar GIFT");
+    private Button exportGiftButton = new Button(I18n.get("main.btn.exportGift"));
     
     private Button addCategoryButton = new Button(I18n.get("main.btn.addCategory"));
     private Button statsButton = new Button(I18n.get("main.btn.stats"));
+    private Button duplicatesButton = new Button(I18n.get("main.btn.duplicates"));
     
     private Button undoButton = new Button();
     private Button redoButton = new Button();
@@ -103,7 +101,51 @@ public class Main extends Application {
 
         primaryStage.setScene(scene);
         primaryStage.setMaximized(true);
+
+        // Evita perder cambios sin guardar al cerrar la ventana por accidente: si el documento
+        // tiene modificaciones pendientes, se pregunta antes de permitir que la aplicación cierre.
+        primaryStage.setOnCloseRequest(event -> {
+            if (!confirmDiscardUnsavedChanges(primaryStage)) {
+                event.consume();
+            }
+        });
+
         primaryStage.show();
+    }
+
+    /**
+     * Si el documento actual tiene cambios sin guardar (según {@code CommandManager.isDirty()}),
+     * pregunta al usuario qué desea hacer antes de continuar con una operación que los
+     * descartaría (cerrar la aplicación, sustituir el banco actual al abrir uno nuevo, etc.).
+     *
+     * @param stage ventana sobre la que anclar los diálogos (necesaria si el usuario elige guardar).
+     * @return true si la operación que motivó la llamada puede continuar; false si debe cancelarse.
+     */
+    private boolean confirmDiscardUnsavedChanges(Stage stage) {
+        if (!CommandManager.getInstance().isDirty()) {
+            return true;
+        }
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(I18n.get("file.dlg.unsavedChanges.title"));
+        alert.setHeaderText(I18n.get("file.dlg.unsavedChanges.header"));
+        alert.setContentText(I18n.get("file.dlg.unsavedChanges.content"));
+
+        ButtonType btnSave = new ButtonType(I18n.get("file.dlg.unsavedChanges.btnSave"), ButtonBar.ButtonData.YES);
+        ButtonType btnDiscard = new ButtonType(I18n.get("file.dlg.unsavedChanges.btnDiscard"), ButtonBar.ButtonData.NO);
+        ButtonType btnCancel = new ButtonType(I18n.get("file.dlg.unsavedChanges.btnCancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(btnSave, btnDiscard, btnCancel);
+
+        Optional<ButtonType> choice = alert.showAndWait();
+        if (choice.isEmpty() || choice.get() == btnCancel) {
+            return false;
+        }
+        if (choice.get() == btnSave) {
+            Category preselected = getSelectedTreeCategory();
+            boolean saved = fileManager.saveMoodleXML(stage, currentRootCategory, preselected, loadedFile).isPresent();
+            return saved || !CommandManager.getInstance().isDirty();
+        }
+        return true; // btnDiscard
     }
 
     private void initBasicComponents(Stage stage) {
@@ -125,35 +167,12 @@ public class Main extends Application {
 
         typeFilterMenu.setDisable(true); 
         fileNameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;");
-        
-        openButton.setOnAction(e -> handleLoadXML(stage));
-        openButton.setId("btn-primary");
-        
-        // --- CONFIGURACIÓN BOTÓN ABRIR GIFT ---
-        openGiftButton.setGraphic(IconFactory.of(FontAwesomeSolid.FILE_ALT, 14, "#495057"));
-        openGiftButton.setGraphicTextGap(8);
-        openGiftButton.setOnAction(e -> {
-            Optional<Pair<Category, File>> resultado = fileManager.openGIFT(stage);
-            if (resultado.isPresent()) {
-                Pair<Category, File> pair = resultado.get();
-                currentRootCategory = pair.getKey();
-                loadedFile = pair.getValue(); 
-                fileNameLabel.setText(I18n.get("main.lbl.currentFile", loadedFile.getName()));
-                populateTypeFilterMenu(currentRootCategory);
-                categoryTreeView.setRoot(TreeBuilder.createTreeItem(currentRootCategory));
-                categoryTreeView.setShowRoot(false); 
-                questionTableView.getItems().clear(); 
-                detailsWebView.getEngine().loadContent(""); 
-                CommandManager.getInstance().clear(); 
-                
-                saveButton.setDisable(false);
-                addQuestionButton.setDisable(false); 
-                addCategoryButton.setDisable(false); 
-                exportLatexButton.setDisable(false);
-                exportGiftButton.setDisable(false); // Activamos exportar
-                statsButton.setDisable(false); 
-            }
-        });
+
+        // --- BOTÓN ÚNICO DE APERTURA (XML + GIFT, sustituir o combinar) ---
+        openBankButton.setId("btn-primary");
+        openBankButton.setGraphic(IconFactory.of(FontAwesomeSolid.FOLDER_OPEN, 14, "white"));
+        openBankButton.setGraphicTextGap(8);
+        openBankButton.setOnAction(e -> handleOpenBank(stage));
 
         saveButton.setDisable(true);
         saveButton.setOnAction(e -> {
@@ -174,7 +193,6 @@ public class Main extends Application {
         exportLatexButton.setDisable(true);
         exportLatexButton.setOnAction(e -> fileManager.exportLaTeX(stage, currentRootCategory, getSelectedTreeCategory()));
 
-        // --- CONFIGURACIÓN BOTÓN EXPORTAR GIFT ---
         exportGiftButton.setDisable(true);
         exportGiftButton.setGraphic(IconFactory.of(FontAwesomeSolid.FILE_EXPORT, 14, "#495057"));
         exportGiftButton.setGraphicTextGap(8);
@@ -196,6 +214,15 @@ public class Main extends Application {
             if (currentRootCategory != null) {
                 DashboardDialog dashboard = new DashboardDialog(currentRootCategory);
                 dashboard.showAndWait();
+            }
+        });
+
+        duplicatesButton.setDisable(true);
+        duplicatesButton.setGraphic(IconFactory.of(FontAwesomeSolid.CLONE, 14, "#495057"));
+        duplicatesButton.setGraphicTextGap(8);
+        duplicatesButton.setOnAction(e -> {
+            if (currentRootCategory != null) {
+                DuplicateQuestionsDialog.showDuplicates(currentRootCategory);
             }
         });
 
@@ -292,23 +319,72 @@ public class Main extends Application {
         languageBox.setAlignment(Pos.CENTER);
     }
 
+    /**
+     * Maneja la apertura unificada del banco: delega la elección de fichero, formato y, si ya
+     * había un banco cargado, la decisión de sustituir o combinar en {@code FileManager}.
+     * Tras una sustitución, limpia el historial de deshacer/rehacer (es un documento nuevo);
+     * tras una combinación, lo conserva (es una modificación del documento actual).
+     */
+    private void handleOpenBank(Stage stage) {
+        Optional<FileManager.OpenResult> result = fileManager.openOrMergeBank(stage, currentRootCategory);
+        if (result.isEmpty()) {
+            return;
+        }
+
+        FileManager.OpenResult openResult = result.get();
+
+        // Si la operación va a SUSTITUIR el banco actual (no a combinarlo) y ese banco tenía
+        // cambios sin guardar, se avisa justo antes de aplicar el resultado. Se pregunta aquí,
+        // después de que el usuario ya haya elegido "sustituir" en FileManager, para no
+        // encadenar dos confirmaciones distintas cuando lo que realmente quiere es combinar
+        // (donde no se pierde nada y no hay nada que avisar).
+        if (!openResult.wasMerge() && !confirmDiscardUnsavedChanges(stage)) {
+            return;
+        }
+
+        currentRootCategory = openResult.rootCategory();
+        loadedFile = openResult.file();
+        fileNameLabel.setText(I18n.get("main.lbl.currentFile", loadedFile.getName()));
+
+        populateTypeFilterMenu(currentRootCategory);
+        categoryTreeView.setRoot(TreeBuilder.createTreeItem(currentRootCategory));
+        categoryTreeView.setShowRoot(false);
+        refreshQuestionTable();
+
+        if (!openResult.wasMerge()) {
+            // Sustitución: es un documento nuevo, no tiene sentido conservar el historial
+            // de deshacer/rehacer ni el estado "modificado" de un banco que ya no existe.
+            questionTableView.getItems().clear();
+            detailsWebView.getEngine().loadContent("");
+            CommandManager.getInstance().clear();
+        }
+        // Si fue una combinación, FileManager ya ha marcado el documento como modificado
+        // (markAsDirty) y el historial de deshacer/rehacer se conserva intacto.
+
+        saveButton.setDisable(false);
+        addQuestionButton.setDisable(false);
+        addCategoryButton.setDisable(false);
+        exportLatexButton.setDisable(false);
+        exportGiftButton.setDisable(false);
+        statsButton.setDisable(false);
+        duplicatesButton.setDisable(false);
+    }
+
     private void updateLanguage(Stage stage) {
         stage.setTitle(I18n.get("main.window.title"));
-        openButton.setText(I18n.get("main.btn.loadXml"));
+        openBankButton.setText(I18n.get("main.btn.openBank"));
         saveButton.setText(I18n.get("main.btn.saveXml"));
         addQuestionButton.setText(I18n.get("main.btn.addQuestion"));
         exportLatexButton.setText(I18n.get("main.btn.saveLatex"));
+        exportGiftButton.setText(I18n.get("main.btn.exportGift"));
         addCategoryButton.setText(I18n.get("main.btn.addCategory"));
         statsButton.setText(I18n.get("main.btn.stats")); 
+        duplicatesButton.setText(I18n.get("main.btn.duplicates"));
         undoButton.getTooltip().setText(I18n.get("main.btn.undo.tooltip"));
         redoButton.getTooltip().setText(I18n.get("main.btn.redo.tooltip"));
         clozeToggle.setText(I18n.get("main.toggle.cloze"));
         searchCategoryField.setPromptText(I18n.get("main.search.category"));
         searchQuestionField.setPromptText(I18n.get("main.search.question"));
-        
-        // Aunque no estén en el I18n todavía, forzamos su actualización aquí por si acaso
-        openGiftButton.setText("Abrir GIFT");
-        exportGiftButton.setText("Exportar GIFT");
         
         int selectedIndex = searchCriteriaCombo.getSelectionModel().getSelectedIndex();
         searchCriteriaCombo.setItems(FXCollections.observableArrayList(
@@ -335,29 +411,6 @@ public class Main extends Application {
         if (selectedItem == null) return null;
         Category category = selectedItem.getValue();
         return (category == currentRootCategory) ? null : category;
-    }
-
-    private void handleLoadXML(Stage stage) {
-        Optional<Pair<Category, File>> resultado = fileManager.openMoodleXML(stage);
-        if (resultado.isPresent()) {
-            Pair<Category, File> pair = resultado.get();
-            currentRootCategory = pair.getKey();
-            loadedFile = pair.getValue(); 
-            fileNameLabel.setText(I18n.get("main.lbl.currentFile", loadedFile.getName()));
-            populateTypeFilterMenu(currentRootCategory);
-            categoryTreeView.setRoot(TreeBuilder.createTreeItem(currentRootCategory));
-            categoryTreeView.setShowRoot(false); 
-            questionTableView.getItems().clear(); 
-            detailsWebView.getEngine().loadContent(""); 
-            CommandManager.getInstance().clear(); 
-            
-            saveButton.setDisable(false);
-            addQuestionButton.setDisable(false); 
-            addCategoryButton.setDisable(false); 
-            exportLatexButton.setDisable(false);
-            exportGiftButton.setDisable(false); // Activamos la exportación GIFT también
-            statsButton.setDisable(false); 
-        }
     }
 
     private void showAddCategoryDialog() {
@@ -521,19 +574,17 @@ public class Main extends Application {
     public MenuButton getTypeFilterMenu() { return typeFilterMenu; }
     public Button getAddQuestionButton() { return addQuestionButton; }
     public Button getAddCategoryButton() { return addCategoryButton; } 
-    public Button getOpenButton() { return openButton; }
+    public Button getOpenBankButton() { return openBankButton; }
     public Button getSaveButton() { return saveButton; }
     public Button getExportLatexButton() { return exportLatexButton; }
+    public Button getExportGiftButton() { return exportGiftButton; }
     public Button getStatsButton() { return statsButton; }
+    public Button getDuplicatesButton() { return duplicatesButton; }
     public Button getUndoButton() { return undoButton; }
     public Button getRedoButton() { return redoButton; }
     public CheckBox getClozeToggle() { return clozeToggle; }
     public Label getFileNameLabel() { return fileNameLabel; }
     public HBox getLanguageBox() { return languageBox; }
-    
-    // --- NUEVOS GETTERS PARA LAYOUT MANAGER ---
-    public Button getOpenGiftButton() { return openGiftButton; }
-    public Button getExportGiftButton() { return exportGiftButton; }
 
     public static void main(String[] args) { launch(args); }
 }
