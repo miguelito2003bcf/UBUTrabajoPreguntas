@@ -10,6 +10,10 @@
 package moodleviewer.model;
 
 import moodleviewer.util.HtmlConstants;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,15 +32,6 @@ public abstract class Question {
     protected String generalFeedback;
     protected List<MoodleFile> files = new ArrayList<>();
 
-    /**
-     * Construye una pregunta con los atributos comunes a todos los tipos.
-     * 
-     * @param type tipo de Moodle.
-     * @param name nombre de la pregunta.
-     * @param text enunciado en HTML.
-     * @param defaultGrade calificación por defecto.
-     * @param penalty fracción de penalización.
-     */
     public Question(String type, String name, String text, String defaultGrade, String penalty) {
         this.type = type;
         this.name = name;
@@ -44,72 +39,67 @@ public abstract class Question {
         this.defaultGrade = defaultGrade;
         this.penalty = penalty;
     }
-    
+
     public String getType() { return type; }
     public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
     public String getText() { return text; }
     public String getDefaultGrade() { return defaultGrade; }
-    public String getPenalty() { return penalty; }    
+    public String getPenalty() { return penalty; }
     public String getGeneralFeedback() { return generalFeedback; }
-    public void setGeneralFeedback(String generalFeedback) { this.generalFeedback = generalFeedback; }
     public List<MoodleFile> getFiles() { return files; }
+
+    public void setName(String name) { this.name = name; }
+    public void setGeneralFeedback(String generalFeedback) { this.generalFeedback = generalFeedback; }
     public void setFiles(List<MoodleFile> files) { this.files = files; }
 
     /**
-     * Resuelve las referencias @@PLUGINFILE@@ del HTML sustituyéndolas por URIs de datos Base64 inline, para que las
-     * imágenes se muestren en el WebView sin necesidad de acceso al servidor de Moodle.
-     * 
-     * @param html cadena HTML con posibles referencias @@PLUGINFILE@@
-     * @return HTML con las referencias sustituidas por URIs.
+     * Permite sustituir el enunciado de la pregunta tras su construcción.
+     * Pensado principalmente para los importadores (ej. {@code GIFTParser}), que necesitan
+     * sanear el HTML original (por ejemplo, reescribir imágenes Base64 incrustadas como
+     * referencias {@code @@PLUGINFILE@@}) una vez ya se ha creado el objeto Question concreto,
+     * sin tener que reconstruir la instancia completa perdiendo el resto de sus atributos.
+     *
+     * @param text nuevo enunciado en HTML.
+     */
+    public void setText(String text) { this.text = text; }
+
+    public abstract String getDetails();
+    public abstract void accept(QuestionVisitor visitor);
+
+    /**
+     * Utiliza JSoup para buscar imágenes nativas de Moodle (@@PLUGINFILE@@) y sustituirlas
+     * dinámicamente inyectando su código Base64, evitando que fallen por atributos desordenados.
      */
     public String processPluginFiles(String html) {
         if (html == null || html.isEmpty()) return "";
         if (files == null || files.isEmpty()) return html;
-        
-        String processed = html;
-        for (MoodleFile f : files) {
-            if (f.content != null && !f.content.isEmpty()) {
-                String mimeType = "image/png"; 
-                if (f.name.toLowerCase().endsWith(".jpg") || f.name.toLowerCase().endsWith(".jpeg")) mimeType = "image/jpeg";
-                else if (f.name.toLowerCase().endsWith(".gif")) mimeType = "image/gif";
-                else if (f.name.toLowerCase().endsWith(".svg")) mimeType = "image/svg+xml";
+
+        Document doc = Jsoup.parseBodyFragment(html);
+        Elements images = doc.select("img");
+
+        for (Element img : images) {
+            String src = img.attr("src");
+            if (src.contains("@@PLUGINFILE@@/")) {
+                String filename = src.substring(src.lastIndexOf("/") + 1);
+                try { filename = java.net.URLDecoder.decode(filename, "UTF-8"); } catch (Exception e) {}
                 
-                String base64URI = "data:" + mimeType + ";base64," + f.content.replace("\n", "").replace("\r", "");
-                processed = processed.replace("@@PLUGINFILE@@" + f.path + f.name, base64URI);
+                for (MoodleFile mf : files) {
+                    if (mf.name.equals(filename) && mf.content != null) {
+                        String mimeType = "image/" + (filename.toLowerCase().endsWith(".png") ? "png" : "jpeg");
+                        // Sustituimos el src por la imagen en Base64
+                        img.attr("src", "data:" + mimeType + ";base64," + mf.content.replaceAll("\\s+", ""));
+                        break;
+                    }
+                }
             }
         }
-        return processed;
+        return doc.body().html();
     }
 
-    /**
-     * Genera el documento HTML completo con los detalles de esta pregunta, para ser cargado en el WebView del panel de detalle.
-     * 
-     * @return cadena con el documento HTML completo.
-     */
-    public abstract String getDetails();
-
-    /**
-     * Genera la cabecera HTML común, con la configuración MathJax, estilos CSS, nombre y tipo de la pregunta y el enunciado resuelto.
-     * 
-     * @return cadena HTML desde el <html> hasta el inicio del área de respuestas.
-     */
     protected String getMoodleHeader() {
-        String safeText = processPluginFiles(text != null ? text : "");
-        
-        return "<html><head><meta charset=\"UTF-8\">" +
-               "<script>" +
-               "  MathJax = {" +
-               "    tex: {" +
-               "      inlineMath: [['$$','$$'], ['$','$'], ['\\\\(','\\\\)']]," +
-               "      displayMath: [['\\\\[','\\\\]']]" + 
-               "    }" +
-               "  };" +
-               "</script>" +
-               "<script id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js\"></script>" +
-               "<style>" +
-               "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #343a40; padding: 20px; margin: 0; background-color: #f8f9fa; }" +
-               "</style></head>" +
+        String safeText = processPluginFiles(text);
+        return "<!DOCTYPE html><html>" +
+               "<head><meta charset=\"UTF-8\"></head>" +
                "<body style=\"" + HtmlConstants.HTML_BODY + "\">" +
                "  <div style=\"" + HtmlConstants.HTML_CARD + "\">" +
                "    <div style=\"" + HtmlConstants.HEADER_FLEX + "\">" +
@@ -119,11 +109,6 @@ public abstract class Question {
                "    <div style=\"" + HtmlConstants.TEXT_BASE + "\">" + safeText + "</div>";
     }
 
-    /**
-     * Genera el pie HTML común, con la retroalimentación general y el cierre de los elementos abiertos por la cabecera.
-     * 
-     * @return cadena HTML con la retroalimentación y el cierre del documento.
-     */
     protected String getMoodleFooter() {
         StringBuilder sb = new StringBuilder();
         if (generalFeedback != null && !generalFeedback.isEmpty()) {
@@ -135,11 +120,4 @@ public abstract class Question {
         sb.append("</div></body></html>");
         return sb.toString();
     }
-
-    /**
-     * Método creado para cumplir con el patrón de diseño Visitor.
-     * 
-     * @param visitor visitante que procesará esta pregunta.
-     */
-    public abstract void accept(QuestionVisitor visitor);
 }

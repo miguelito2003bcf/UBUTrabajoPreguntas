@@ -15,8 +15,11 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -27,82 +30,195 @@ import javafx.util.Pair;
 import moodleviewer.model.Category;
 import moodleviewer.model.Question;
 import moodleviewer.model.ClozeQuestion;
+import moodleviewer.util.I18n;
+import moodleviewer.util.IconFactory;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import moodleviewer.events.AppEvents;
+import moodleviewer.events.EventBus;
+import moodleviewer.commands.CommandManager;
+import org.controlsfx.control.textfield.CustomTextField;
+
 import java.util.HashSet;
 import java.io.File;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
 /**
- * Clase creada como punto de entrada y controlador principal de la aplicación.
- * Mantiene el estado global de la sesión y coordina los gestores especializados.
+ * Clase principal de la aplicación. Gestiona la interfaz, el estado del banco de preguntas
+ * y la actualización dinámica de idioma.
  */
 public class Main extends Application {
 
     private TreeView<Category> categoryTreeView = new TreeView<>();
     private TableView<Question> questionTableView = new TableView<>();
     private WebView detailsWebView = new WebView();
-    private Button openButton = new Button("Cargar XML de Moodle");
-    private Button saveButton = new Button("Guardar Cambios XML");
-    private Button addQuestionButton = new Button("➕ Añadir Pregunta");
-    private Button exportLatexButton = new Button("Guardar Cambios LaTeX");
-    private Button addCategoryButton = new Button("➕ Categoría");
-    private CheckBox clozeToggle = new CheckBox("Ver como el alumno (Renderizado)");
-    private TextField searchCategoryField = new TextField();
-    private TextField searchQuestionField = new TextField();
-    private MenuButton typeFilterMenu = new MenuButton("Filtrar por Tipo");
+    
+    private FileManager fileManager = new FileManager();
+    
+    private Button openButton = new Button(I18n.get("main.btn.loadXml"));
+    // --- NUEVOS BOTONES GIFT ---
+    private Button openGiftButton = new Button("Abrir GIFT");
+    
+    private Button saveButton = new Button(I18n.get("main.btn.saveXml"));
+    private Button addQuestionButton = new Button(I18n.get("main.btn.addQuestion"));
+    private Button exportLatexButton = new Button(I18n.get("main.btn.saveLatex"));
+    // --- NUEVOS BOTONES GIFT ---
+    private Button exportGiftButton = new Button("Exportar GIFT");
+    
+    private Button addCategoryButton = new Button(I18n.get("main.btn.addCategory"));
+    private Button statsButton = new Button(I18n.get("main.btn.stats"));
+    
+    private Button undoButton = new Button();
+    private Button redoButton = new Button();
+    
+    private CheckBox clozeToggle = new CheckBox(I18n.get("main.toggle.cloze"));
+    
+    private CustomTextField searchCategoryField = new CustomTextField();
+    private CustomTextField searchQuestionField = new CustomTextField();
+    private ComboBox<String> searchCriteriaCombo = new ComboBox<>();
+    private MenuButton typeFilterMenu = new MenuButton(I18n.get("main.filter.type"));
+    
     private Category currentRootCategory; 
-    private Label fileNameLabel = new Label("Ningún archivo cargado");
+    private Label fileNameLabel = new Label(I18n.get("main.lbl.noFile"));
     private Set<String> activeTypeFilters = new HashSet<>(); 
+    
+    private HBox languageBox = new HBox(8);
+    private File loadedFile = null;
 
-    /**
-     * Punto de entrada de JavaFX. Inicializa los componentes y muestra la ventana principal.
-     *
-     * @param primaryStage ventana principal proporcionada por JavaFX.
-     */
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Editor Avanzado de Preguntas Moodle XML");
+        primaryStage.setTitle(I18n.get("main.window.title"));
 
         initBasicComponents(primaryStage);
-        TableManager.configure(this);
-        TreeManager.configure(this);
+        
+        // 1. GESTORES DESACOPLADOS: Solo se les pasa su componente visual respectivo
+        TableManager.configure(questionTableView);
+        TreeManager.configure(categoryTreeView);
+        
         Scene scene = LayoutManager.buildScene(this);
 
+        String css = getClass().getResource("/styles.css").toExternalForm();
+        scene.getStylesheets().add(css);
+
         primaryStage.setScene(scene);
+        primaryStage.setMaximized(true);
         primaryStage.show();
     }
 
-    /**
-     * Inicializa los componentes básicos y registra todos los listeners de interacción.
-     * 
-     * @param stage ventana principal.
-     */
     private void initBasicComponents(Stage stage) {
-        searchCategoryField.setPromptText("🔍 Buscar categoría...");
+        searchCategoryField.setPromptText(I18n.get("main.search.category"));
         searchCategoryField.textProperty().addListener((obs, oldVal, newVal) -> applyCategoryFilter(newVal));
+        searchCategoryField.setLeft(IconFactory.of(FontAwesomeSolid.SEARCH, 13, "#868e96"));
 
-        searchQuestionField.setPromptText("🔍 Buscar por nombre...");
+        searchQuestionField.setPromptText(I18n.get("main.search.question"));
         searchQuestionField.textProperty().addListener((obs, oldVal, newVal) -> refreshQuestionTable());
+        searchQuestionField.setLeft(IconFactory.of(FontAwesomeSolid.SEARCH, 13, "#868e96"));
         HBox.setHgrow(searchQuestionField, Priority.ALWAYS); 
+        
+        searchCriteriaCombo.setItems(FXCollections.observableArrayList(
+            I18n.get("main.search.byName"), 
+            I18n.get("main.search.byText")
+        ));
+        searchCriteriaCombo.getSelectionModel().selectFirst();
+        searchCriteriaCombo.valueProperty().addListener((obs, oldVal, newVal) -> refreshQuestionTable());
 
         typeFilterMenu.setDisable(true); 
-        fileNameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 14px;");
+        fileNameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;");
         
+        openButton.setOnAction(e -> handleLoadXML(stage));
+        openButton.setId("btn-primary");
+        
+        // --- CONFIGURACIÓN BOTÓN ABRIR GIFT ---
+        openGiftButton.setGraphic(IconFactory.of(FontAwesomeSolid.FILE_ALT, 14, "#495057"));
+        openGiftButton.setGraphicTextGap(8);
+        openGiftButton.setOnAction(e -> {
+            Optional<Pair<Category, File>> resultado = fileManager.openGIFT(stage);
+            if (resultado.isPresent()) {
+                Pair<Category, File> pair = resultado.get();
+                currentRootCategory = pair.getKey();
+                loadedFile = pair.getValue(); 
+                fileNameLabel.setText(I18n.get("main.lbl.currentFile", loadedFile.getName()));
+                populateTypeFilterMenu(currentRootCategory);
+                categoryTreeView.setRoot(TreeBuilder.createTreeItem(currentRootCategory));
+                categoryTreeView.setShowRoot(false); 
+                questionTableView.getItems().clear(); 
+                detailsWebView.getEngine().loadContent(""); 
+                CommandManager.getInstance().clear(); 
+                
+                saveButton.setDisable(false);
+                addQuestionButton.setDisable(false); 
+                addCategoryButton.setDisable(false); 
+                exportLatexButton.setDisable(false);
+                exportGiftButton.setDisable(false); // Activamos exportar
+                statsButton.setDisable(false); 
+            }
+        });
+
+        saveButton.setDisable(true);
+        saveButton.setOnAction(e -> {
+            Category preselected = getSelectedTreeCategory();
+            Optional<File> savedFile = fileManager.saveMoodleXML(stage, currentRootCategory, preselected, loadedFile);
+            savedFile.ifPresent(file -> {
+                loadedFile = file;
+                fileNameLabel.setText(I18n.get("main.lbl.currentFile", loadedFile.getName()));
+            });
+        });
+
         addQuestionButton.setDisable(true);
         addQuestionButton.setOnAction(e -> showAddQuestionDialog());
+        addQuestionButton.setId("btn-success");
+        addQuestionButton.setGraphic(IconFactory.of(FontAwesomeSolid.PLUS, 14, "white"));
+        addQuestionButton.setGraphicTextGap(8);
         
         exportLatexButton.setDisable(true);
-        exportLatexButton.setOnAction(e -> FileManager.exportLaTeX(stage, currentRootCategory));
+        exportLatexButton.setOnAction(e -> fileManager.exportLaTeX(stage, currentRootCategory, getSelectedTreeCategory()));
+
+        // --- CONFIGURACIÓN BOTÓN EXPORTAR GIFT ---
+        exportGiftButton.setDisable(true);
+        exportGiftButton.setGraphic(IconFactory.of(FontAwesomeSolid.FILE_EXPORT, 14, "#495057"));
+        exportGiftButton.setGraphicTextGap(8);
+        exportGiftButton.setOnAction(e -> {
+            if (currentRootCategory != null) {
+                fileManager.exportGIFT(stage, currentRootCategory, getSelectedTreeCategory());
+            }
+        });
 
         addCategoryButton.setDisable(true);
         addCategoryButton.setOnAction(e -> showAddCategoryDialog());
+        addCategoryButton.setGraphic(IconFactory.of(FontAwesomeSolid.PLUS, 14, "#495057"));
+        addCategoryButton.setGraphicTextGap(8);
 
-        openButton.setOnAction(e -> handleLoadXML(stage));
-        saveButton.setDisable(true);
-        saveButton.setOnAction(e -> FileManager.saveXML(stage, currentRootCategory));
+        statsButton.setDisable(true);
+        statsButton.setGraphic(IconFactory.of(FontAwesomeSolid.CHART_BAR, 14, "#495057"));
+        statsButton.setGraphicTextGap(8);
+        statsButton.setOnAction(e -> {
+            if (currentRootCategory != null) {
+                DashboardDialog dashboard = new DashboardDialog(currentRootCategory);
+                dashboard.showAndWait();
+            }
+        });
+
+        // --- BOTONES DESHACER / REHACER ---
+        undoButton.setGraphic(IconFactory.of(FontAwesomeSolid.UNDO, 16, "#495057"));
+        undoButton.setTooltip(new Tooltip(I18n.get("main.btn.undo.tooltip")));
+        undoButton.setStyle("-fx-padding: 0 10 0 10;");
+        undoButton.setDisable(true);
+        undoButton.setOnAction(e -> CommandManager.getInstance().undo());
+
+        redoButton.setGraphic(IconFactory.of(FontAwesomeSolid.REDO, 16, "#495057"));
+        redoButton.setTooltip(new Tooltip(I18n.get("main.btn.redo.tooltip")));
+        redoButton.setStyle("-fx-padding: 0 10 0 10;");
+        redoButton.setDisable(true);
+        redoButton.setOnAction(e -> CommandManager.getInstance().redo());
+
+        EventBus.getInstance().subscribe(AppEvents.UndoRedoStateChangedEvent.class, event -> {
+            undoButton.setDisable(!event.canUndo());
+            redoButton.setDisable(!event.canRedo());
+        });
 
         clozeToggle.setVisible(false);
-        clozeToggle.setStyle("-fx-text-fill: #1177d1; -fx-font-weight: bold; -fx-padding: 5 0 5 10;");
+        clozeToggle.setStyle("-fx-background-color: rgba(255, 255, 255, 0.95); -fx-text-fill: #1177d1; -fx-font-weight: bold; -fx-padding: 6 10 6 10; -fx-border-color: #dee2e6; -fx-border-radius: 4; -fx-background-radius: 4; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 3, 0, 0, 1);");
         clozeToggle.selectedProperty().addListener((obs, old, isSelected) -> {
             ClozeQuestion.MODO_PREVIA_ALUMNO = isSelected;
             Question current = questionTableView.getSelectionModel().getSelectedItem();
@@ -111,10 +227,22 @@ public class Main extends Application {
             }
         });
 
-        categoryTreeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+        // 2. BUS DE EVENTOS
+        EventBus.getInstance().subscribe(AppEvents.CategorySelectedEvent.class, event -> {
             refreshQuestionTable();
             detailsWebView.getEngine().loadContent("");
             clozeToggle.setVisible(false);
+        });
+
+        EventBus.getInstance().subscribe(AppEvents.CategoryUpdatedEvent.class, event -> {
+            applyCategoryFilter(searchCategoryField.getText());
+            refreshQuestionTable(); 
+        });
+
+        EventBus.getInstance().subscribe(AppEvents.QuestionDeletedEvent.class, event -> {
+            refreshQuestionTable(); 
+            categoryTreeView.refresh(); 
+            populateTypeFilterMenu(currentRootCategory); 
         });
 
         questionTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -126,75 +254,134 @@ public class Main extends Application {
                 detailsWebView.getEngine().loadContent("");
             }
         });
+
+        double flagWidth = 21;
+        double flagHeight = 14;
+
+        javafx.scene.Node nodeEs;
+        try {
+            ImageView imgEs = new ImageView(new Image(getClass().getResourceAsStream("/es.png")));
+            imgEs.setFitWidth(flagWidth);
+            imgEs.setFitHeight(flagHeight);
+            imgEs.setPreserveRatio(false);
+            imgEs.setStyle("-fx-cursor: hand;");
+            nodeEs = imgEs;
+        } catch (Exception ex) {
+            Label lblEs = new Label("🇪🇸");
+            lblEs.setStyle("-fx-cursor: hand; -fx-font-size: 14px;");
+            nodeEs = lblEs;
+        }
+        nodeEs.setOnMouseClicked(e -> { I18n.setLocale(Locale.of("es", "ES")); updateLanguage(stage); });
+
+        javafx.scene.Node nodeEn;
+        try {
+            ImageView imgEn = new ImageView(new Image(getClass().getResourceAsStream("/uk.png")));
+            imgEn.setFitWidth(flagWidth);
+            imgEn.setFitHeight(flagHeight);
+            imgEn.setPreserveRatio(false);
+            imgEn.setStyle("-fx-cursor: hand;");
+            nodeEn = imgEn;
+        } catch (Exception ex) {
+            Label lblEn = new Label("🇬🇧");
+            lblEn.setStyle("-fx-cursor: hand; -fx-font-size: 14px;");
+            nodeEn = lblEn;
+        }
+        nodeEn.setOnMouseClicked(e -> { I18n.setLocale(Locale.of("en", "GB")); updateLanguage(stage); });
+
+        languageBox.getChildren().addAll(nodeEs, nodeEn);
+        languageBox.setAlignment(Pos.CENTER);
     }
 
-    /**
-     * Carga un XML de Moodle y actualiza toda la interfaz con los datos leídos.
-     * 
-     * @param stage ventana padre para el diálogo de apertura de fichero.
-     */
+    private void updateLanguage(Stage stage) {
+        stage.setTitle(I18n.get("main.window.title"));
+        openButton.setText(I18n.get("main.btn.loadXml"));
+        saveButton.setText(I18n.get("main.btn.saveXml"));
+        addQuestionButton.setText(I18n.get("main.btn.addQuestion"));
+        exportLatexButton.setText(I18n.get("main.btn.saveLatex"));
+        addCategoryButton.setText(I18n.get("main.btn.addCategory"));
+        statsButton.setText(I18n.get("main.btn.stats")); 
+        undoButton.getTooltip().setText(I18n.get("main.btn.undo.tooltip"));
+        redoButton.getTooltip().setText(I18n.get("main.btn.redo.tooltip"));
+        clozeToggle.setText(I18n.get("main.toggle.cloze"));
+        searchCategoryField.setPromptText(I18n.get("main.search.category"));
+        searchQuestionField.setPromptText(I18n.get("main.search.question"));
+        
+        // Aunque no estén en el I18n todavía, forzamos su actualización aquí por si acaso
+        openGiftButton.setText("Abrir GIFT");
+        exportGiftButton.setText("Exportar GIFT");
+        
+        int selectedIndex = searchCriteriaCombo.getSelectionModel().getSelectedIndex();
+        searchCriteriaCombo.setItems(FXCollections.observableArrayList(
+            I18n.get("main.search.byName"), 
+            I18n.get("main.search.byText")
+        ));
+        searchCriteriaCombo.getSelectionModel().select(Math.max(0, selectedIndex));
+        
+        if (loadedFile == null) fileNameLabel.setText(I18n.get("main.lbl.noFile"));
+        else fileNameLabel.setText(I18n.get("main.lbl.currentFile", loadedFile.getName()));
+        
+        updateFilterButtonStyle();
+        
+        if (!questionTableView.getColumns().isEmpty()) {
+            questionTableView.getColumns().get(0).setText(I18n.get("table.col.name"));
+            questionTableView.getColumns().get(1).setText(I18n.get("table.col.type"));
+        }
+        categoryTreeView.refresh();
+        questionTableView.refresh();
+    }
+
+    private Category getSelectedTreeCategory() {
+        TreeItem<Category> selectedItem = categoryTreeView.getSelectionModel().getSelectedItem();
+        if (selectedItem == null) return null;
+        Category category = selectedItem.getValue();
+        return (category == currentRootCategory) ? null : category;
+    }
+
     private void handleLoadXML(Stage stage) {
-        Optional<Pair<Category, File>> resultado = FileManager.openXML(stage);
-
+        Optional<Pair<Category, File>> resultado = fileManager.openMoodleXML(stage);
         if (resultado.isPresent()) {
-        	
             Pair<Category, File> pair = resultado.get();
-            
             currentRootCategory = pair.getKey();
-            File loadedFile = pair.getValue(); 
-            
-            fileNameLabel.setText("Archivo actual: " + loadedFile.getName());
-
-            searchCategoryField.setText("");
-            searchQuestionField.setText("");
+            loadedFile = pair.getValue(); 
+            fileNameLabel.setText(I18n.get("main.lbl.currentFile", loadedFile.getName()));
             populateTypeFilterMenu(currentRootCategory);
-            
             categoryTreeView.setRoot(TreeBuilder.createTreeItem(currentRootCategory));
             categoryTreeView.setShowRoot(false); 
-            
             questionTableView.getItems().clear(); 
             detailsWebView.getEngine().loadContent(""); 
+            CommandManager.getInstance().clear(); 
             
             saveButton.setDisable(false);
             addQuestionButton.setDisable(false); 
             addCategoryButton.setDisable(false); 
             exportLatexButton.setDisable(false);
+            exportGiftButton.setDisable(false); // Activamos la exportación GIFT también
+            statsButton.setDisable(false); 
         }
     }
 
-    /**
-     * Muestra el diálogo para crear una nueva categoría en el banco. Permite elegir entre crearla como raíz
-     * o como subcategoría de la selección dada.
-     */
     private void showAddCategoryDialog() {
         if (currentRootCategory == null) return;
         TreeItem<Category> selectedItem = categoryTreeView.getSelectionModel().getSelectedItem();
         Category parentCategory = (selectedItem != null) ? selectedItem.getValue() : currentRootCategory;
-
         Dialog<String> dialog = new Dialog<>();
-        dialog.setTitle("Añadir Nueva Categoría");
-        dialog.setHeaderText("Crear una nueva categoría en el banco");
-
-        ButtonType btnAceptar = new ButtonType("Aceptar", ButtonBar.ButtonData.OK_DONE);
+        dialog.setTitle(I18n.get("main.dlg.cat.title"));
+        dialog.setHeaderText(I18n.get("main.dlg.cat.header"));
+        ButtonType btnAceptar = new ButtonType(I18n.get("main.dlg.btnAccept"), ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(btnAceptar, ButtonType.CANCEL);
-
         GridPane grid = new GridPane();
         grid.setHgap(10); grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
-
         TextField nameField = new TextField();
         ToggleGroup group = new ToggleGroup();
-        RadioButton rbRoot = new RadioButton("Como Raíz");
-        RadioButton rbSub = new RadioButton("Como subcategoría de: " + (selectedItem != null ? parentCategory.getName() : ""));
+        RadioButton rbRoot = new RadioButton(I18n.get("main.dlg.cat.root"));
+        RadioButton rbSub = new RadioButton(I18n.get("main.dlg.cat.sub", (selectedItem != null ? parentCategory.getName() : "")));
         rbRoot.setToggleGroup(group); rbSub.setToggleGroup(group);
-
         if (selectedItem != null) rbSub.setSelected(true); else { rbRoot.setSelected(true); rbSub.setDisable(true); }
-
-        grid.add(new Label("Ubicación:"), 0, 0);
+        grid.add(new Label(I18n.get("main.dlg.cat.location")), 0, 0);
         grid.add(new VBox(5, rbRoot, rbSub), 1, 0);
-        grid.add(new Label("Nombre:"), 0, 1);
+        grid.add(new Label(I18n.get("main.dlg.cat.name")), 0, 1);
         grid.add(nameField, 1, 1);
-
         dialog.getDialogPane().setContent(grid);
         dialog.setResultConverter(db -> {
             if (db == btnAceptar && !nameField.getText().trim().isEmpty()) {
@@ -208,57 +395,81 @@ public class Main extends Application {
         dialog.showAndWait();
     }
 
-    /**
-     * Muestra el diálogo para añadir una pregunta para la categoría seleccionada. Tras añadir la pregunta, actualiza
-     * el menú de tipos y refresca la tabla.
-     */
     private void showAddQuestionDialog() {
         TreeItem<Category> selectedCategoryItem = categoryTreeView.getSelectionModel().getSelectedItem();
         if (selectedCategoryItem == null) {
-            new Alert(Alert.AlertType.WARNING, "Por favor, selecciona una categoría.").showAndWait();
+            new Alert(Alert.AlertType.WARNING, I18n.get("main.alert.selectCat")).showAndWait();
             return;
         }
         Category targetCategory = selectedCategoryItem.getValue();
         AddQuestionDialog dialog = new AddQuestionDialog(targetCategory);
-        Optional<Question> result = dialog.showAndWait();
-        result.ifPresent(newQuestion -> {
-            targetCategory.addQuestion(newQuestion);
-            if (!typeContainsFilter(newQuestion.getType())) populateTypeFilterMenu(currentRootCategory);
-            refreshQuestionTable();
-            categoryTreeView.refresh(); 
-        });
+        
+        dialog.showAndWait();
+        
+        populateTypeFilterMenu(currentRootCategory);
+        refreshQuestionTable();
+        categoryTreeView.refresh(); 
     }
 
-    /**
-     * Aplica un filtro de texto al árbol de categorías. Si el texto está vacío, muestra el árbol completo
-     * sin filtrar.
-     * 
-     * @param searchText texto de búsqueda.
-     */
     public void applyCategoryFilter(String searchText) {
         if (currentRootCategory == null) return;
+
+        TreeItem<Category> previouslySelected = categoryTreeView.getSelectionModel().getSelectedItem();
+        Category categoryToReselect = (previouslySelected != null) ? previouslySelected.getValue() : null;
+
+        TreeItem<Category> newRoot;
         if (searchText == null || searchText.trim().isEmpty()) {
-            categoryTreeView.setRoot(TreeBuilder.createTreeItem(currentRootCategory));
-            return;
+            newRoot = TreeBuilder.createTreeItem(currentRootCategory);
+        } else {
+            newRoot = TreeBuilder.createFilteredTreeItem(currentRootCategory, searchText.toLowerCase());
         }
-        TreeItem<Category> filteredRoot = TreeBuilder.createFilteredTreeItem(currentRootCategory, searchText.toLowerCase());
-        categoryTreeView.setRoot(filteredRoot);
+        categoryTreeView.setRoot(newRoot);
+
+        if (categoryToReselect != null && newRoot != null) {
+            TreeItem<Category> match = findTreeItemByCategory(newRoot, categoryToReselect);
+            if (match != null) {
+                categoryTreeView.getSelectionModel().select(match);
+            }
+        }
     }
 
-    /**
-     * Actualiza la tabla de preguntas aplicando el filtro de texto y de tipo activos. Si no hay categoría seleccionada la tabla se vacía.
-     */
+    private TreeItem<Category> findTreeItemByCategory(TreeItem<Category> node, Category target) {
+        if (node == null) return null;
+        if (node.getValue() == target) return node;
+        for (TreeItem<Category> child : node.getChildren()) {
+            TreeItem<Category> found = findTreeItemByCategory(child, target);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
     public void refreshQuestionTable() {
         TreeItem<Category> selectedNode = categoryTreeView.getSelectionModel().getSelectedItem();
         if (selectedNode != null && selectedNode.getValue() != null) {
             Category selectedCat = selectedNode.getValue();
             ObservableList<Question> obsList = FXCollections.observableArrayList(selectedCat.getQuestions());
+            
             FilteredList<Question> filteredData = new FilteredList<>(obsList, q -> {
                 String searchTxt = searchQuestionField.getText();
-                boolean matchesText = searchTxt == null || searchTxt.isEmpty() || q.getName().toLowerCase().contains(searchTxt.toLowerCase());
                 boolean matchesType = activeTypeFilters.isEmpty() || activeTypeFilters.contains(q.getType());
+
+                if (searchTxt == null || searchTxt.trim().isEmpty()) {
+                    return matchesType;
+                }
+
+                String lowerSearch = searchTxt.toLowerCase();
+                boolean matchesText = false;
+                
+                int searchIndex = searchCriteriaCombo.getSelectionModel().getSelectedIndex();
+                if (searchIndex == 0) {
+                    matchesText = q.getName().toLowerCase().contains(lowerSearch);
+                } else if (searchIndex == 1) {
+                    matchesText = q.getText() != null && q.getText().toLowerCase().contains(lowerSearch);
+                }
+                
                 return matchesText && matchesType;
             });
+            
             SortedList<Question> sortedData = new SortedList<>(filteredData);
             sortedData.comparatorProperty().bind(questionTableView.comparatorProperty());
             questionTableView.setItems(sortedData);
@@ -267,29 +478,16 @@ public class Main extends Application {
         }
     }
 
-    /**
-     * Rellena el menú de filtrado por tipo con todos los tipos presentes en el banco.
-     * Limpia los filtros activos al regenerar el menú para evitar estados inconsistentes.
-     * 
-     * @param rootCategory categoría raíz desde la que se recolectan los tipos.
-     */
     private void populateTypeFilterMenu(Category rootCategory) {
         typeFilterMenu.getItems().clear();
         activeTypeFilters.clear(); 
         updateFilterButtonStyle();
-
         Set<String> uniqueTypes = new HashSet<>();
         collectTypesRecursively(rootCategory, uniqueTypes);
-        
         for (String type : uniqueTypes) {
-            CheckMenuItem menuItem = new CheckMenuItem(type);
+            CheckMenuItem menuItem = new CheckMenuItem(type.toUpperCase());
             menuItem.selectedProperty().addListener((obs, was, is) -> {
-                if (is) {
-                    activeTypeFilters.add(type); 
-                } else {
-                    activeTypeFilters.remove(type);
-                }
-                
+                if (is) activeTypeFilters.add(type); else activeTypeFilters.remove(type);
                 updateFilterButtonStyle();
                 refreshQuestionTable(); 
             });
@@ -298,59 +496,44 @@ public class Main extends Application {
         typeFilterMenu.setDisable(false); 
     }
 
-    /**
-     * Recorre recursivamente el árbol acumulando todos los tipos de pregunta distintos.
-     * 
-     * @param cat categoría a explorar.
-     * @param typesSet conjunto acumulador de tipos.
-     */
     private void collectTypesRecursively(Category cat, Set<String> typesSet) {
         for (Question q : cat.getQuestions()) typesSet.add(q.getType());
         for (Category sub : cat.getSubcategories()) collectTypesRecursively(sub, typesSet);
     }
-
-    /**
-     * Comprueba si el menú de filtrado ya contiene un elemento para el tipo indicado.
-     *
-     * @param type tipo de pregunta a buscar.
-     * @return true si ya existe un MenuItem con ese texto.
-     */
-    private boolean typeContainsFilter(String type) {
-        for(MenuItem item : typeFilterMenu.getItems()) if (item.getText().equals(type)) return true;
-        return false;
-    }
     
-    /**
-     * Actualiza el estilo visual del botón de filtrado para indicar si hay filtros activos.
-     */
     private void updateFilterButtonStyle() {
         if (activeTypeFilters.isEmpty()) {
             typeFilterMenu.setStyle(""); 
-            typeFilterMenu.setText("Filtrar por Tipo");
+            typeFilterMenu.setText(I18n.get("main.filter.type"));
         } else {
-        	typeFilterMenu.setStyle("-fx-background-color: #dc3545; -fx-border-color: #c82333; -fx-text-fill: white; -fx-font-weight: bold;");
-            typeFilterMenu.setText("Filtrar por Tipo (" + activeTypeFilters.size() + ")");
+            typeFilterMenu.setStyle("-fx-background-color: #dc3545; -fx-border-color: #c82333; -fx-text-fill: white; -fx-font-weight: bold;");
+            typeFilterMenu.setText(I18n.get("main.filter.typeActive", String.valueOf(activeTypeFilters.size())));
         }
     }
     
+    // Getters
     public TreeView<Category> getCategoryTreeView() { return categoryTreeView; }
     public TableView<Question> getQuestionTableView() { return questionTableView; }
     public WebView getDetailsWebView() { return detailsWebView; }
     public TextField getSearchCategoryField() { return searchCategoryField; }
     public TextField getSearchQuestionField() { return searchQuestionField; }
+    public ComboBox<String> getSearchCriteriaCombo() { return searchCriteriaCombo; }
     public MenuButton getTypeFilterMenu() { return typeFilterMenu; }
     public Button getAddQuestionButton() { return addQuestionButton; }
     public Button getAddCategoryButton() { return addCategoryButton; } 
     public Button getOpenButton() { return openButton; }
     public Button getSaveButton() { return saveButton; }
     public Button getExportLatexButton() { return exportLatexButton; }
+    public Button getStatsButton() { return statsButton; }
+    public Button getUndoButton() { return undoButton; }
+    public Button getRedoButton() { return redoButton; }
     public CheckBox getClozeToggle() { return clozeToggle; }
     public Label getFileNameLabel() { return fileNameLabel; }
+    public HBox getLanguageBox() { return languageBox; }
+    
+    // --- NUEVOS GETTERS PARA LAYOUT MANAGER ---
+    public Button getOpenGiftButton() { return openGiftButton; }
+    public Button getExportGiftButton() { return exportGiftButton; }
 
-    /**
-     * Método principal que lanza la aplicación JavaFX.
-     * 
-     * @param args argumentos de línea de comandos. (no utilizados)
-     */
     public static void main(String[] args) { launch(args); }
 }

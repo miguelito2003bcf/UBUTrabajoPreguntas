@@ -10,11 +10,12 @@
 package moodleviewer.model;
 
 import moodleviewer.util.HtmlConstants;
+import org.jsoup.Jsoup;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Clase extendida de Question que representa una pregunta opcióm múltiple de Moodle.
+ * Clase extendida de Question que representa una pregunta de opción múltiple de Moodle.
  */
 public class MultichoiceQuestion extends Question {
 	
@@ -22,18 +23,6 @@ public class MultichoiceQuestion extends Question {
     private boolean shuffleAnswers;
     private List<Answer> answers;
 
-    /**
-     * Construye una pregunta de opción múltiple con todos sus atributos.
-     * 
-     * @param type tipo de Moodle.
-     * @param name nombre de la pregunta.
-     * @param text enunciado en HTML.
-     * @param grade calificación por defecto.
-     * @param penalty fracción de penalización.
-     * @param single true si solo admite una respuesta correcta.
-     * @param shuffle true si las opciones deben barajarse.
-     * @param answers lista de opciones de respuesta.
-     */
     public MultichoiceQuestion(String type, String name, String text, String grade, String penalty, boolean single, boolean shuffle, List<Answer> answers) {
         super(type, name, text, grade, penalty);
         this.singleAnswer = single;
@@ -45,42 +34,34 @@ public class MultichoiceQuestion extends Question {
     public boolean isShuffleAnswers() { return shuffleAnswers; }
     public List<Answer> getAnswers() { return answers; }
 
-    /**
-     * Genera un desplegable con todas las opciones y sus porcentajes de calificación. Las opciones con fracción
-     * positiva se consideran correctas y se listan también en un bloque de respuestas correctas al pie del panel.
-     */
     @Override
     public String getDetails() {
         StringBuilder sb = new StringBuilder(getMoodleHeader());
         
-        sb.append("<div style=\"").append(HtmlConstants.LABEL_BOLD).append("\">Seleccione una").append(isSingleAnswer() ? ":" : " o más de una:").append("</div>");
+        sb.append("<div style=\"").append(HtmlConstants.LABEL_BOLD).append("\">Opciones:</div>");
+        sb.append("<div style=\"").append(HtmlConstants.FLEX_ROW).append("\">")
+          .append("<select disabled style=\"").append(HtmlConstants.INPUT_BASE).append(" width: 100%;\">");
         
         List<String> correctAnswers = new ArrayList<>();
-        sb.append("<div style=\"margin-left: 5px;\">");
-        sb.append("<select style=\"").append(HtmlConstants.INPUT_BASE).append(" width: 100%; max-width: 600px; font-size: 15px; color: #495057; cursor: pointer;\">");
-        sb.append("<option value=\"\" disabled selected>Haz clic para ver las opciones y puntuaciones...</option>");
         
         for (Answer a : answers) {
-            double fractionVal = 0.0;
+            double fractionVal = 0;
             try {
-                if (a.getFraction() != null && !a.getFraction().isEmpty()) {
-                    fractionVal = Double.parseDouble(a.getFraction());
+                fractionVal = Double.parseDouble(a.getFraction());
+                if (fractionVal > 0) {
+                    correctAnswers.add(processPluginFiles(a.getText()) + " (" + fractionVal + "%)");
                 }
-            } catch (NumberFormatException e) {
-            }
-            
-            if (fractionVal > 0) {
-                correctAnswers.add(processPluginFiles(a.getText()));
-            }
+            } catch (NumberFormatException ignored) {}
             
             String formattedFraction;
             if (fractionVal == Math.floor(fractionVal)) {
                 formattedFraction = String.format("%.0f%%", fractionVal);
             } else {
-                formattedFraction = String.format("%.1f%%", fractionVal).replace(",", ".");
+                formattedFraction = String.format(java.util.Locale.US, "%.1f%%", fractionVal);
             }
             
-            String plainText = a.getText() != null ? a.getText().replaceAll("<[^>]+>", "").trim() : "";
+            // EXTRACCIÓN SEGURA DE TEXTO PLANO CON JSOUP
+            String plainText = a.getText() != null ? Jsoup.parse(a.getText()).text().trim() : "";
             if (plainText.isEmpty()) {
                 plainText = "[Imagen o contenido multimedia]";
             }
@@ -102,11 +83,6 @@ public class MultichoiceQuestion extends Question {
         return sb.toString();
     }
     
-    /**
-     * Método creado para cumplir con el patrón de diseño Visitor.
-     * 
-     * @param visitor visitante que procesará esta pregunta.
-     */
     @Override
     public void accept(QuestionVisitor visitor) {
         visitor.visit(this);

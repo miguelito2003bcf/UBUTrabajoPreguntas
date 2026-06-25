@@ -18,34 +18,31 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
 import moodleviewer.model.Category;
-import moodleviewer.model.Question;
-import java.util.ArrayList;
-import java.util.List;
+import moodleviewer.util.I18n; 
+import moodleviewer.util.DragAndDropConstants; 
+import moodleviewer.events.AppEvents;
+import moodleviewer.events.EventBus;
+import moodleviewer.commands.Command;
+import moodleviewer.commands.CommandManager;
+import moodleviewer.commands.MoveCategoryCommand;
+import moodleviewer.util.IconFactory;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import java.util.Optional;
 
-/**
- * Clase creada para configurar el comportamiento del árbol de categorías.
- */
 public class TreeManager {
 
     private static TreeItem<Category> draggedCategoryNode = null;
 
-    /**
-     * Aplica la configuración completa al árbol de categorías de la aplicación.
-     * 
-     * @param main instancia de main que proporciona el árbol, la tabla y los métodos de refresco.
-     */
-    public static void configure(Main main) {
-        TreeView<Category> tree = main.getCategoryTreeView();
-        tree.setCellFactory(tv -> new CategoryTreeCell(main));
+    public static void configure(TreeView<Category> tree) {
+        tree.setCellFactory(tv -> new CategoryTreeCell());
+
+        tree.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && newVal.getValue() != null) {
+                EventBus.getInstance().publish(new AppEvents.CategorySelectedEvent(newVal.getValue()));
+            }
+        });
     }
     
-    /**
-     * Expande o contrae recursivamente un TreeItem y todos sus descendientes.
-     * 
-     * @param item el nodo a expandir/contraer.
-     * @param expand true para expandir o false para contraer.
-     */
     private static void expandAll(TreeItem<?> item, boolean expand) {
         if (item != null && !item.isLeaf()) {
             item.setExpanded(expand);
@@ -55,13 +52,6 @@ public class TreeManager {
         }
     }
     
-    /**
-     * Cuenta de forma recursiva el número total de preguntas que hay en una categoría y en todas
-     * sus subcategorías descendientes.
-     * 
-     * @param category categoría base desde la que empezar a contar.
-     * @return número total de preguntas en la rama.
-     */
     private static int countTotalQuestions(Category category) {
         if (category == null) return 0;
         
@@ -72,14 +62,6 @@ public class TreeManager {
         return count;
     }
 
-    /**
-     * Comprueba si un destino es válido para el drop de una categoría arrastrada. Un destino es inválido
-     * si coincide con el origen, es su padre actual o es un descendiente de él.
-     * 
-     * @param source nodo que se está arrastrando.
-     * @param target nodo sobre el que se pretende soltar.
-     * @return true si el drop es válido, o false en caso contrario.
-     */
     private static boolean isValidDropTarget(TreeItem<Category> source, TreeItem<Category> target) {
         if (source == null || target == null || source == target) return false;
         if (source.getParent() == target) return false;
@@ -92,36 +74,13 @@ public class TreeManager {
         return true; 
     }
     
-    /**
-     * Clase interna que define cómo se visualiza y cómo se comporta cada celda del árbol.
-     */
     private static class CategoryTreeCell extends TreeCell<Category> {
-    	
-        private Main main;
-        private TreeView<Category> tree;
-        private TableView<Question> table;
 
-        /**
-         * Construye una nueva celda para el árbol de categorías.
-         * 
-         * @param main instancia para acceder a los componentes globales.
-         */
-        public CategoryTreeCell(Main main) {
-            this.main = main;
-            this.tree = main.getCategoryTreeView();
-            this.table = main.getQuestionTableView();
-            
+        public CategoryTreeCell() {
             configurarEventos();
             configurarMenuContextual();
         }
 
-        /**
-         * Actualiza el contenido visual de la celda cada vez que JavaFX la redibuja.
-         * Muestra el nombre de la categoría junto con el conteo de preguntas.
-         * 
-         * @param item la categoría asociada a esta celda.
-         * @param empty indica si la celda está vacía.
-         */
         @Override
         protected void updateItem(Category item, boolean empty) {
             super.updateItem(item, empty);
@@ -134,18 +93,13 @@ public class TreeManager {
             }
         }
 
-        /**
-         * Configura los manejadores de eventos interactivos para la celda. Esto incluye el inicio y
-         * recepción de operaciones Drag & Drop para mover preguntas y categorías, junto con el atajo para
-         * contraer o expandir la rama completa.
-         */
         private void configurarEventos() {
             this.setOnDragDetected(event -> {
                 if (!this.isEmpty() && this.getTreeItem().getParent() != null) {
                     draggedCategoryNode = this.getTreeItem();
                     Dragboard db = this.startDragAndDrop(TransferMode.MOVE);
                     ClipboardContent content = new ClipboardContent();
-                    content.putString("MOVER_CATEGORIA");
+                    content.putString(DragAndDropConstants.MOVE_CATEGORY);
                     db.setContent(content);
                     
                     SnapshotParameters params = new SnapshotParameters();
@@ -160,9 +114,9 @@ public class TreeManager {
                     String dragType = event.getDragboard().getString();
                     TreeItem<Category> targetItem = this.getTreeItem();
 
-                    if ("MOVER_PREGUNTAS".equals(dragType)) {
+                    if (DragAndDropConstants.MOVE_QUESTIONS.equals(dragType)) {
                         event.acceptTransferModes(TransferMode.MOVE);
-                    } else if ("MOVER_CATEGORIA".equals(dragType) && isValidDropTarget(draggedCategoryNode, targetItem)) {
+                    } else if (DragAndDropConstants.MOVE_CATEGORY.equals(dragType) && isValidDropTarget(draggedCategoryNode, targetItem)) {
                         event.acceptTransferModes(TransferMode.MOVE);
                     }
                 }
@@ -175,31 +129,23 @@ public class TreeManager {
                     String dragType = event.getDragboard().getString();
                     Category destCategory = this.getItem();
 
-                    if ("MOVER_PREGUNTAS".equals(dragType)) {
-                        List<Question> draggedQuestions = new ArrayList<>(table.getSelectionModel().getSelectedItems());
-                        TreeItem<Category> sourceCategoryItem = tree.getSelectionModel().getSelectedItem();
+                    if (DragAndDropConstants.MOVE_QUESTIONS.equals(dragType)) {
+                        EventBus.getInstance().publish(new AppEvents.MoveQuestionsEvent(destCategory));
+                        success = true;
                         
-                        if (sourceCategoryItem != null && sourceCategoryItem.getValue() != destCategory) {
-                            sourceCategoryItem.getValue().getQuestions().removeAll(draggedQuestions);
-                            destCategory.getQuestions().addAll(draggedQuestions);
-                            
-                            main.refreshQuestionTable();
-                            tree.refresh();
-                            success = true;
-                        }
-                    } else if ("MOVER_CATEGORIA".equals(dragType) && draggedCategoryNode != null) {
+                    } else if (DragAndDropConstants.MOVE_CATEGORY.equals(dragType) && draggedCategoryNode != null) {
                         Category sourceCategory = draggedCategoryNode.getValue();
                         TreeItem<Category> sourceParentItem = draggedCategoryNode.getParent();
                         Category sourceParentCategory = sourceParentItem.getValue();
 
                         Platform.runLater(() -> {
                             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                            alert.setTitle("Mover Categoría");
-                            alert.setHeaderText("Mover '" + sourceCategory.getName() + "' a '" + destCategory.getName() + "'");
+                            alert.setTitle(I18n.get("tree.dlg.move.title"));
+                            alert.setHeaderText(I18n.get("tree.dlg.move.header", sourceCategory.getName(), destCategory.getName()));
                             
-                            ButtonType btnSub = new ButtonType("Como subcategoría");
-                            ButtonType btnCombine = new ButtonType("Fusionar preguntas");
-                            ButtonType btnCancel = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+                            ButtonType btnSub = new ButtonType(I18n.get("tree.dlg.move.btn.sub"));
+                            ButtonType btnCombine = new ButtonType(I18n.get("tree.dlg.move.btn.combine"));
+                            ButtonType btnCancel = new ButtonType(I18n.get("tree.dlg.move.btn.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
                             
                             alert.getButtonTypes().setAll(btnSub, btnCombine, btnCancel);
                             
@@ -207,13 +153,14 @@ public class TreeManager {
                             
                             if (result.isPresent() && result.get() != btnCancel) {
                                 if (result.get() == btnSub) {
-                                    sourceParentCategory.getSubcategories().remove(sourceCategory);
-                                    destCategory.getSubcategories().add(sourceCategory);
+                                    // PATRÓN COMMAND: Encapsulamos el movimiento de categoría
+                                    Command moveCmd = new MoveCategoryCommand(sourceCategory, sourceParentCategory, destCategory);
+                                    CommandManager.getInstance().executeCommand(moveCmd);
                                 } else if (result.get() == btnCombine) {
                                     destCategory.getQuestions().addAll(sourceCategory.getQuestions());
                                     sourceParentCategory.getSubcategories().remove(sourceCategory);
+                                    EventBus.getInstance().publish(new AppEvents.CategoryUpdatedEvent());
                                 }
-                                main.applyCategoryFilter(main.getSearchCategoryField().getText());
                             }
                         });
                         success = true;
@@ -236,46 +183,45 @@ public class TreeManager {
             });
         }
 
-        /**
-         * Configura y asocia un menú contextual a la celda. Proporciona las opciones de añadir una subcategoría,
-         * renombrar la categoría actual o eliminarla, gestionando la reubicación de sus preguntas si fuese necesario.
-         */
         private void configurarMenuContextual() {
             ContextMenu categoryMenu = new ContextMenu();
             
-            MenuItem addCatItem = new MenuItem("➕ Añadir Subcategoría");
+            MenuItem addCatItem = new MenuItem(I18n.get("tree.ctx.addSub"));
+            addCatItem.setGraphic(IconFactory.of(FontAwesomeSolid.PLUS, 13, "#495057"));
             addCatItem.setOnAction(e -> {
                 TextInputDialog dialog = new TextInputDialog();
-                dialog.setTitle("Nueva Categoría");
-                dialog.setHeaderText("Crear dentro de: " + this.getItem().getName());
-                dialog.setContentText("Nombre:");
+                dialog.setTitle(I18n.get("tree.dlg.add.title"));
+                dialog.setHeaderText(I18n.get("tree.dlg.add.header", this.getItem().getName()));
+                dialog.setContentText(I18n.get("tree.dlg.add.content"));
                 dialog.showAndWait().ifPresent(name -> {
                     this.getItem().addSubcategory(new Category(name));
-                    main.applyCategoryFilter(main.getSearchCategoryField().getText());
+                    EventBus.getInstance().publish(new AppEvents.CategoryUpdatedEvent());
                 });
             });
 
-            MenuItem editCatItem = new MenuItem("Renombrar");
+            MenuItem editCatItem = new MenuItem(I18n.get("tree.ctx.rename"));
+            editCatItem.setGraphic(IconFactory.of(FontAwesomeSolid.EDIT, 13, "#495057"));
             editCatItem.setOnAction(e -> {
                 TextInputDialog dialog = new TextInputDialog(this.getItem().getName());
-                dialog.setTitle("Renombrar");
-                dialog.setHeaderText("Nuevo nombre:");
+                dialog.setTitle(I18n.get("tree.ctx.rename"));
+                dialog.setHeaderText(I18n.get("tree.dlg.rename.header"));
                 dialog.showAndWait().ifPresent(newName -> {
                     this.getItem().setName(newName);
-                    tree.refresh();
+                    EventBus.getInstance().publish(new AppEvents.CategoryUpdatedEvent());
                 });
             });
 
-            MenuItem deleteCatItem = new MenuItem("Eliminar Categoría");
+            MenuItem deleteCatItem = new MenuItem(I18n.get("tree.ctx.delete"));
+            deleteCatItem.setGraphic(IconFactory.of(FontAwesomeSolid.TRASH_ALT, 13, "#c0392b"));
             deleteCatItem.setOnAction(event -> {
                 TreeItem<Category> treeItemToDelete = this.getTreeItem();
                 TreeItem<Category> parentItem = treeItemToDelete.getParent();
 
                 if (parentItem != null && parentItem.getParent() != null) {
                     Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-                    confirm.setTitle("Confirmar Eliminación");
-                    confirm.setHeaderText("¿Estás seguro de que deseas eliminar la categoría '" + treeItemToDelete.getValue().getName() + "'?");
-                    confirm.setContentText("Sus preguntas y subcategorías se moverán a la categoría padre ('" + parentItem.getValue().getName() + "').");
+                    confirm.setTitle(I18n.get("tree.dlg.del.title"));
+                    confirm.setHeaderText(I18n.get("tree.dlg.del.header", treeItemToDelete.getValue().getName()));
+                    confirm.setContentText(I18n.get("tree.dlg.del.content", parentItem.getValue().getName()));
 
                     confirm.showAndWait().ifPresent(response -> {
                         if (response == ButtonType.OK) {
@@ -285,12 +231,12 @@ public class TreeManager {
                             parentCat.getSubcategories().addAll(catToDelete.getSubcategories());
                             parentCat.getSubcategories().remove(catToDelete);
                             
-                            main.applyCategoryFilter(main.getSearchCategoryField().getText());
+                            EventBus.getInstance().publish(new AppEvents.CategoryUpdatedEvent());
                         }
                     });
 
                 } else {
-                    new Alert(Alert.AlertType.WARNING, "No se puede eliminar la categoría principal.").show();
+                    new Alert(Alert.AlertType.WARNING, I18n.get("tree.alert.delRoot")).show();
                 }
             });
             

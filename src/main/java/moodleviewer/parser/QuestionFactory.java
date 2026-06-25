@@ -16,26 +16,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Clase creada como fábrica de objetos Question a partie del DOM del XML de Moodle. 
- * Implementa el patrón Factory Method.
+ * Clase encargada de la fabricación de objetos Question a partir del DOM del XML de Moodle.
+ * Implementa el patrón Factory Method optimizado con expresiones switch de Java 17.
  */
 public class QuestionFactory {
 
-	/**
-	 * Crea e instancia el tipo de Question adecuado según el tipo Moodle indicado.
-	 * 
-	 * @param type tipo Moodle.
-	 * @param name nombre de la pregunta.
-	 * @param text enunciado en HTML.
-	 * @param grade calificación por defecto.
-	 * @param penalty fracción de penalización.
-	 * @param questionElement elemento DOM de pregunta del que se extraen los atributos específicos.
-	 * @return instancia concreta de Question.
-	 */
+    /**
+     * Crea e instancia el tipo de Question adecuado según el tipo Moodle indicado.
+     * * @param type tipo Moodle.
+     * @param name nombre de la pregunta.
+     * @param text enunciado en HTML.
+     * @param grade calificación por defecto.
+     * @param penalty fracción de penalización.
+     * @param questionElement elemento DOM de pregunta del que se extraen los atributos específicos.
+     * @return instancia concreta de Question.
+     */
     public static Question createQuestion(String type, String name, String text, String grade, String penalty, Element questionElement) {
         
-        switch (type) {
-            case "matching":
+        return switch (type) {
+            case "matching" -> {
                 List<MatchingPair> pairs = new ArrayList<>();
                 NodeList subqs = questionElement.getElementsByTagName("subquestion");
                 for (int j = 0; j < subqs.getLength(); j++) {
@@ -44,9 +43,10 @@ public class QuestionFactory {
                     String aT = XMLParser.getNestedText(sq, "answer", "text");
                     if (qT != null && aT != null) pairs.add(new MatchingPair(qT, aT));
                 }
-                return new MatchingQuestion(type, name, text, grade, penalty, pairs);
+                yield new MatchingQuestion(type, name, text, grade, penalty, pairs);
+            }
 
-            case "multichoice":
+            case "multichoice" -> {
                 boolean single = "true".equals(XMLParser.getSimpleText(questionElement, "single"));
                 boolean shuffleMulti = "true".equals(XMLParser.getSimpleText(questionElement, "shuffleanswers"));
                 List<Answer> multiAnswers = new ArrayList<>();
@@ -58,9 +58,10 @@ public class QuestionFactory {
                     String feedback = XMLParser.getNestedText(ansEl, "feedback", "text");
                     multiAnswers.add(new Answer(fraction, aText != null ? aText : "", feedback != null ? feedback : ""));
                 }
-                return new MultichoiceQuestion(type, name, text, grade, penalty, single, shuffleMulti, multiAnswers);
+                yield new MultichoiceQuestion(type, name, text, grade, penalty, single, shuffleMulti, multiAnswers);
+            }
 
-            case "truefalse":
+            case "truefalse" -> {
                 Answer tAns = new Answer("100", "Verdadero", "");
                 Answer fAns = new Answer("0", "Falso", "");
                 NodeList tfAnswers = questionElement.getElementsByTagName("answer");
@@ -74,9 +75,10 @@ public class QuestionFactory {
                         fAns = new Answer("0", "Falso", ansFeedback != null ? ansFeedback : "");
                     }
                 }
-                return new TrueFalseQuestion(type, name, text, grade, penalty, tAns, fAns);
+                yield new TrueFalseQuestion(type, name, text, grade, penalty, tAns, fAns);
+            }
 
-            case "numerical":
+            case "numerical" -> {
                 Answer numAnswer = new Answer("100", "0", ""); 
                 String tolerance = "0";
                 NodeList numAnsNodes = questionElement.getElementsByTagName("answer");
@@ -88,9 +90,10 @@ public class QuestionFactory {
                     tolerance = XMLParser.getSimpleText(ansElem, "tolerance");
                     numAnswer = new Answer(fraction, aText != null ? aText : "", feedback != null ? feedback : "");
                 }
-                return new NumericalQuestion(type, name, text, grade, penalty, numAnswer, tolerance != null ? tolerance : "0");
+                yield new NumericalQuestion(type, name, text, grade, penalty, numAnswer, tolerance != null ? tolerance : "0");
+            }
 
-            case "shortanswer":
+            case "shortanswer" -> {
                 boolean caseSensitive = "1".equals(XMLParser.getSimpleText(questionElement, "usecase"));
                 List<Answer> shortAnswers = new ArrayList<>();
                 NodeList saNodes = questionElement.getElementsByTagName("answer");
@@ -101,13 +104,12 @@ public class QuestionFactory {
                     String feedback = XMLParser.getNestedText(ansElem, "feedback", "text");
                     shortAnswers.add(new Answer(fraction, aText != null ? aText : "", feedback != null ? feedback : ""));
                 }
-                return new ShortAnswerQuestion(type, name, text, grade, penalty, caseSensitive, shortAnswers);
+                yield new ShortAnswerQuestion(type, name, text, grade, penalty, caseSensitive, shortAnswers);
+            }
 
-            case "cloze":
-                return new ClozeQuestion(type, name, text, grade, penalty);
+            case "cloze" -> new ClozeQuestion(type, name, text, grade, penalty);
 
-            default:
-                return new GenericQuestion(type, name, text, grade, penalty);
-        }
+            default -> new GenericQuestion(type, name, text, grade, penalty);
+        };
     }
 }

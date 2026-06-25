@@ -9,124 +9,285 @@
 
 package moodleviewer;
 
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import moodleviewer.model.Category;
-import moodleviewer.parser.XMLExporter;
-import moodleviewer.parser.XMLParser;
-import java.io.File;
+import moodleviewer.util.I18n;
 import javafx.util.Pair;
+import org.controlsfx.control.Notifications;
+import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import java.io.File;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Clase creada para gestionar las operaciones de apertura, guardado y exportacion de ficheros.
- * Se centra en la lógica de diálogos de fichero y la gestión de errores.
+ * Gestor de la interfaz de usuario para operaciones con archivos.
+ * Coordina los diálogos visuales de selección de rutas e interactúa con el 
+ * servicio de Entrada/Salida subyacente reflejando el estado de las operaciones mediante alertas.
  */
 public class FileManager {
-	
-	private static final Logger LOGGER = Logger.getLogger(FileManager.class.getName());
 
-	/**
-	 * Abre un diálogo de selección de fichero para cargar un XML de Moodle.
-	 * Parsea el fichero y devuelve un par con la categoría raíz y el archivo, o vacío si se cancela o falla.
-	 * 
-	 * @param stage ventana padre sobre la que se muestra el diálogo.
-	 * @return un Pair con la categoría raíz y el archivo si la carga fue exitosa.
-	 */
-	public static Optional<Pair<Category, File>> openXML(Stage stage) {
+    private static final Logger LOGGER = Logger.getLogger(FileManager.class.getName());
+    private final FileIOService ioService;
+
+    /**
+     * Inicializa el gestor de archivos vinculándolo a una instancia limpia de los servicios de Entrada/Salida.
+     */
+    public FileManager() {
+        this.ioService = new FileIOService();
+    }
+
+    /**
+     * Muestra un selector de archivos para importar un banco XML y delega su lectura en el servicio.
+     * * @param stage Ventana contenedora principal sobre la que se ancla el diálogo.
+     * @return Un contenedor opcional con la estructura procesada y su archivo asociado en disco.
+     */
+    public Optional<Pair<Category, File>> openMoodleXML(Stage stage) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos XML", "*.xml"));
+        fileChooser.setTitle(I18n.get("file.ext.xml"));
+        fileChooser.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter(I18n.get("file.ext.xml"), "*.xml")
+        );
+
         File file = fileChooser.showOpenDialog(stage);
-
-        if (file != null) {
-            try {
-                Category root = XMLParser.parseMoodleXML(file);
-                return Optional.of(new Pair<>(root, file));
-            } catch (Exception ex) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Error al leer el archivo XML: " + ex.getMessage());
-                alert.showAndWait();
-            }
+        if (file == null) {
+            return Optional.empty();
         }
-        return Optional.empty();
+
+        try {
+            Category rootCategory = ioService.loadBankFromXML(file);
+            return Optional.of(new Pair<>(rootCategory, file));
+        } catch (Exception ex) {
+            Alert err = new Alert(Alert.AlertType.ERROR, I18n.get("file.err.readXml", ex.getMessage()));
+            err.showAndWait();
+            LOGGER.log(Level.SEVERE, "Excepción controlada al importar el archivo XML", ex);
+            return Optional.empty();
+        }
     }
 
     /**
-     * Abre un diálogo de guardado para exportar el árbol como XML de Moodle.
-     * 
-     * @param stage ventana padre.
-     * @param currentRootCategory categoría raíz del árbol a guardar.
+     * Almacena de manera persistente los cambios en el archivo XML actual o solicita una nueva ubicación de guardado.
+     * Antes de guardar, pregunta al usuario si desea exportar el banco completo o solo una selección
+     * de categorías concretas.
+     * * @param stage Ventana contenedora principal.
+     * @param rootCategory Jerarquía de categorías completa del banco actual.
+     * @param preselectedCategory Categoría actualmente seleccionada en el árbol principal (puede ser null),
+     * usada como punto de partida si el usuario elige exportar una selección.
+     * @param currentFile Archivo de trabajo actual (puede ser nulo si no se ha guardado previamente).
+     * @return El descriptor del archivo físico guardado, o vacío si se cancela el proceso.
      */
-    public static void saveXML(Stage stage, Category currentRootCategory) {
-        if (currentRootCategory == null) return;
+    public Optional<File> saveMoodleXML(Stage stage, Category rootCategory, Category preselectedCategory, File currentFile) {
 
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Guardar XML de Moodle");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos XML", "*.xml"));
-        File file = fileChooser.showSaveDialog(stage);
-
-        if (file != null) {
-            try {
-                XMLExporter.exportMoodleXML(currentRootCategory, file);
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Archivo guardado con éxito.");
-                alert.setHeaderText(null);
-                alert.showAndWait();
-            } catch (Exception ex) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Error al guardar el archivo XML: " + ex.getMessage());
-                alert.showAndWait();
-                LOGGER.log(Level.SEVERE, "Excepción durante la exportación del archivo LaTeX", ex);
-            }
+        Optional<Category> scopeChoice = ExportScopeDialog.askExportScope(rootCategory, preselectedCategory);
+        if (scopeChoice.isEmpty()) {
+            return Optional.empty();
         }
-    }
-    
-    /**
-     * Muestra un diálogo de opciones de exportación LaTeX y luego el diálogo de guardado. Pregunta
-     * al usuario si desea el solucionario o el examen.
-     * 
-     * @param stage ventana padre.
-     * @param currentRootCategory categoría raíz del árbol a exportar.
-     */
-    public static void exportLaTeX(Stage stage, Category currentRootCategory) {
-        if (currentRootCategory == null) return;
+        Category categoryToExport = scopeChoice.get();
+        boolean isPartialExport = categoryToExport != rootCategory;
+
+        // --- LINTING PRE-EXPORTACIÓN (XML -> false) ---
+        if (!PreExportValidatorUI.checkAndConfirmExport(categoryToExport, false)) {
+            return Optional.empty();
+        }
         
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Opciones de Exportación LaTeX");
-        alert.setHeaderText("¿Cómo deseas exportar el documento?");
-        alert.setContentText("Elige si quieres incluir las respuestas (para el profesor) o solo los enunciados (para los alumnos).");
+        File file = isPartialExport ? null : currentFile;
+        if (file == null) {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle(I18n.get("file.title.saveXml"));
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter(I18n.get("file.ext.xml"), "*.xml")
+            );
+            file = fileChooser.showSaveDialog(stage);
+        }
 
-        ButtonType btnTeacher = new ButtonType("Con respuestas (Solucionario)");
-        ButtonType btnStudent = new ButtonType("Sin respuestas (Examen)");
-        ButtonType btnCancel = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+        if (file == null) {
+            return Optional.empty();
+        }
 
-        alert.getButtonTypes().setAll(btnTeacher, btnStudent, btnCancel);
+        try {
+            ioService.saveBankToXML(categoryToExport, file);
+            showSuccessNotification(stage, I18n.get("file.info.savedXml"));
+            return isPartialExport ? Optional.empty() : Optional.of(file);
+        } catch (Exception ex) {
+            Alert err = new Alert(Alert.AlertType.ERROR, I18n.get("file.err.saveXml", ex.getMessage()));
+            err.showAndWait();
+            LOGGER.log(Level.SEVERE, "Excepción controlada al exportar el archivo XML", ex);
+            return Optional.empty();
+        }
+    }
 
-        Optional<ButtonType> result = alert.showAndWait();
-        if (!result.isPresent() || result.get() == btnCancel) {
+    /**
+     * Despliega las opciones de exportación tipográfica para compilar el banco a formato LaTeX y PDF de forma asíncrona.
+     * * @param stage Ventana contenedora principal.
+     * @param rootCategory Jerarquía de categorías completa del banco actual.
+     * @param preselectedCategory Categoría actualmente seleccionada en el árbol principal.
+     */
+    public void exportLaTeX(Stage stage, Category rootCategory, Category preselectedCategory) {
+
+        Optional<Category> scopeChoice = ExportScopeDialog.askExportScope(rootCategory, preselectedCategory);
+        if (scopeChoice.isEmpty()) {
+            return;
+        }
+        Category categoryToExport = scopeChoice.get();
+
+        // --- LINTING PRE-EXPORTACIÓN (LaTeX -> false) ---
+        if (!PreExportValidatorUI.checkAndConfirmExport(categoryToExport, false)) {
             return;
         }
         
-        boolean showAnswers = (result.get() == btnTeacher);
+        ButtonType btnTeacher = new ButtonType(I18n.get("file.btn.teacher"), ButtonBar.ButtonData.OK_DONE);
+        ButtonType btnStudent = new ButtonType(I18n.get("file.btn.student"), ButtonBar.ButtonData.OTHER);
+        ButtonType btnCancel = new ButtonType(I18n.get("file.btn.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        Alert optionsDlg = new Alert(Alert.AlertType.CONFIRMATION);
+        optionsDlg.setTitle(I18n.get("file.dlg.latex.title"));
+        optionsDlg.setHeaderText(I18n.get("file.dlg.latex.header"));
+        optionsDlg.setContentText(I18n.get("file.dlg.latex.content"));
+        optionsDlg.getButtonTypes().setAll(btnTeacher, btnStudent, btnCancel);
+
+        Optional<ButtonType> choice = optionsDlg.showAndWait();
+        if (choice.isEmpty() || choice.get() == btnCancel) {
+            return;
+        }
+
+        boolean showAnswers = (choice.get() == btnTeacher);
 
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Exportar a LaTeX");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivo LaTeX", "*.tex"));
-        File file = fileChooser.showSaveDialog(stage);
+        fileChooser.setTitle(I18n.get("file.title.exportLatex"));
+        fileChooser.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter(I18n.get("file.ext.latex"), "*.tex")
+        );
 
-        if (file != null) {
-            try {
-                moodleviewer.parser.LaTeXExporter.exportToLaTeX(currentRootCategory, file, showAnswers);
-                Alert info = new Alert(Alert.AlertType.INFORMATION, "Archivo LaTeX exportado con éxito.");
-                info.setHeaderText(null);
-                info.showAndWait();
-            } catch (Exception ex) {
-                Alert err = new Alert(Alert.AlertType.ERROR, "Error al exportar a LaTeX: " + ex.getMessage());
-                err.showAndWait();
-                LOGGER.log(Level.SEVERE, "Excepción durante la exportación del archivo LaTeX", ex);
-            }
+        File file = fileChooser.showSaveDialog(stage);
+        if (file == null) {
+            return;
         }
+
+        try {
+            ioService.exportToLaTeX(categoryToExport, file, showAnswers);
+
+            Alert pdfPrompt = new Alert(Alert.AlertType.CONFIRMATION);
+            pdfPrompt.setTitle(I18n.get("file.dlg.pdf.title"));
+            pdfPrompt.setHeaderText(I18n.get("file.dlg.pdf.header"));
+            pdfPrompt.setContentText(I18n.get("file.dlg.pdf.content"));
+
+            Optional<ButtonType> pdfChoice = pdfPrompt.showAndWait();
+            if (pdfChoice.isPresent() && pdfChoice.get() == ButtonType.OK) {
+                new Thread(() -> {
+                    try {
+                        ioService.compilePDF(file);
+                    } catch (Exception ex) {
+                        Platform.runLater(() -> {
+                            Alert err = new Alert(Alert.AlertType.ERROR, I18n.get("file.err.pdf") + "\n" + ex.getMessage());
+                            err.showAndWait();
+                        });
+                        LOGGER.log(Level.SEVERE, "Fallo detectado en el motor de compilación externo de PDF", ex);
+                    }
+                }).start();
+            } else {
+                showSuccessNotification(stage, I18n.get("file.info.savedLatex"));
+            }
+
+        } catch (Exception ex) {
+            Alert err = new Alert(Alert.AlertType.ERROR, I18n.get("file.err.saveLatex", ex.getMessage()));
+            err.showAndWait();
+            LOGGER.log(Level.SEVERE, "Fallo estructural en el proceso de exportación LaTeX", ex);
+        }
+    }
+
+    // =====================================================================
+    //                   NUEVOS MÉTODOS PARA FORMATO GIFT
+    // =====================================================================
+
+    /**
+     * Muestra un selector de archivos para importar un banco en formato GIFT (.txt).
+     * * @param stage Ventana contenedora principal.
+     * @return Un contenedor opcional con la estructura procesada y su archivo asociado en disco.
+     */
+    public Optional<Pair<Category, File>> openGIFT(Stage stage) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Abrir archivo GIFT");
+        fileChooser.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter("Formato Moodle GIFT (*.txt)", "*.txt")
+        );
+
+        File file = fileChooser.showOpenDialog(stage);
+        if (file == null) {
+            return Optional.empty();
+        }
+
+        try {
+            Category rootCategory = ioService.loadBankFromGIFT(file);
+            return Optional.of(new Pair<>(rootCategory, file));
+        } catch (Exception ex) {
+            Alert err = new Alert(Alert.AlertType.ERROR, "Fallo al leer el archivo GIFT:\n" + ex.getMessage());
+            err.showAndWait();
+            LOGGER.log(Level.SEVERE, "Excepción controlada al importar el archivo GIFT", ex);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Inicia el proceso de exportación a formato de texto plano GIFT.
+     * * @param stage Ventana contenedora principal.
+     * @param rootCategory Jerarquía de categorías completa del banco actual.
+     * @param preselectedCategory Categoría seleccionada como punto de partida si se elige exportación parcial.
+     */
+    public void exportGIFT(Stage stage, Category rootCategory, Category preselectedCategory) {
+        
+        Optional<Category> scopeChoice = ExportScopeDialog.askExportScope(rootCategory, preselectedCategory);
+        if (scopeChoice.isEmpty()) {
+            return;
+        }
+        Category categoryToExport = scopeChoice.get();
+
+        // --- LINTING PRE-EXPORTACIÓN (GIFT -> true) ---
+        // ¡Aquí es donde le pasamos "true" para que salte la alerta si hay imágenes!
+        if (!PreExportValidatorUI.checkAndConfirmExport(categoryToExport, true)) {
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Guardar como Moodle GIFT");
+        fileChooser.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter("Formato Moodle GIFT (*.txt)", "*.txt")
+        );
+
+        File file = fileChooser.showSaveDialog(stage);
+        if (file == null) {
+            return;
+        }
+
+        try {
+            ioService.exportToGIFT(categoryToExport, file);
+            showSuccessNotification(stage, "El banco de preguntas se ha exportado correctamente en formato GIFT.");
+        } catch (Exception ex) {
+            Alert err = new Alert(Alert.AlertType.ERROR, "Error al exportar a formato GIFT:\n" + ex.getMessage());
+            err.showAndWait();
+            LOGGER.log(Level.SEVERE, "Fallo estructural en el proceso de exportación GIFT", ex);
+        }
+    }
+
+    // =====================================================================
+
+    /**
+     * Muestra una notificación emergente no bloqueante en la esquina de la pantalla para confirmar
+     * el éxito de una operación.
+     */
+    private void showSuccessNotification(Stage stage, String message) {
+        Notifications.create()
+            .title(I18n.get("file.notif.title"))
+            .text(message)
+            .graphic(new FontIcon(FontAwesomeSolid.CHECK_CIRCLE))
+            .hideAfter(javafx.util.Duration.seconds(4))
+            .position(javafx.geometry.Pos.BOTTOM_RIGHT)
+            .owner(stage)
+            .showInformation();
     }
 }

@@ -11,6 +11,8 @@ package moodleviewer.parser;
 
 import moodleviewer.model.*;
 import org.w3c.dom.*;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
@@ -19,17 +21,10 @@ import java.util.List;
 
 /**
  * Clase creada como parseadora del formato XML de exportación de bancos de preguntas de Moodle.
- * Transforma un fichero XML de Moodle en una jerarquía de objetos categoría con sus preguntas anidadas.
+ * Transforma un fichero XML de Moodle en una jerarquía limpia gracias a JSoup.
  */
 public class XMLParser {
 
-	/**
-	 * Parsea un fichero XML de Moodle y construye el árbol de categorías y preguntas.
-	 * 
-	 * @param xmlFile fichero XML de Moodle a parsear.
-	 * @return categoría raíz del árbol construido.
-	 * @throws Exception si el fichero no exsite o contiene errores estructurales.
-	 */
     public static Category parseMoodleXML(File xmlFile) throws Exception {
         Category rootCategory = new Category("Banco de Preguntas");
         Category currentCategory = rootCategory;
@@ -39,105 +34,88 @@ public class XMLParser {
         Document document = builder.parse(xmlFile);
         document.getDocumentElement().normalize();
 
-        NodeList questionNodes = document.getElementsByTagName("question");
+        NodeList questionList = document.getElementsByTagName("question");
 
-        for (int i = 0; i < questionNodes.getLength(); i++) {
-            Node node = questionNodes.item(i);
-
+        for (int i = 0; i < questionList.getLength(); i++) {
+            Node node = questionList.item(i);
             if (node.getNodeType() == Node.ELEMENT_NODE) {
-                Element questionElement = (Element) node;
-                String type = questionElement.getAttribute("type");
+                Element element = (Element) node;
+                String type = element.getAttribute("type");
 
                 if ("category".equals(type)) {
-                    String fullPath = getNestedText(questionElement, "category", "text");
+                    String fullPath = getNestedText(element, "category", "text");
                     if (fullPath != null) {
-                        fullPath = fullPath.replace("$module$/top/", "").replace("$course$/top/", "");
-                        if (fullPath.equals("$module$/top") || fullPath.equals("$course$/top")) continue;
                         currentCategory = findOrCreateCategory(rootCategory, fullPath);
                     }
-                    continue;
-                }
+                } else if (!"info".equals(type)) {
+                    String name = getNestedText(element, "name", "text");
+                    String text = getNestedText(element, "questiontext", "text");
+                    String grade = getSimpleText(element, "defaultgrade");
+                    String penalty = getSimpleText(element, "penalty");
 
-                String name = getNestedText(questionElement, "name", "text");
-                String text = getNestedText(questionElement, "questiontext", "text");
-                String defaultGrade = getSimpleText(questionElement, "defaultgrade");
-                if (defaultGrade == null || defaultGrade.isEmpty()) defaultGrade = "1.0000000";
-                String penalty = getSimpleText(questionElement, "penalty");
-                if (penalty == null || penalty.isEmpty()) penalty = "0.3333333";
-                String generalFeedback = getNestedText(questionElement, "generalfeedback", "text");
+                    Question question = QuestionFactory.createQuestion(type, name, text, grade, penalty, element);
 
-                List<MoodleFile> questionFiles = new ArrayList<>();
-                NodeList fileNodes = questionElement.getElementsByTagName("file");
-                for (int j = 0; j < fileNodes.getLength(); j++) {
-                    Element fileElem = (Element) fileNodes.item(j);
-                    String fName = fileElem.getAttribute("name");
-                    String fPath = fileElem.getAttribute("path");
-                    String fEncoding = fileElem.getAttribute("encoding");
-                    String fContent = fileElem.getTextContent().trim();
-                    questionFiles.add(new MoodleFile(fName, fPath, fEncoding, fContent));
-                }
+                    String generalFeedback = getNestedText(element, "generalfeedback", "text");
+                    question.setGeneralFeedback(generalFeedback);
 
-                Question q = QuestionFactory.createQuestion(
-                        type, 
-                        name != null ? name : "Sin nombre", 
-                        text != null ? text : "", 
-                        defaultGrade, 
-                        penalty, 
-                        questionElement
-                );
+                    List<MoodleFile> files = extractFiles(element);
+                    question.setFiles(files);
 
-                if (q != null) {
-                    q.setFiles(questionFiles); 
-                    if (generalFeedback != null) q.setGeneralFeedback(generalFeedback);
-                    currentCategory.addQuestion(q);
+                    currentCategory.addQuestion(question);
                 }
             }
         }
         return rootCategory;
     }
 
+    private static List<MoodleFile> extractFiles(Element questionElement) {
+        List<MoodleFile> files = new ArrayList<>();
+        NodeList fileNodes = questionElement.getElementsByTagName("file");
+        for (int j = 0; j < fileNodes.getLength(); j++) {
+            Element fileElem = (Element) fileNodes.item(j);
+            String name = fileElem.getAttribute("name");
+            String path = fileElem.getAttribute("path");
+            String encoding = fileElem.getAttribute("encoding");
+            String content = fileElem.getTextContent();
+            files.add(new MoodleFile(name, path, encoding, content));
+        }
+        return files;
+    }
+
     /**
-     * Obtiene el contenido de texto de un elemento anidado en el XML.
-     * 
-     * @param parent elemento XML en el que buscar.
-     * @param outerTag nombre del elemento exterior.
-     * @param innerTag nombre del elemento interior cuyo texto se extrae.
-     * @return contenido de texto del elemento interior, o null si no existe.
+     * Extrae el texto anidado y utiliza JSoup para limpiar etiquetas HTML basura.
      */
-    public static String getNestedText(Element parent, String outerTag, String innerTag) {
-        NodeList outerList = parent.getElementsByTagName(outerTag);
-        if (outerList.getLength() > 0) {
-            Element outerElement = (Element) outerList.item(0);
-            NodeList innerList = outerElement.getElementsByTagName(innerTag);
-            if (innerList.getLength() > 0) return innerList.item(0).getTextContent().trim();
+    public static String getNestedText(Element parent, String parentTag, String childTag) {
+        NodeList list = parent.getElementsByTagName(parentTag);
+        if (list.getLength() > 0) {
+            Element pElement = (Element) list.item(0);
+            NodeList childList = pElement.getElementsByTagName(childTag);
+            if (childList.getLength() > 0) {
+                String rawHtml = childList.item(0).getTextContent().trim();
+                // Safelist.relaxed() permite negritas, cursivas, listas e imágenes seguras, limpiando el resto.
+                return Jsoup.clean(rawHtml, Safelist.relaxed().addAttributes("img", "src", "alt", "width", "height"));
+            }
         }
         return null;
     }
 
     /**
-     * Obtiene el contenido de texto de un elemento hijo directo de parent.
-     * Busca solo entre hijos directos para evitar capturas accidentales en niveles más profundos.
-     * 
-     * @param parent elemento XML en el que buscar.
-     * @param tag nombre del elemento hijo cuyo texto se extrae.
-     * @return contenido de texto del elemento hijo, o null si no existe.
+     * Extrae el texto directo. Si es contenido enriquecido ("text" o "feedback"), lo sanea con JSoup.
      */
     public static String getSimpleText(Element parent, String tag) {
         NodeList list = parent.getChildNodes();
-        for (int i=0; i<list.getLength(); i++) {
-            if (list.item(i).getNodeName().equals(tag)) return list.item(i).getTextContent().trim();
+        for (int i = 0; i < list.getLength(); i++) {
+            if (list.item(i).getNodeName().equals(tag)) {
+                String rawText = list.item(i).getTextContent().trim();
+                if (tag.equals("text") || tag.equals("feedback")) {
+                    return Jsoup.clean(rawText, Safelist.relaxed().addAttributes("img", "src", "alt", "width", "height"));
+                }
+                return rawText;
+            }
         }
         return null;
     }
 
-    /**
-     * Localiza o crea la categoría correspondiente a una ruta completa dentro del árbol,
-     * creando los nodos intermedios que no existan.
-     * 
-     * @param root categoría raíz del árbol.
-     * @param fullPath ruta completa.
-     * @return categoría correspondiente al último segmento de la ruta.
-     */
     private static Category findOrCreateCategory(Category root, String fullPath) {
         if (fullPath == null || fullPath.isEmpty()) return root;
         String[] parts = fullPath.split("/");
@@ -145,6 +123,10 @@ public class XMLParser {
         for (String part : parts) {
             part = part.trim();
             if (part.isEmpty()) continue;
+            // Ignoramos los segmentos técnicos que usa Moodle para anclar la ruta de categorías:
+            // "top" y cualquier placeholder de contexto entre signos de dólar
+            // ($course$, $module$, $system$, etc.), ya que no son categorías reales del usuario.
+            if (part.equalsIgnoreCase("top") || part.matches("(?i)^\\$[a-z0-9_]+\\$$")) continue;
             Category next = null;
             for (Category sub : current.getSubcategories()) {
                 if (sub.getName().equals(part)) {

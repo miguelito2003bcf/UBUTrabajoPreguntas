@@ -34,4 +34,14 @@ public class Answer {
     public String getFraction() { return fraction; }
     public String getText() { return text; }
     public String getFeedback() { return feedback; }
+
+    /**
+     * Permite sustituir el texto de la respuesta tras su construcción. Pensado para los
+     * importadores (ej. {@code GIFTParser}), que necesitan reescribir imágenes Base64
+     * incrustadas en el texto de la respuesta como referencias {@code @@PLUGINFILE@@}
+     * una vez extraído el fichero a {@link MoodleFile}.
+     *
+     * @param text nuevo texto de la respuesta.
+     */
+    public void setText(String text) { this.text = text; }
 }

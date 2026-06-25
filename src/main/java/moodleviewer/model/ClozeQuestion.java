@@ -10,6 +10,7 @@
 package moodleviewer.model;
 
 import moodleviewer.util.HtmlConstants;
+import org.jsoup.Jsoup;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -149,8 +150,8 @@ public class ClozeQuestion extends Question {
         StringBuilder widget = new StringBuilder();
         
         if (typeKey.matches("SHORTANSWER|SA|MW|SHORTANSWER_C|SAC|MWC|NUMERICAL|NM")) {
-            String correct = alts.stream().filter(a -> a.fraction == 1.0).map(a -> a.text.replaceAll("<[^>]+>", "")).findFirst()
-                .orElseGet(() -> alts.stream().max(Comparator.comparingDouble(a -> a.fraction)).map(a -> a.text.replaceAll("<[^>]+>", "")).orElse(""));
+            String correct = alts.stream().filter(a -> a.fraction == 1.0).map(a -> stripHtmlTags(a.text)).findFirst()
+                .orElseGet(() -> alts.stream().max(Comparator.comparingDouble(a -> a.fraction)).map(a -> stripHtmlTags(a.text)).orElse(""));
             
             int size = Math.max(10, Math.min(correct.length() + 6, 40));
             widget.append("<input type='text' disabled size='").append(size).append("' placeholder='").append(escapeHtmlAttr(correct))
@@ -164,7 +165,7 @@ public class ClozeQuestion extends Question {
             for (ClozeAlt a : alts) {
                 boolean correct = a.fraction == 1.0;
                 
-                String plainText = a.text != null ? a.text.replaceAll("<[^>]+>", "").trim() : "";
+                String plainText = stripHtmlTags(a.text).trim();
                 if (plainText.isEmpty()) {
                     plainText = "[Imagen o contenido multimedia]";
                 }
@@ -260,6 +261,19 @@ public class ClozeQuestion extends Question {
         double pct = f * 100.0;
         if (pct == Math.floor(pct)) return (int) pct + "%";
         return String.format(Locale.US, "%.1f%%", pct);
+    }
+
+    /**
+     * Extrae el texto plano de un fragmento HTML, eliminando cualquier etiqueta de forma segura.
+     * Sustituye al antiguo regex "&lt;[^&gt;]+&gt;" (frágil ante HTML mal formado, comentarios o
+     * atributos con '&gt;'), delegando el parseo real en JSoup.
+     * 
+     * @param html fragmento HTML de origen, puede ser null.
+     * @return texto plano sin etiquetas, o cadena vacía si html es null.
+     */
+    private static String stripHtmlTags(String html) {
+        if (html == null) return "";
+        return Jsoup.parse(html).text();
     }
 
     /**

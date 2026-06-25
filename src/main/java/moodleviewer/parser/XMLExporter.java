@@ -161,7 +161,8 @@ public class XMLExporter {
         } else if (q instanceof NumericalQuestion) {
             NumericalQuestion nq = (NumericalQuestion) q;
             Element ansEl = doc.createElement("answer");
-            ansEl.setAttribute("fraction", nq.getAnswer().getFraction());
+            String numFraction = nq.getAnswer().getFraction();
+            ansEl.setAttribute("fraction", numFraction != null ? numFraction : "0");
             ansEl.setAttribute("format", "moodle_auto_format");
             addTextNode(doc, ansEl, "text", nq.getAnswer().getText());
             if (nq.getAnswer().getFeedback() != null && !nq.getAnswer().getFeedback().isEmpty()) {

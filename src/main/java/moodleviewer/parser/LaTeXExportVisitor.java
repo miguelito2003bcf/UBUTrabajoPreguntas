@@ -10,6 +10,11 @@
 package moodleviewer.parser;
 
 import moodleviewer.model.*;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -27,25 +32,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Clase creada como visitante que serializa cada tipo de pregunta de Moodle al formato LaTeX.
- * Implementa el patrón Visitor definido en QuestionVisitor.
+ * Clase visitante que serializa cada tipo de pregunta de Moodle al formato LaTeX.
+ * Utiliza JSoup para una manipulación robusta del DOM HTML.
  */
 public class LaTeXExportVisitor implements QuestionVisitor {
     
-	private static final Logger LOGGER = Logger.getLogger(LaTeXExportVisitor.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(LaTeXExportVisitor.class.getName());
     private final BufferedWriter writer;
     private final File imagesDir;
     private final String imagesFolderName;
     private final boolean showAnswers; 
 
-    /**
-     * Construye un visitante de exportación LaTeX.
-     *
-     * @param writer escritor del fichero .tex.
-     * @param imagesDir directorio físico donde se guardarán las imágenes.
-     * @param imagesFolderName nombre relativo de la carpeta de imágenes.
-     * @param showAnswers true para incluir respuestas correctas.
-     */
     public LaTeXExportVisitor(BufferedWriter writer, File imagesDir, String imagesFolderName, boolean showAnswers) {
         this.writer = writer;
         this.imagesDir = imagesDir;
@@ -53,12 +50,6 @@ public class LaTeXExportVisitor implements QuestionVisitor {
         this.showAnswers = showAnswers;
     }
 
-    /**
-     * Exporta una pregunta de opción múltiple a LaTeX.
-     * Usa unaRespuesta o variasRespuestas según admita una o varias respuestas.
-     * 
-     * @param q pregunta de opción múltiple a exportar.
-     */
     @Override
     public void visit(MultichoiceQuestion q) {
         try {
@@ -77,16 +68,10 @@ public class LaTeXExportVisitor implements QuestionVisitor {
             }
             writer.write("\\end{" + envName + "}\n\n\\vspace{0.5cm}\n");
         } catch (IOException e) { 
-        	LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); 
+            LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); 
         }
     }
 
-    /**
-     * Exporta una pregunta de verdadero/falso a LaTeX.
-     * Siempre genera exactamente dos opciones dentro del entorno unaRespuesta.
-     * 
-     * @param q pregunta de verdadero/falso a exportar.
-     */
     @Override
     public void visit(TrueFalseQuestion q) {
         try {
@@ -103,13 +88,6 @@ public class LaTeXExportVisitor implements QuestionVisitor {
         } catch (IOException e) { LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); }
     }
 
-    /**
-     * Exporta una pregunta de respuesta corta a LaTeX.
-     * En modo solucionario muestra las respuestas correctas en un recuadro azul y 
-     * en modo examen deja un espacio en blanco.
-     * 
-     * @param q pregunta de respuesta corta a exportar.
-     */
     @Override
     public void visit(ShortAnswerQuestion q) {
         try {
@@ -117,8 +95,7 @@ public class LaTeXExportVisitor implements QuestionVisitor {
             if (showAnswers) {
                 List<String> correctAnswers = new ArrayList<>();
                 for (Answer a : q.getAnswers()) {
-                    
-                	String scoreBadge = formatLaTeXScore(a.getFraction());
+                    String scoreBadge = formatLaTeXScore(a.getFraction());
                     correctAnswers.add(processTextForLatex(q, a.getText()) + scoreBadge);
                 }
                 writer.write("\\vspace{0.3cm}\n\\noindent \\textbf{Respuesta esperada:} \\fcolorbox{azul}{blue!5}{\\textcolor{azul}{\\textbf{" + String.join(" / ", correctAnswers) + "}}}\n\n");
@@ -129,18 +106,11 @@ public class LaTeXExportVisitor implements QuestionVisitor {
         } catch (IOException e) { LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); }
     }
 
-    /**
-     * Exporta una pregunta numérica a LaTeX.
-     * En modo solucionario muestra el valor correcto y la tolerancia y en modo examen deja espacio.
-     * 
-     * @param q pregunta numérica a exportar.
-     */
     @Override
     public void visit(NumericalQuestion q) {
         try {
             writeQuestionTitle(q);
             if (showAnswers) {
-            	
                 String tolText = (q.getTolerance() != null && !q.getTolerance().equals("0") && !q.getTolerance().isEmpty()) 
                         ? " (margen de error $\\pm$" + escapeLatex(q.getTolerance()) + ")" : "";
                 String scoreBadge = formatLaTeXScore(q.getAnswer().getFraction());
@@ -153,12 +123,6 @@ public class LaTeXExportVisitor implements QuestionVisitor {
         } catch (IOException e) { LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); }
     }
 
-    /**
-     * Exporta una pregunta de emparejamiento a LaTeX.
-     * En modo solucionario añade la respuesta y una letra identificadora y en modo examen una línea en blanco.
-     * 
-     * @param q pregunta de emparejamiento a exportar.
-     */
     @Override
     public void visit(MatchingQuestion q) {
         try {
@@ -170,7 +134,6 @@ public class LaTeXExportVisitor implements QuestionVisitor {
             String scoreBadge = showAnswers ? formatLaTeXScore(pairFraction) : "";
 
             for (MatchingPair p : q.getPairs()) {
-            	
                 String qLatex = processTextForLatex(q, p.getQuestionText()).replaceAll("\\\\\\\\\\s*$", "").replace("\n", " ").trim();
                 String aLatex = processTextForLatex(q, p.getAnswerText()).replaceAll("\\\\\\\\\\s*$", "").replace("\n", " ").trim();
                 
@@ -183,15 +146,10 @@ public class LaTeXExportVisitor implements QuestionVisitor {
             }
             writer.write("\\end{emparejar}\n\n\\vspace{0.5cm}\n");
         } catch (IOException e) { 
-        	LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); 
+            LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); 
         }
     }
 
-    /**
-     * Exporta una pregunta Cloze a LaTeX.
-     * 
-     * @param q pregunta Cloze a exportar.
-     */
     @Override
     public void visit(ClozeQuestion q) {
         try {
@@ -200,11 +158,6 @@ public class LaTeXExportVisitor implements QuestionVisitor {
         } catch (IOException e) { LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); }
     }
     
-    /**
-     * Exporta una pregunta genérica o de ensayo a LaTeX.
-     * 
-     * @param q pregunta genérica a exportar.
-     */
     @Override
     public void visit(GenericQuestion q) {
         try {
@@ -213,77 +166,75 @@ public class LaTeXExportVisitor implements QuestionVisitor {
         } catch (IOException e) { LOGGER.log(Level.SEVERE, "Error al exportar la pregunta a formato LaTeX", e); }
     }
 
-    /**
-     * Escribe la línea de título de una pregunta en el fichero LaTeX.
-     * 
-     * @param q pregunta cuyo título se va a escribir.
-     * @throws IOException si ocurre algún error de escritura.
-     */
     private void writeQuestionTitle(Question q) throws IOException {
         String processed = processTextForLatex(q, q.getText());
         writer.write("\\question \\textbf{" + escapeLatex(q.getName()) + "}\\\\\n" + processed + "\n\n");
     }
 
     /**
-     * Aplica la cadena completa de transformaciones para convertir el HTML de un fragmento de pregunta a LaTeX limpio.
-     * 
-     * @param q pregunta propietaria del HTML.
-     * @param html fragmento HTML a convertir.
-     * @return cadena LaTeX lista para ser escrita en el fichero de salida.
+     * Aplica la cadena de transformaciones para convertir el HTML en LaTeX.
+     * Utiliza JSoup para manipular de forma segura las etiquetas de imágenes antes de llamar a Pandoc.
      */
     private String processTextForLatex(Question q, String html) {
         if (html == null || html.isEmpty()) return "";
         
-        html = convertBase64ToPluginFile(q, html); 
-        saveImagesToDisk(q);                       
-        html = formatClozeSyntax(html);           
-        html = resolvePluginFilePaths(html);       
+        // 1. Parseo seguro del HTML utilizando JSoup
+        Document doc = Jsoup.parseBodyFragment(html);
+        int base64Counter = 1;
+        Elements images = doc.select("img");
         
+        for (Element img : images) {
+            String src = img.attr("src");
+            
+            // A) Procesamiento de Imágenes Base64
+            if (src.matches("(?i)^data:image/([a-zA-Z]+);base64,(.*)")) {
+                Matcher m = Pattern.compile("(?i)^data:image/([a-zA-Z]+);base64,(.*)").matcher(src);
+                if (m.find()) {
+                    String extension = m.group(1);
+                    String data = m.group(2).replaceAll("\\s+", "");
+                    String filename = "imgbase_" + System.currentTimeMillis() + "_" + base64Counter + "." + extension;
+                    
+                    try {
+                        File imageFile = new File(imagesDir, filename);
+                        if (!imageFile.exists()) {
+                            byte[] bytes = Base64.getDecoder().decode(data);
+                            try (FileOutputStream fos = new FileOutputStream(imageFile)) { fos.write(bytes); }
+                        }
+                        // Mutamos el DOM directamente
+                        img.attr("src", imagesFolderName + "/" + filename);
+                        base64Counter++;
+                    } catch (Exception e) { 
+                        LOGGER.log(Level.WARNING, "No se pudo extraer la imagen Base64", e); 
+                    }
+                }
+            } 
+            // B) Procesamiento de referencias nativas Moodle (@@PLUGINFILE@@)
+            else if (src.contains("@@PLUGINFILE@@/")) {
+                String filename = src.substring(src.lastIndexOf("/") + 1);
+                try { 
+                    filename = java.net.URLDecoder.decode(filename, StandardCharsets.UTF_8.name()); 
+                } catch (Exception e) { }
+                // Mutamos el DOM directamente
+                img.attr("src", imagesFolderName + "/" + filename);
+            }
+        }
+        
+        // Extraemos el HTML modificado (solo el interior del fragmento)
+        html = doc.body().html();
+        
+        // 2. Guardamos en disco las imágenes adjuntas a nivel de modelo
+        saveImagesToDisk(q);                       
+        
+        // 3. Procesamos la sintaxis Cloze. (Aquí mantenemos RegEx porque Cloze NO es HTML, es un micro-lenguaje de texto).
+        html = formatClozeSyntax(html);           
+        
+        // 4. Conversión con Pandoc
         String result = convertHtmlToLatexWithPandoc(html); 
         
+        // 5. Parches de macros
         return applyLatexFinalPatches(result);   
     }
 
-    /**
-     * Detecta imágenes Base64 en el HTML, las guarda en disco y sustituye sus URIs por referencias @@PLUGINFILE@@.
-     * 
-     * @param q pregunta propietaria.
-     * @param html HTML con posibles atributos src=...
-     * @return HTML con las URIs Base64 sustituidas por referencias @@PLUGINFILE@@.
-     */
-    private String convertBase64ToPluginFile(Question q, String html) {
-        Pattern base64Pattern = Pattern.compile("(?i)src=[\"']data:image/([a-zA-Z]+);base64,([a-zA-Z0-9+/=\\s]+)[\"']");
-        Matcher matcher = base64Pattern.matcher(html);
-        StringBuffer sb = new StringBuffer();
-        int counter = 1;
-        
-        while (matcher.find()) {
-            String extension = matcher.group(1);
-            String data = matcher.group(2).replaceAll("\\s+", ""); 
-            String filename = "imgbase_" + System.currentTimeMillis() + "_" + counter + "." + extension;
-            
-            try {
-                File imageFile = new File(imagesDir, filename);
-                if (!imageFile.exists()) {
-                    byte[] bytes = Base64.getDecoder().decode(data);
-                    try (FileOutputStream fos = new FileOutputStream(imageFile)) { fos.write(bytes); }
-                }
-                matcher.appendReplacement(sb, Matcher.quoteReplacement("src=\"@@PLUGINFILE@@/" + filename + "\""));
-                counter++;
-            } catch (Exception e) { 
-                matcher.appendReplacement(sb, Matcher.quoteReplacement(matcher.group(0))); 
-            }
-        }
-        matcher.appendTail(sb);
-        return sb.toString();
-    }
-
-    /**
-     * Guarda en disco los ficheros MoodleFile adjuntos a la pregunta. Si el fichero ya existe no se sobreescribe. 
-     * Los errores individuales se ignoran.
-     * 
-     * @param q pregunta cuyos ficheros adjuntos se van a guardar en disco.
-     */
     private void saveImagesToDisk(Question q) {
         if (q.getFiles() == null) return;
         for (MoodleFile mFile : q.getFiles()) {
@@ -300,33 +251,6 @@ public class LaTeXExportVisitor implements QuestionVisitor {
         }
     }
 
-    /**
-     * Sustituye referencias @@PLUGINFILE@@/nombre por rutas locales relativas. 
-     * 
-     * @param html HTML con referencias @@PLUGINFILE@@.
-     * @return HTML con las referencias convertidas a rutas locales.
-     */
-    private String resolvePluginFilePaths(String html) {
-        Pattern pattern = Pattern.compile("(?i)src=[\"']@@PLUGINFILE@@/([^\"']+)[\"']");
-        Matcher matcher = pattern.matcher(html);
-        StringBuffer sb = new StringBuffer();
-        while (matcher.find()) {
-            String filename = matcher.group(1);
-            try { filename = java.net.URLDecoder.decode(filename, StandardCharsets.UTF_8.name()); } catch (Exception e) { }
-            String localPath = imagesFolderName + "/" + filename;
-            matcher.appendReplacement(sb, Matcher.quoteReplacement("src=\"" + localPath + "\""));
-        }
-        matcher.appendTail(sb);
-        return sb.toString();
-    }
-
-    /**
-     * Tokeniza la sintaxis Cloze embebida en el HTML sustituyendo cada token por marcadores intermedios que sobreviven intactos
-     * al paso de conversión con pandoc. Los marcadores se sustituyen por macros LaTeX definitivas en applyFinalPatches.
-     * 
-     * @param html HTML que puede contener token Cloze.
-     * @return HTML con los tokens Cloze sustituidos por marcadores intermedios.
-     */
     private String formatClozeSyntax(String html) {
         Pattern clozePattern = Pattern.compile("(?s)\\{\\d+:([A-Za-z0-9_]+):(.*?)\\}");
         Matcher matcher = clozePattern.matcher(html);
@@ -376,13 +300,6 @@ public class LaTeXExportVisitor implements QuestionVisitor {
         return sb.toString();
     }
     
-    /**
-     * Limpia el prefijo de puntuación y la retroalimentación de una opción Cloze, devolviendo únicamente el texto de la alternativa.
-     * 
-     * @param opt texto crudo de la opción.
-     * @param isNumerical true si el tipo es NUMERICAL.
-     * @return texto limpio sin prefijos de puntuación ni retroalimentación.
-     */
     private String cleanClozeOption(String opt, boolean isNumerical) {
         String cleanOpt = opt.replaceFirst("^[=%]-?[0-9.]*%", "").replaceFirst("^=", "").trim();
         cleanOpt = cleanOpt.split("(?<!\\\\)#")[0].trim();
@@ -390,15 +307,8 @@ public class LaTeXExportVisitor implements QuestionVisitor {
         return cleanOpt.replace("\\~", "~").replace("\\#", "#").replace("\\=", "=").replace("\\:", ":").replace("\\}", "}");
     }
 
-    /**
-     * Convierte un fragmento HTML a LaTeX invocando pandoc como proceso externo. Si pandoc no está disponible, devuelve el HTML original como fallback.
-     * 
-     * @param htmlText fragmento HTML a convertir.
-     * @return cadena LaTeX resultante, o el HTML original si pandoc no está disponible.
-     */
     private String convertHtmlToLatexWithPandoc(String htmlText) {
-    	
-    	String os = System.getProperty("os.name").toLowerCase();
+        String os = System.getProperty("os.name").toLowerCase();
         String pandocPath = os.contains("win") ? "C:\\Program Files\\Pandoc\\pandoc.exe" : "/usr/bin/pandoc";
         
         ProcessBuilder pb = new ProcessBuilder(pandocPath, "-f", "html+tex_math_dollars+tex_math_single_backslash", "-t", "latex");
@@ -420,12 +330,6 @@ public class LaTeXExportVisitor implements QuestionVisitor {
         return latex.toString().trim();
     }
 
-    /**
-     * Aplica transformaciones finales sobre el LaTeX generado por pandoc.
-     * 
-     * @param result cadena LaTeX producida por pandoc.
-     * @return cadena LaTeX con todos los parches aplicados.
-     */
     private String applyLatexFinalPatches(String result) {
         result = result.replace("XXSABLANKXX", "\\rule{3cm}{0.4pt}")
                        .replace("XXSABLANKIMGXX", "\\rule{6cm}{0.4pt}")
@@ -482,24 +386,11 @@ public class LaTeXExportVisitor implements QuestionVisitor {
         return finalSb.toString().trim();
     }
 
-    /**
-     * Escapa los caracteres especiales de LaTeX en texto plano.
-     * 
-     * @param text cadena a escapar.
-     * @return cadena con los caracteres especiales LaTeX escapados con backslash.
-     */
     public static String escapeLatex(String text) {
         if (text == null) return "";
         return text.replace("%", "\\%").replace("_", "\\_").replace("#", "\\#").replace("&", "\\&").replace("$", "\\$");
     }
     
-    /**
-     * Genera la etiqueta de puntuación formateada para LaTeX a partir de la fracción de Moodle.
-     * Aplica formato de texto en negrita, color azul para puntuaciones positivas y rojo para negativas.
-     * 
-     * @param fractionStr cadena con el valor de la fracción.
-     * @return cadena formateada con macros de LaTeX para estilo y color.
-     */
     private String formatLaTeXScore(String fractionStr) {
         if (fractionStr == null || fractionStr.isEmpty() || "0".equals(fractionStr)) {
             return "";

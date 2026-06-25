@@ -1,0 +1,109 @@
+/* --- Fondo general más limpio --- */
+.root {
+    -fx-background-color: #f4f6f8;
+    -fx-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -fx-font-size: 13px;
+}
+
+/* --- Barra de herramientas superior --- */
+.tool-bar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 15 10 15;
+}
+
+/* --- Unificar alturas de TODOS los controles superiores --- */
+.text-field, .button, .menu-button {
+    -fx-pref-height: 32px;
+    -fx-min-height: 32px;
+    -fx-max-height: 32px;
+}
+
+/* --- Estilo base para todos los botones --- */
+.button, .menu-button {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ced4da;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 0 12 0 12;
+    -fx-text-fill: #495057;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER;
+}
+
+.button:hover, .menu-button:hover {
+    -fx-background-color: #e9ecef;
+}
+
+.button:disabled, .menu-button:disabled {
+    -fx-opacity: 0.5;
+}
+
+/* --- Botón Primario (Azul Moodle) --- */
+#btn-primary {
+    -fx-background-color: #0f6cbf;
+    -fx-border-color: #0f6cbf;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+#btn-primary:hover {
+    -fx-background-color: #0b5394;
+}
+
+/* --- Botón Éxito (Verde para añadir) --- */
+#btn-success {
+    -fx-background-color: #28a745;
+    -fx-border-color: #28a745;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+#btn-success:hover {
+    -fx-background-color: #218838;
+}
+
+/* --- Unificación visual de los paneles (SplitPane) --- */
+.split-pane {
+    -fx-background-color: transparent;
+}
+
+.split-pane > .split-pane-divider {
+    -fx-background-color: #dee2e6;
+    -fx-padding: 0 1 0 1; 
+}
+
+/* --- Fusión del Árbol y la Tabla --- */
+.tree-view, .table-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1 0 0 0; 
+    -fx-background-insets: 0;
+}
+
+/* --- Cabeceras de la tabla más limpias --- */
+.table-view .column-header {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 0 1 1 0;
+}
+
+/* =====================================================================
+   ARREGLO DEFINITIVO PARA LAS CAJAS GRANDES (TEXTAREA)
+   ===================================================================== */
+
+/* 1. Obligamos al texto a ser negro siempre */
+.text-area {
+    -fx-text-fill: #000000 !important;
+}
+
+/* 2. Obligamos a la capa interna (la que se estaba poniendo gris oscura) a ser blanca */
+.text-area .content {
+    -fx-background-color: #ffffff !important;
+}
+
+/* 3. Aseguramos que siga siendo blanca cuando haces clic dentro para escribir */
+.text-area:focused .content {
+    -fx-background-color: #ffffff !important;
+}

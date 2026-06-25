@@ -13,6 +13,7 @@ import javafx.scene.control.TreeItem;
 import moodleviewer.model.Category;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Clase creada como fábrica de nodos TreeItem para el árbol de categorías.
@@ -27,15 +28,31 @@ public class TreeBuilder {
 	 * @return nodo con todos sus descendientes.
 	 */
     public static TreeItem<Category> createTreeItem(Category category) {
-        TreeItem<Category> item = new TreeItem<>(category);
-        
+        return createTreeItem(category, TreeItem::new);
+    }
+
+    /**
+     * Construye recursivamente el árbol completo a partir de la jerarquía de la categoría,
+     * permitiendo personalizar cómo se crea cada nodo individual (por ejemplo, para usar una
+     * subclase de TreeItem con datos adicionales, como hace ExportScopeDialog con su árbol
+     * de selección por checkboxes). El recorrido, el orden alfabético de subcategorías y la
+     * expansión de los nodos se mantienen centralizados aquí para no duplicar esa lógica en
+     * cada lugar que necesite construir un árbol de categorías.
+     *
+     * @param category categoría raíz a partir de la cual construir el árbol.
+     * @param nodeFactory función que crea el TreeItem concreto a partir de una categoría.
+     * @return nodo con todos sus descendientes, creados mediante nodeFactory.
+     */
+    public static TreeItem<Category> createTreeItem(Category category, Function<Category, TreeItem<Category>> nodeFactory) {
+        TreeItem<Category> item = nodeFactory.apply(category);
+
         List<Category> sortedSubcategories = new ArrayList<>(category.getSubcategories());
         sortedSubcategories.sort((c1, c2) -> c1.getName().compareToIgnoreCase(c2.getName()));
 
         for (Category sub : sortedSubcategories) {
-            item.getChildren().add(createTreeItem(sub));
+            item.getChildren().add(createTreeItem(sub, nodeFactory));
         }
-        item.setExpanded(true); 
+        item.setExpanded(true);
         return item;
     }
 
