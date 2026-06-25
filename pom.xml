@@ -79,6 +79,7 @@
 
     <build>
         <plugins>
+<<<<<<< HEAD
         <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-shade-plugin</artifactId>
@@ -102,6 +103,28 @@
         </execution>
     </executions>
 </plugin>
+=======
+         <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-shade-plugin</artifactId>
+                  <version>3.4.1</version>
+                  <executions>
+                 <execution>
+                     <phase>package</phase>
+                     <goals>
+                         <goal>shade</goal>
+                     </goals>
+                     <configuration>
+                         <transformers>
+                             <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                 <mainClass>moodleviewer.Launcher</mainClass>
+                             </transformer>
+                         </transformers>
+                     </configuration>
+                 </execution>
+             </executions>
+         </plugin>
+>>>>>>> 5f96edb0d3bcc49fd43a78da85d01df508cf2143
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
