@@ -27,7 +27,6 @@ import moodleviewer.model.Question;
 import moodleviewer.util.I18n;
 import moodleviewer.util.QuestionValidator;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

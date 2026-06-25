@@ -194,8 +194,6 @@ public class Main extends Application {
         exportLatexButton.setOnAction(e -> fileManager.exportLaTeX(stage, currentRootCategory, getSelectedTreeCategory()));
 
         exportGiftButton.setDisable(true);
-        exportGiftButton.setGraphic(IconFactory.of(FontAwesomeSolid.FILE_EXPORT, 14, "#495057"));
-        exportGiftButton.setGraphicTextGap(8);
         exportGiftButton.setOnAction(e -> {
             if (currentRootCategory != null) {
                 fileManager.exportGIFT(stage, currentRootCategory, getSelectedTreeCategory());
@@ -204,7 +202,8 @@ public class Main extends Application {
 
         addCategoryButton.setDisable(true);
         addCategoryButton.setOnAction(e -> showAddCategoryDialog());
-        addCategoryButton.setGraphic(IconFactory.of(FontAwesomeSolid.PLUS, 14, "#495057"));
+        addCategoryButton.setId("btn-success");
+        addCategoryButton.setGraphic(IconFactory.of(FontAwesomeSolid.PLUS, 14, "white"));
         addCategoryButton.setGraphicTextGap(8);
 
         statsButton.setDisable(true);

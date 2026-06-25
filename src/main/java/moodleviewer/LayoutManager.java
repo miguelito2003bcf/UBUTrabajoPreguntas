@@ -28,11 +28,12 @@ import moodleviewer.commands.CommandManager;
  * Estructura general:
  * - Toolbar superior: apertura/deshacer-rehacer a la izquierda, nombre de archivo centrado,
  *   exportación + selector de idioma a la derecha.
- * - SplitPane horizontal principal: panel de categorías (buscador + árbol) a la izquierda,
- *   panel de preguntas a la derecha.
- * - El panel de preguntas contiene a su vez un SplitPane vertical: barra de búsqueda/filtro
- *   de preguntas + tabla arriba, vista de detalle (WebView) abajo.
- * - Barra de estado inferior: estadísticas y duplicados a la izquierda.
+ * - SplitPane horizontal principal: panel de categorías a la izquierda, panel de preguntas
+ *   a la derecha.
+ * - Panel de categorías: buscador + botón de añadir categoría arriba, árbol en el centro,
+ *   y estadísticas + búsqueda de duplicados en una barra propia debajo del árbol.
+ * - Panel de preguntas: barra de búsqueda/filtro + botón de añadir pregunta arriba, y debajo
+ *   un SplitPane vertical con la tabla de preguntas y la vista de detalle (WebView).
  */
 public class LayoutManager {
 
@@ -41,7 +42,6 @@ public class LayoutManager {
 
         root.setTop(buildTopToolbar(main));
         root.setCenter(buildMainSplitPane(main));
-        root.setBottom(buildStatusBar(main));
 
         Scene scene = new Scene(root, 1200, 800);
         registerAccelerators(scene, main);
@@ -110,7 +110,8 @@ public class LayoutManager {
 
     /**
      * Panel izquierdo: barra propia con buscador de categorías + botón de añadir categoría,
-     * y el árbol de categorías ocupando el resto del espacio disponible.
+     * el árbol de categorías ocupando el espacio disponible, y una tercera barra debajo con
+     * los botones de análisis del banco (estadísticas y búsqueda de duplicados).
      */
     private static VBox buildCategoriesPanel(Main main) {
         HBox categoriesBar = new HBox(10);
@@ -124,7 +125,16 @@ public class LayoutManager {
             main.getAddCategoryButton()
         );
 
-        VBox panel = new VBox(categoriesBar, main.getCategoryTreeView());
+        HBox analysisBar = new HBox(10);
+        analysisBar.setPadding(new Insets(8, 10, 8, 10));
+        analysisBar.setAlignment(Pos.CENTER_LEFT);
+        analysisBar.setStyle("-fx-background-color: #e9ecef; -fx-border-color: #dee2e6; -fx-border-width: 1 0 0 0;");
+        analysisBar.getChildren().addAll(
+            main.getStatsButton(),
+            main.getDuplicatesButton()
+        );
+
+        VBox panel = new VBox(categoriesBar, main.getCategoryTreeView(), analysisBar);
         VBox.setVgrow(main.getCategoryTreeView(), Priority.ALWAYS);
         return panel;
     }
@@ -175,22 +185,6 @@ public class LayoutManager {
         VBox.setVgrow(verticalSplit, Priority.ALWAYS);
 
         return panel;
-    }
-
-    // =====================================================================
-    //  BARRA DE ESTADO INFERIOR: estadísticas + duplicados, a la izquierda
-    // =====================================================================
-
-    private static HBox buildStatusBar(Main main) {
-        HBox statusBar = new HBox(10);
-        statusBar.setPadding(new Insets(5, 15, 5, 15));
-        statusBar.setAlignment(Pos.CENTER_LEFT);
-        statusBar.setStyle("-fx-background-color: #e9ecef; -fx-border-color: #dee2e6; -fx-border-width: 1 0 0 0;");
-        statusBar.getChildren().addAll(
-            main.getStatsButton(),
-            main.getDuplicatesButton()
-        );
-        return statusBar;
     }
 
     // =====================================================================

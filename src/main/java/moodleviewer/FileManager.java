@@ -24,7 +24,6 @@ import moodleviewer.parser.GIFTParser.GiftImportResult;
 import moodleviewer.parser.GIFTParser.GiftParseIssue;
 import moodleviewer.util.CategoryMerger;
 import moodleviewer.util.I18n;
-import javafx.util.Pair;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
