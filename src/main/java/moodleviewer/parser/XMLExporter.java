@@ -23,13 +23,13 @@ import java.io.File;
 /**
  * Clase creada como exportadora del árbol de categorías y preguntas al formato XML de Moodle.
  * Realiza la operación inversa a XMLParser.
+ * * CORRECCIÓN: Acceso a MoodleFile a través de los getters.
  */
 public class XMLExporter {
 
 	/**
 	 * Exporta el árbol de categorías y preguntas a un fichero XML compatible con Moodle.
-	 * 
-	 * @param rootCategory categoría raíz del árbol a exportar.
+	 * * @param rootCategory categoría raíz del árbol a exportar.
 	 * @param file fichero de destino donde se escribirá el XML.
 	 * @throws Exception si ocurre algún error al construir el DOM o al escribir el fichero.
 	 */
@@ -52,8 +52,7 @@ public class XMLExporter {
 
     /**
      * Serializa recursivamente una categoría y su contenido al DOM.
-     * 
-     * @param category categoría a serializar.
+     * * @param category categoría a serializar.
      * @param currentPath ruta acumulada hasta la categoría padre.
      * @param parentNode nodo DOM padre al que añadir los elementos generados.
      * @param doc documento DOM en construcción.
@@ -81,8 +80,7 @@ public class XMLExporter {
 
     /**
      * Serializa una pregunta individual al DOM con sus atributos comunes y los específicos de su tipo.
-     * 
-     * @param q pregunta a serializar.
+     * * @param q pregunta a serializar.
      * @param parentNode nodo DOM padre.
      * @param doc documento DOM en construcción.
      * @throws Exception si ocurre algún error al manipular el DOM.
@@ -106,10 +104,10 @@ public class XMLExporter {
         if (q.getFiles() != null && !q.getFiles().isEmpty()) {
             for (MoodleFile f : q.getFiles()) {
                 Element fileEl = doc.createElement("file");
-                fileEl.setAttribute("name", f.name);
-                fileEl.setAttribute("path", f.path);
-                fileEl.setAttribute("encoding", f.encoding);
-                fileEl.setTextContent(f.content);
+                fileEl.setAttribute("name", f.getName());
+                fileEl.setAttribute("path", f.getPath());
+                fileEl.setAttribute("encoding", f.getEncoding());
+                fileEl.setTextContent(f.getContent());
                 qtextEl.appendChild(fileEl);
             }
         }
@@ -176,8 +174,7 @@ public class XMLExporter {
 
     /**
      * Serializa una respuesta estándar como elemento respuesta en formato HTML.
-     * 
-     * @param a respuesta a serializar.
+     * * @param a respuesta a serializar.
      * @param parentNode elemento DOM padre.
      * @param doc Documento DOM en construcción.
      */
@@ -196,8 +193,7 @@ public class XMLExporter {
 
     /**
      * Serializa una respuesta de verdadero/falso usando el valor lógico en lugar del texto localizado.
-     * 
-     * @param a respuesta de verdadero/falso.
+     * * @param a respuesta de verdadero/falso.
      * @param tfValue true o false.
      * @param parentNode elemento DOM padre.
      * @param doc documento DOM en construcción.
@@ -219,8 +215,7 @@ public class XMLExporter {
 
     /**
      * Añade un elemento hijo con contenido de texto plano al elemento padre.
-     * 
-     * @param doc documento DOM.
+     * * @param doc documento DOM.
      * @param parent elemento padre.
      * @param tagName nombre del elemento hijo a crear.
      * @param textContent contenido de texto.
@@ -233,8 +228,7 @@ public class XMLExporter {
 
     /**
      * Añade un elemento hijo con formato HTML y contenido CDATA al elemento padre.
-     * 
-     * @param doc documento DOM.
+     * * @param doc documento DOM.
      * @param parent elemento padre.
      * @param tagName nombre del elemento contenedor.
      * @param cdataContent contenido HTML a envolver en CDATA.

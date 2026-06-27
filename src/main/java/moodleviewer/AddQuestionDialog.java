@@ -14,17 +14,23 @@ import javafx.scene.control.*;
 import moodleviewer.model.Category;
 import moodleviewer.model.Question;
 import moodleviewer.util.I18n;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 
 /**
- * Envoltura para el diálogo estructurado mediante FXML.
+ * Envoltura para el diálogo de creación/edición de preguntas.
+ *
+ * PUNTO F: tras cargar el FXML, localiza el botón Aceptar del DialogPane y lo
+ * inyecta en el controlador mediante {@code injectSaveButton()}, de modo que el
+ * controlador pueda habilitarlo/deshabilitarlo en tiempo real según el estado de
+ * validación sin necesidad de conocer el DialogPane desde fuera.
  */
 public class AddQuestionDialog {
 
-    private final Dialog<ButtonType> dialog;
-    private AddQuestionDialogController controller;
+    private final Dialog<ButtonType>        dialog;
+    private       AddQuestionDialogController controller;
 
     public AddQuestionDialog(Category targetCategory) {
         this(targetCategory, null);
@@ -32,12 +38,12 @@ public class AddQuestionDialog {
 
     public AddQuestionDialog(Category targetCategory, Question questionToEdit) {
         this.dialog = new Dialog<>();
-        
-        // Estilos globales de la aplicación
+
         if (getClass().getResource("/styles.css") != null) {
-            this.dialog.getDialogPane().getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+            this.dialog.getDialogPane().getStylesheets()
+                    .add(getClass().getResource("/styles.css").toExternalForm());
         }
-        
+
         if (questionToEdit == null) {
             this.dialog.setTitle(I18n.get("addq.title"));
             this.dialog.setHeaderText(I18n.get("addq.header", targetCategory.getName()));
@@ -46,34 +52,45 @@ public class AddQuestionDialog {
             this.dialog.setHeaderText(I18n.get("editq.header", questionToEdit.getName()));
         }
 
-        // Vinculación con el botón de aceptación nativo del proyecto
-        ButtonType saveButtonType = new ButtonType(I18n.get("main.dlg.btnAccept"), ButtonBar.ButtonData.OK_DONE);
+        ButtonType saveButtonType = new ButtonType(
+                I18n.get("main.dlg.btnAccept"), ButtonBar.ButtonData.OK_DONE);
         this.dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
 
         try {
             URL fxmlLocation = getClass().getResource("/fxml/AddQuestionDialog.fxml");
             if (fxmlLocation == null) {
-                throw new IOException("Descriptor FXML ausente. Asegúrate de que el archivo se encuentra exactamente en: src/main/resources/fxml/AddQuestionDialog.fxml");
+                throw new IOException(
+                        "Descriptor FXML ausente. Asegúrate de que el archivo se encuentra en: "
+                        + "src/main/resources/fxml/AddQuestionDialog.fxml");
             }
-            
+
             FXMLLoader loader = new FXMLLoader(fxmlLocation);
             ScrollPane root = loader.load();
             this.dialog.getDialogPane().setContent(root);
-            
+
             this.controller = loader.getController();
+
+            // PUNTO F: inyectamos el botón Aceptar en el controlador para que pueda
+            // habilitarlo/deshabilitarlo según la validación en tiempo real.
+            Button saveBtn = (Button) this.dialog.getDialogPane().lookupButton(saveButtonType);
+            if (saveBtn != null) {
+                this.controller.injectSaveButton(saveBtn);
+            }
+
             this.controller.initData(targetCategory, questionToEdit);
-            
+
         } catch (IOException e) {
             System.err.println("Fallo al inicializar el componente FXML: " + e.getMessage());
             e.printStackTrace();
         }
-        
+
         this.dialog.setResizable(true);
     }
 
     public void showAndWait() {
         Optional<ButtonType> result = dialog.showAndWait();
-        if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
+        if (result.isPresent()
+                && result.get().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
             if (controller != null) {
                 controller.saveQuestion();
             }

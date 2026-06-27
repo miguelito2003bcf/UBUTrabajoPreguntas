@@ -1,12 +1,7 @@
 /*
  * Copyright (c) 2026 Miguel Alonso Alonso
- *
- * Este archivo forma parte de Gestión del banco de preguntas de Moodle.
- *
- * Se distribuye bajo la licencia MIT. Consulta el archivo LICENSE
- * en la raíz del proyecto para más detalles.
+ * Se distribuye bajo la licencia MIT.
  */
-
 package moodleviewer;
 
 import javafx.beans.binding.Bindings;
@@ -16,9 +11,15 @@ import javafx.scene.control.*;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import moodleviewer.model.*;
+import moodleviewer.parser.GIFTExportVisitor;
+import moodleviewer.parser.LaTeXExporter;
 import moodleviewer.util.I18n;
 import moodleviewer.util.DragAndDropConstants;
 import moodleviewer.util.IconFactory;
@@ -28,166 +29,430 @@ import moodleviewer.events.EventBus;
 import moodleviewer.commands.Command;
 import moodleviewer.commands.CommandManager;
 import moodleviewer.commands.DeleteQuestionsCommand;
+import moodleviewer.commands.MoveQuestionsCommand;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
-public class TableManager {
-    
-    private static Category currentCategory;
+/**
+ * Gestiona el comportamiento de la tabla de preguntas.
+ *
+ * PUNTO  4: {@code dragSourceIndex} se resetea en {@code onDragDone} de la fila
+ *           para cubrir el caso en que el drag se cancela sin disparar {@code onDragDropped}.
+ * PUNTO 15: implementa {@link BankPanelManager} para que el compilador detecte
+ *           incompatibilidades si se cambia la firma de {@code configure}.
+ * PUNTO 22: columna de número de orden {@code #} añadida a la tabla.
+ */
+public class TableManager implements BankPanelManager {
 
-    public static void configure(TableView<Question> table) {
-        
-        // --- SUSCRIPCIONES AL EVENT BUS ---
+    // -------------------------------------------------------------------------
+    //  Estado de instancia
+    // -------------------------------------------------------------------------
+
+    private Category currentCategory;
+    private final Supplier<Category> rootCategorySupplier;
+    private int dragSourceIndex = -1;
+
+    private static final String REORDER_QUESTIONS = "REORDER_QUESTIONS";
+
+    // -------------------------------------------------------------------------
+    //  Constructor
+    // -------------------------------------------------------------------------
+
+    public TableManager(Supplier<Category> rootCategorySupplier) {
+        this.rootCategorySupplier = rootCategorySupplier;
+    }
+
+    // -------------------------------------------------------------------------
+    //  BankPanelManager
+    // -------------------------------------------------------------------------
+
+    /**
+     * Configura la tabla sin etiqueta de contador (compatibilidad con código existente).
+     */
+    @Override
+    public void configure(TableView<Question> table) {
+        configure(table, null);
+    }
+
+    /**
+     * Configura la tabla con etiqueta de contador (punto D).
+     *
+     * @param table        tabla de preguntas.
+     * @param counterLabel etiqueta donde mostrar "X de Y preguntas" (puede ser null).
+     */
+    public void configure(TableView<Question> table, Label counterLabel) {
+
+        // Suscripciones al Event Bus
         EventBus.getInstance().subscribe(AppEvents.CategorySelectedEvent.class, event -> {
             currentCategory = event.category();
         });
 
         EventBus.getInstance().subscribe(AppEvents.MoveQuestionsEvent.class, event -> {
-            List<Question> draggedQs = new ArrayList<>(table.getSelectionModel().getSelectedItems());
-            if (currentCategory != null && currentCategory != event.destCategory() && !draggedQs.isEmpty()) {
-                currentCategory.getQuestions().removeAll(draggedQs);
-                event.destCategory().getQuestions().addAll(draggedQs);
-                EventBus.getInstance().publish(new AppEvents.CategoryUpdatedEvent());
+            List<Question> dragged = new ArrayList<>(table.getSelectionModel().getSelectedItems());
+            if (currentCategory != null
+                    && currentCategory != event.destCategory()
+                    && !dragged.isEmpty()) {
+                Command cmd = new MoveQuestionsCommand(dragged, currentCategory, event.destCategory());
+                CommandManager.getInstance().executeCommand(cmd);
             }
         });
 
         EventBus.getInstance().subscribe(AppEvents.CategoryUpdatedEvent.class, event -> {
             table.refresh();
+            updateCounter(table, counterLabel);
         });
 
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        TableColumn<Question, String> nameColumn = new TableColumn<>(I18n.get("table.col.name"));
-        nameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
-        
-        TableColumn<Question, String> typeColumn = new TableColumn<>(I18n.get("table.col.type"));
-        typeColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getType().toUpperCase()));
-        typeColumn.setStyle("-fx-alignment: CENTER;"); 
-        
-        nameColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.75));
-        typeColumn.prefWidthProperty().bind(table.widthProperty().multiply(0.24));
-        
-        table.getColumns().add(nameColumn);
-        table.getColumns().add(typeColumn);
+        // PUNTO 22: columna de número de orden
+        TableColumn<Question, String> numCol = new TableColumn<>("#");
+        numCol.setCellValueFactory(data -> {
+            if (currentCategory == null) return new SimpleStringProperty("-");
+            int idx = currentCategory.getQuestions().indexOf(data.getValue());
+            return new SimpleStringProperty(idx >= 0 ? String.valueOf(idx + 1) : "-");
+        });
+        numCol.setStyle("-fx-alignment: CENTER;");
+        numCol.setSortable(false);
 
-        // --- GESTIÓN DE EVENTOS DE TECLADO ---
+        TableColumn<Question, String> nameCol = new TableColumn<>(I18n.get("table.col.name"));
+        nameCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getName()));
+
+        TableColumn<Question, String> typeCol = new TableColumn<>(I18n.get("table.col.type"));
+        typeCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getType().toUpperCase()));
+        typeCol.setStyle("-fx-alignment: CENTER;");
+
+        numCol.prefWidthProperty().bind(table.widthProperty().multiply(0.05));
+        nameCol.prefWidthProperty().bind(table.widthProperty().multiply(0.70));
+        typeCol.prefWidthProperty().bind(table.widthProperty().multiply(0.23));
+
+        table.getColumns().addAll(numCol, nameCol, typeCol);
+
+        // Punto D: contador al cambiar la lista
+        table.itemsProperty().addListener((obs, oldList, newList) -> {
+            updateCounter(table, counterLabel);
+            if (newList != null) {
+                newList.addListener(
+                    (javafx.collections.ListChangeListener<Question>) c ->
+                            updateCounter(table, counterLabel));
+            }
+        });
+
+        // Punto G: Ctrl+A selecciona todo
         table.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.DELETE) {
+            if (new KeyCodeCombination(KeyCode.A, KeyCombination.SHORTCUT_DOWN).match(event)) {
+                table.getSelectionModel().selectAll();
+                event.consume();
+            } else if (event.getCode() == KeyCode.DELETE) {
                 handleDeleteQuestions(table);
             } else if (event.isShortcutDown() && event.getCode() == KeyCode.D) {
                 handleDuplicateQuestions(table);
             }
         });
 
-        table.setRowFactory(tv -> {
-            TableRow<Question> row = new TableRow<>();
-            
-            row.setOnDragDetected(event -> {
-                if (!row.isEmpty()) {
-                    Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
-                    ClipboardContent content = new ClipboardContent();
-                    content.putString(DragAndDropConstants.MOVE_QUESTIONS);
-                    db.setContent(content);
-                    
-                    SnapshotParameters params = new SnapshotParameters();
-                    params.setFill(Color.TRANSPARENT);
-                    db.setDragView(row.snapshot(params, null));
-                    event.consume();
-                }
-            });
-
-            ContextMenu questionMenu = new ContextMenu(); 
-            
-            MenuItem editQuestionItem = new MenuItem(I18n.get("table.ctx.edit"));
-            editQuestionItem.setGraphic(IconFactory.of(FontAwesomeSolid.EDIT, 13, "#495057"));
-            editQuestionItem.setOnAction(event -> {
-                Question q = row.getItem();
-                if (q != null && currentCategory != null) {
-                    AddQuestionDialog dialog = new AddQuestionDialog(currentCategory, q);
-                    dialog.showAndWait();
-                    
-                    EventBus.getInstance().publish(new AppEvents.QuestionUpdatedEvent(q));
-                    EventBus.getInstance().publish(new AppEvents.CategoryUpdatedEvent());
-                }
-            });
-
-            MenuItem duplicateQuestionItem = new MenuItem(I18n.get("table.ctx.duplicate"));
-            duplicateQuestionItem.setGraphic(IconFactory.of(FontAwesomeSolid.COPY, 13, "#495057"));
-            duplicateQuestionItem.setOnAction(event -> handleDuplicateQuestions(table));
-
-            MenuItem deleteQuestionItem = new MenuItem(I18n.get("table.ctx.delete"));
-            deleteQuestionItem.setGraphic(IconFactory.of(FontAwesomeSolid.TRASH_ALT, 13, "#c0392b"));
-            deleteQuestionItem.setOnAction(event -> handleDeleteQuestions(table));
-            
-            questionMenu.getItems().addAll(editQuestionItem, duplicateQuestionItem, deleteQuestionItem);
-            row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null).otherwise(questionMenu));
-            return row;
-        });
+        table.setRowFactory(tv -> buildRow(table));
     }
 
-    private static void handleDuplicateQuestions(TableView<Question> table) {
-        List<Question> selectedQs = new ArrayList<>(table.getSelectionModel().getSelectedItems());
-        
-        if (!selectedQs.isEmpty() && currentCategory != null) {
-            for (Question q : selectedQs) {
-                Question clone = createDeepCopy(q);
-                currentCategory.getQuestions().add(clone);
+    // -------------------------------------------------------------------------
+    //  Fábrica de filas
+    // -------------------------------------------------------------------------
+
+    private TableRow<Question> buildRow(TableView<Question> table) {
+        TableRow<Question> row = new TableRow<>();
+
+        row.setOnDragDetected(event -> {
+            if (!row.isEmpty()) {
+                dragSourceIndex = row.getIndex();
+                Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent cc = new ClipboardContent();
+                cc.putString(table.getSelectionModel().getSelectedItems().size() > 1
+                        ? DragAndDropConstants.MOVE_QUESTIONS : REORDER_QUESTIONS);
+                db.setContent(cc);
+                SnapshotParameters p = new SnapshotParameters();
+                p.setFill(Color.TRANSPARENT);
+                db.setDragView(row.snapshot(p, null));
+                event.consume();
             }
+        });
+
+        // PUNTO 4: resetear dragSourceIndex cuando el drag termina (con o sin drop exitoso)
+        row.setOnDragDone(event -> {
+            dragSourceIndex = -1;
+            event.consume();
+        });
+
+        row.setOnDragOver(event -> {
+            if (event.getDragboard().hasString()
+                    && REORDER_QUESTIONS.equals(event.getDragboard().getString())
+                    && !row.isEmpty()
+                    && row.getIndex() != dragSourceIndex) {
+                event.acceptTransferModes(TransferMode.MOVE);
+            }
+            event.consume();
+        });
+
+        row.setOnDragEntered(event -> {
+            if (event.getDragboard().hasString()
+                    && REORDER_QUESTIONS.equals(event.getDragboard().getString())
+                    && !row.isEmpty()
+                    && row.getIndex() != dragSourceIndex) {
+                row.setStyle("-fx-background-color: #d0e8ff;");
+            }
+        });
+
+        row.setOnDragExited(event -> row.setStyle(""));
+
+        row.setOnDragDropped(event -> {
+            boolean success = false;
+            if (event.getDragboard().hasString()
+                    && REORDER_QUESTIONS.equals(event.getDragboard().getString())
+                    && currentCategory != null
+                    && dragSourceIndex >= 0
+                    && !row.isEmpty()) {
+                int dest = row.getIndex();
+                List<Question> qs = currentCategory.getQuestions();
+                if (dragSourceIndex < qs.size() && dest < qs.size()
+                        && dragSourceIndex != dest) {
+                    Question moved = qs.remove(dragSourceIndex);
+                    qs.add(dest, moved);
+                    CommandManager.getInstance().markAsDirty();
+                    EventBus.getInstance().publish(new AppEvents.CategoryUpdatedEvent());
+                    table.getSelectionModel().select(dest);
+                    success = true;
+                }
+            }
+            event.setDropCompleted(success);
+            event.consume();
+            // dragSourceIndex se resetea en onDragDone, no aquí
+        });
+
+        ContextMenu menu = buildContextMenu(row, table);
+        row.contextMenuProperty().bind(
+                Bindings.when(row.emptyProperty()).then((ContextMenu) null).otherwise(menu));
+        return row;
+    }
+
+    // -------------------------------------------------------------------------
+    //  Menú contextual
+    // -------------------------------------------------------------------------
+
+    private ContextMenu buildContextMenu(TableRow<Question> row, TableView<Question> table) {
+        ContextMenu menu = new ContextMenu();
+
+        MenuItem editItem = new MenuItem(I18n.get("table.ctx.edit"));
+        editItem.setGraphic(IconFactory.of(FontAwesomeSolid.EDIT, 13, "#495057"));
+        editItem.setOnAction(e -> {
+            Question q = row.getItem();
+            if (q != null && currentCategory != null) {
+                new AddQuestionDialog(currentCategory, q).showAndWait();
+                EventBus.getInstance().publish(new AppEvents.QuestionUpdatedEvent(q));
+                EventBus.getInstance().publish(new AppEvents.CategoryUpdatedEvent());
+            }
+        });
+
+        MenuItem dupItem = new MenuItem(I18n.get("table.ctx.duplicate"));
+        dupItem.setGraphic(IconFactory.of(FontAwesomeSolid.COPY, 13, "#495057"));
+        dupItem.setOnAction(e -> handleDuplicateQuestions(table));
+
+        // Submenú "Mover a categoría..."
+        Menu moveToMenu = new Menu(I18n.get("table.ctx.moveTo"));
+        moveToMenu.setGraphic(IconFactory.of(FontAwesomeSolid.SHARE, 13, "#495057"));
+        moveToMenu.setOnShowing(e -> buildMoveToSubMenu(moveToMenu, table));
+
+        MenuItem expGiftItem = new MenuItem(I18n.get("table.ctx.exportSingle"));
+        expGiftItem.setGraphic(IconFactory.of(FontAwesomeSolid.FILE_EXPORT, 13, "#495057"));
+        expGiftItem.setOnAction(e -> {
+            Question q = row.getItem();
+            if (q != null) handleExportSingleGIFT(q, table.getScene().getWindow());
+        });
+
+        MenuItem expLatexItem = new MenuItem(I18n.get("table.ctx.exportSingleLatex"));
+        expLatexItem.setGraphic(IconFactory.of(FontAwesomeSolid.FILE_ALT, 13, "#495057"));
+        expLatexItem.setOnAction(e -> {
+            Question q = row.getItem();
+            if (q != null) handleExportSingleLaTeX(q, table.getScene().getWindow());
+        });
+
+        MenuItem delItem = new MenuItem(I18n.get("table.ctx.delete"));
+        delItem.setGraphic(IconFactory.of(FontAwesomeSolid.TRASH_ALT, 13, "#c0392b"));
+        delItem.setOnAction(e -> handleDeleteQuestions(table));
+
+        menu.getItems().addAll(editItem, dupItem, moveToMenu,
+                new SeparatorMenuItem(), expGiftItem, expLatexItem,
+                new SeparatorMenuItem(), delItem);
+        return menu;
+    }
+
+    // -------------------------------------------------------------------------
+    //  Submenú "Mover a categoría..."
+    // -------------------------------------------------------------------------
+
+    private void buildMoveToSubMenu(Menu moveToMenu, TableView<Question> table) {
+        moveToMenu.getItems().clear();
+        Category root = rootCategorySupplier.get();
+        if (root == null) return;
+        List<Question> selected = new ArrayList<>(table.getSelectionModel().getSelectedItems());
+        if (selected.isEmpty()) return;
+        addCategoryItems(moveToMenu, root, selected, 0);
+        if (moveToMenu.getItems().isEmpty()) {
+            MenuItem none = new MenuItem(I18n.get("table.ctx.moveTo.none"));
+            none.setDisable(true);
+            moveToMenu.getItems().add(none);
+        }
+    }
+
+    private void addCategoryItems(Menu parent, Category cat,
+                                  List<Question> selected, int depth) {
+        if (cat != currentCategory) {
+            String indent = "  ".repeat(depth);
+            MenuItem item = new MenuItem(indent + cat.getName());
+            item.setOnAction(e -> {
+                if (currentCategory != null && !selected.isEmpty()) {
+                    Command cmd = new MoveQuestionsCommand(selected, currentCategory, cat);
+                    CommandManager.getInstance().executeCommand(cmd);
+                }
+            });
+            parent.getItems().add(item);
+        }
+        for (Category sub : cat.getSubcategories()) {
+            addCategoryItems(parent, sub, selected, depth + 1);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    //  Contador (punto D)
+    // -------------------------------------------------------------------------
+
+    private void updateCounter(TableView<Question> table, Label counterLabel) {
+        if (counterLabel == null) return;
+        int visible = table.getItems() != null ? table.getItems().size() : 0;
+        int total   = currentCategory != null ? currentCategory.getQuestions().size() : 0;
+        counterLabel.setText(visible == total
+                ? I18n.get("table.counter.all", total)
+                : I18n.get("table.counter.filtered", visible, total));
+    }
+
+    // -------------------------------------------------------------------------
+    //  Exportación LaTeX individual (punto H)
+    // -------------------------------------------------------------------------
+
+    private void handleExportSingleLaTeX(Question question, Window owner) {
+        FileChooser fc = new FileChooser();
+        fc.setTitle(I18n.get("file.title.exportSingleLatex"));
+        fc.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter(I18n.get("file.ext.latex"), "*.tex"));
+        String safe = question.getName() != null
+                ? question.getName().replaceAll("[\\\\/:*?\"<>|]", "_") : "pregunta";
+        fc.setInitialFileName(safe + ".tex");
+        File file = fc.showSaveDialog(owner);
+        if (file == null) return;
+
+        Category tmp = new Category("tmp");
+        tmp.addQuestion(question);
+        try {
+            LaTeXExporter.exportToLaTeX(tmp, file, true);
+            new Alert(Alert.AlertType.INFORMATION,
+                    I18n.get("file.info.exportedSingleLatex")).showAndWait();
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR,
+                    I18n.get("file.err.exportSingle", e.getMessage())).showAndWait();
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    //  Exportación GIFT individual (punto 9 anterior)
+    // -------------------------------------------------------------------------
+
+    private void handleExportSingleGIFT(Question question, Window owner) {
+        FileChooser fc = new FileChooser();
+        fc.setTitle(I18n.get("file.title.exportSingleGift"));
+        fc.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter(I18n.get("file.ext.gift"), "*.txt"));
+        String safe = question.getName() != null
+                ? question.getName().replaceAll("[\\\\/:*?\"<>|]", "_") : "pregunta";
+        fc.setInitialFileName(safe + ".txt");
+        File file = fc.showSaveDialog(owner);
+        if (file == null) return;
+
+        try (BufferedWriter bw = new BufferedWriter(
+                new FileWriter(file, java.nio.charset.StandardCharsets.UTF_8))) {
+            question.accept(new GIFTExportVisitor(bw));
+            new Alert(Alert.AlertType.INFORMATION,
+                    I18n.get("file.info.exportedSingle")).showAndWait();
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR,
+                    I18n.get("file.err.exportSingle", e.getMessage())).showAndWait();
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    //  Acciones internas
+    // -------------------------------------------------------------------------
+
+    private void handleDuplicateQuestions(TableView<Question> table) {
+        List<Question> sel = new ArrayList<>(table.getSelectionModel().getSelectedItems());
+        if (!sel.isEmpty() && currentCategory != null) {
+            sel.forEach(q -> currentCategory.getQuestions().add(createDeepCopy(q)));
+            CommandManager.getInstance().markAsDirty();
             EventBus.getInstance().publish(new AppEvents.CategoryUpdatedEvent());
         }
     }
 
-    private static void handleDeleteQuestions(TableView<Question> table) {
-        List<Question> questionsToDelete = new ArrayList<>(table.getSelectionModel().getSelectedItems());
-        
-        if (!questionsToDelete.isEmpty() && currentCategory != null) {
+    private void handleDeleteQuestions(TableView<Question> table) {
+        List<Question> toDelete = new ArrayList<>(table.getSelectionModel().getSelectedItems());
+        if (!toDelete.isEmpty() && currentCategory != null) {
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
             confirm.setTitle(I18n.get("table.dlg.del.title"));
-            confirm.setHeaderText(I18n.get("table.dlg.del.header", questionsToDelete.size()));
+            confirm.setHeaderText(I18n.get("table.dlg.del.header", toDelete.size()));
             confirm.setContentText(I18n.get("table.dlg.del.content"));
-
-            confirm.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    // PATRÓN COMMAND: Encapsulamos el borrado en un comando y lo enviamos al gestor
-                    Command deleteCmd = new DeleteQuestionsCommand(questionsToDelete, currentCategory);
-                    CommandManager.getInstance().executeCommand(deleteCmd);
+            confirm.showAndWait().ifPresent(r -> {
+                if (r == ButtonType.OK) {
+                    CommandManager.getInstance().executeCommand(
+                            new DeleteQuestionsCommand(toDelete, currentCategory));
                 }
             });
         }
     }
 
-    private static Question createDeepCopy(Question original) {
-        String newName = original.getName() + " (Copia)";
-        Question copy = null;
-
-        if (original instanceof TrueFalseQuestion tf) {
-            Answer ta = new Answer(tf.getTrueAnswer().getFraction(), tf.getTrueAnswer().getText(), tf.getTrueAnswer().getFeedback());
-            Answer fa = new Answer(tf.getFalseAnswer().getFraction(), tf.getFalseAnswer().getText(), tf.getFalseAnswer().getFeedback());
-            copy = new TrueFalseQuestion(tf.getType(), newName, tf.getText(), tf.getDefaultGrade(), tf.getPenalty(), ta, fa);
-        } else if (original instanceof MultichoiceQuestion mc) {
-            List<Answer> ansCopy = new ArrayList<>();
-            for (Answer a : mc.getAnswers()) ansCopy.add(new Answer(a.getFraction(), a.getText(), a.getFeedback()));
-            copy = new MultichoiceQuestion(mc.getType(), newName, mc.getText(), mc.getDefaultGrade(), mc.getPenalty(), mc.isSingleAnswer(), mc.isShuffleAnswers(), ansCopy);
-        } else if (original instanceof ShortAnswerQuestion sa) {
-            List<Answer> ansCopy = new ArrayList<>();
-            for (Answer a : sa.getAnswers()) ansCopy.add(new Answer(a.getFraction(), a.getText(), a.getFeedback()));
-            copy = new ShortAnswerQuestion(sa.getType(), newName, sa.getText(), sa.getDefaultGrade(), sa.getPenalty(), sa.isCaseSensitive(), ansCopy);
-        } else if (original instanceof NumericalQuestion nq) {
+    private Question createDeepCopy(Question o) {
+        String n = o.getName() + " (Copia)";
+        Question c;
+        if (o instanceof TrueFalseQuestion tf) {
+            c = new TrueFalseQuestion(tf.getType(), n, tf.getText(),
+                    tf.getDefaultGrade(), tf.getPenalty(),
+                    new Answer(tf.getTrueAnswer().getFraction(),  tf.getTrueAnswer().getText(),  tf.getTrueAnswer().getFeedback()),
+                    new Answer(tf.getFalseAnswer().getFraction(), tf.getFalseAnswer().getText(), tf.getFalseAnswer().getFeedback()));
+        } else if (o instanceof MultichoiceQuestion mc) {
+            List<Answer> ans = new ArrayList<>();
+            mc.getAnswers().forEach(a -> ans.add(new Answer(a.getFraction(), a.getText(), a.getFeedback())));
+            c = new MultichoiceQuestion(mc.getType(), n, mc.getText(),
+                    mc.getDefaultGrade(), mc.getPenalty(), mc.isSingleAnswer(), mc.isShuffleAnswers(), ans);
+        } else if (o instanceof ShortAnswerQuestion sa) {
+            List<Answer> ans = new ArrayList<>();
+            sa.getAnswers().forEach(a -> ans.add(new Answer(a.getFraction(), a.getText(), a.getFeedback())));
+            c = new ShortAnswerQuestion(sa.getType(), n, sa.getText(),
+                    sa.getDefaultGrade(), sa.getPenalty(), sa.isCaseSensitive(), ans);
+        } else if (o instanceof NumericalQuestion nq) {
             Answer a = nq.getAnswer();
-            Answer ansCopy = new Answer(a.getFraction(), a.getText(), a.getFeedback());
-            copy = new NumericalQuestion(nq.getType(), newName, nq.getText(), nq.getDefaultGrade(), nq.getPenalty(), ansCopy, nq.getTolerance());
-        } else if (original instanceof MatchingQuestion mq) {
-            List<MatchingPair> pairsCopy = new ArrayList<>();
-            for (MatchingPair p : mq.getPairs()) pairsCopy.add(new MatchingPair(p.getQuestionText(), p.getAnswerText()));
-            copy = new MatchingQuestion(mq.getType(), newName, mq.getText(), mq.getDefaultGrade(), mq.getPenalty(), pairsCopy);
-        } else if (original instanceof ClozeQuestion cq) {
-            copy = new ClozeQuestion(cq.getType(), newName, cq.getText(), cq.getDefaultGrade(), cq.getPenalty());
+            c = new NumericalQuestion(nq.getType(), n, nq.getText(),
+                    nq.getDefaultGrade(), nq.getPenalty(),
+                    new Answer(a.getFraction(), a.getText(), a.getFeedback()), nq.getTolerance());
+        } else if (o instanceof MatchingQuestion mq) {
+            List<MatchingPair> pairs = new ArrayList<>();
+            mq.getPairs().forEach(p -> pairs.add(new MatchingPair(p.getQuestionText(), p.getAnswerText())));
+            c = new MatchingQuestion(mq.getType(), n, mq.getText(),
+                    mq.getDefaultGrade(), mq.getPenalty(), pairs);
+        } else if (o instanceof ClozeQuestion cq) {
+            c = new ClozeQuestion(cq.getType(), n, cq.getText(), cq.getDefaultGrade(), cq.getPenalty());
         } else {
-            copy = new GenericQuestion(original.getType(), newName, original.getText(), original.getDefaultGrade(), original.getPenalty());
+            c = new GenericQuestion(o.getType(), n, o.getText(), o.getDefaultGrade(), o.getPenalty());
         }
-
-        copy.setGeneralFeedback(original.getGeneralFeedback());
-        return copy;
+        c.setGeneralFeedback(o.getGeneralFeedback());
+        return c;
     }
 }

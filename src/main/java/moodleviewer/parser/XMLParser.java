@@ -1,12 +1,7 @@
 /*
  * Copyright (c) 2026 Miguel Alonso Alonso
- *
- * Este archivo forma parte de Gestión del banco de preguntas de Moodle.
- *
- * Se distribuye bajo la licencia MIT. Consulta el archivo LICENSE
- * en la raíz del proyecto para más detalles.
+ * Se distribuye bajo la licencia MIT.
  */
-
 package moodleviewer.parser;
 
 import moodleviewer.model.*;
@@ -20,13 +15,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Clase creada como parseadora del formato XML de exportación de bancos de preguntas de Moodle.
- * Transforma un fichero XML de Moodle en una jerarquía limpia gracias a JSoup.
+ * Parser del formato XML de exportación de bancos de preguntas de Moodle.
+ *
+ * PUNTO 6: {@link #getNestedText} ahora busca el elemento padre por hijo directo
+ * en lugar de usar {@code getElementsByTagName}, que devuelve descendientes de
+ * cualquier nivel y podía capturar el texto de un bloque de retroalimentación
+ * anidado en vez del enunciado principal.
  */
 public class XMLParser {
 
     public static Category parseMoodleXML(File xmlFile) throws Exception {
-        Category rootCategory = new Category("Banco de Preguntas");
+        Category rootCategory    = new Category("Banco de Preguntas");
         Category currentCategory = rootCategory;
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -38,83 +37,116 @@ public class XMLParser {
 
         for (int i = 0; i < questionList.getLength(); i++) {
             Node node = questionList.item(i);
-            if (node.getNodeType() == Node.ELEMENT_NODE) {
-                Element element = (Element) node;
-                String type = element.getAttribute("type");
+            if (node.getNodeType() != Node.ELEMENT_NODE) continue;
 
-                if ("category".equals(type)) {
-                    String fullPath = getNestedText(element, "category", "text");
-                    if (fullPath != null) {
-                        currentCategory = findOrCreateCategory(rootCategory, fullPath);
-                    }
-                } else if (!"info".equals(type)) {
-                    String name = getNestedText(element, "name", "text");
-                    String text = getNestedText(element, "questiontext", "text");
-                    String grade = getSimpleText(element, "defaultgrade");
-                    String penalty = getSimpleText(element, "penalty");
+            Element element = (Element) node;
+            String type = element.getAttribute("type");
 
-                    Question question = QuestionFactory.createQuestion(type, name, text, grade, penalty, element);
-
-                    String generalFeedback = getNestedText(element, "generalfeedback", "text");
-                    question.setGeneralFeedback(generalFeedback);
-
-                    List<MoodleFile> files = extractFiles(element);
-                    question.setFiles(files);
-
-                    currentCategory.addQuestion(question);
+            if ("category".equals(type)) {
+                String fullPath = getNestedText(element, "category", "text");
+                if (fullPath != null) {
+                    currentCategory = findOrCreateCategory(rootCategory, fullPath);
                 }
+            } else if (!"info".equals(type)) {
+                String name    = getNestedText(element, "name", "text");
+                String text    = getNestedText(element, "questiontext", "text");
+                String grade   = getSimpleText(element, "defaultgrade");
+                String penalty = getSimpleText(element, "penalty");
+
+                Question question = QuestionFactory.createQuestion(
+                        type, name, text, grade, penalty, element);
+
+                question.setGeneralFeedback(getNestedText(element, "generalfeedback", "text"));
+                question.setFiles(extractFiles(element));
+                currentCategory.addQuestion(question);
             }
         }
         return rootCategory;
     }
 
+    // -------------------------------------------------------------------------
+    //  Extracción de ficheros adjuntos
+    // -------------------------------------------------------------------------
+
     private static List<MoodleFile> extractFiles(Element questionElement) {
         List<MoodleFile> files = new ArrayList<>();
         NodeList fileNodes = questionElement.getElementsByTagName("file");
         for (int j = 0; j < fileNodes.getLength(); j++) {
-            Element fileElem = (Element) fileNodes.item(j);
-            String name = fileElem.getAttribute("name");
-            String path = fileElem.getAttribute("path");
-            String encoding = fileElem.getAttribute("encoding");
-            String content = fileElem.getTextContent();
-            files.add(new MoodleFile(name, path, encoding, content));
+            Element fe = (Element) fileNodes.item(j);
+            files.add(new MoodleFile(
+                    fe.getAttribute("name"),
+                    fe.getAttribute("path"),
+                    fe.getAttribute("encoding"),
+                    fe.getTextContent()));
         }
         return files;
     }
 
+    // -------------------------------------------------------------------------
+    //  PUNTO 6: lectura de texto buscando solo hijos directos del elemento padre,
+    //  no descendientes de cualquier nivel.
+    // -------------------------------------------------------------------------
+
     /**
-     * Extrae el texto anidado y utiliza JSoup para limpiar etiquetas HTML basura.
+     * Extrae el texto contenido en {@code <childTag>} que es hijo directo del primer
+     * {@code <parentTag>} que es hijo directo de {@code parent}.
+     *
+     * <p>A diferencia del uso anterior de {@code getElementsByTagName}, este método
+     * itera únicamente los hijos inmediatos de cada nivel, evitando que el texto de
+     * un bloque de retroalimentación anidado contamine el enunciado principal.</p>
      */
     public static String getNestedText(Element parent, String parentTag, String childTag) {
-        NodeList list = parent.getElementsByTagName(parentTag);
-        if (list.getLength() > 0) {
-            Element pElement = (Element) list.item(0);
-            NodeList childList = pElement.getElementsByTagName(childTag);
-            if (childList.getLength() > 0) {
-                String rawHtml = childList.item(0).getTextContent().trim();
-                // Safelist.relaxed() permite negritas, cursivas, listas e imágenes seguras, limpiando el resto.
-                return Jsoup.clean(rawHtml, Safelist.relaxed().addAttributes("img", "src", "alt", "width", "height"));
+        // Buscar el primer hijo directo con nombre parentTag
+        Element parentEl = firstDirectChild(parent, parentTag);
+        if (parentEl == null) return null;
+
+        // Buscar el primer hijo directo de ese elemento con nombre childTag
+        Element childEl = firstDirectChild(parentEl, childTag);
+        if (childEl == null) return null;
+
+        String rawHtml = childEl.getTextContent().trim();
+        return Jsoup.clean(rawHtml,
+                Safelist.relaxed().addAttributes("img", "src", "alt", "width", "height"));
+    }
+
+    /**
+     * Extrae el texto de un hijo directo de {@code parent} con nombre {@code tag}.
+     * Para tags de contenido HTML ({@code text}, {@code feedback}) aplica saneado JSoup.
+     */
+    public static String getSimpleText(Element parent, String tag) {
+        NodeList children = parent.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            if (!child.getNodeName().equals(tag)) continue;
+            String rawText = child.getTextContent().trim();
+            if ("text".equals(tag) || "feedback".equals(tag)) {
+                return Jsoup.clean(rawText,
+                        Safelist.relaxed().addAttributes("img", "src", "alt", "width", "height"));
             }
+            return rawText;
         }
         return null;
     }
 
     /**
-     * Extrae el texto directo. Si es contenido enriquecido ("text" o "feedback"), lo sanea con JSoup.
+     * Devuelve el primer hijo directo de {@code parent} cuyo nombre de nodo sea {@code tagName},
+     * o {@code null} si no existe ninguno.
      */
-    public static String getSimpleText(Element parent, String tag) {
-        NodeList list = parent.getChildNodes();
-        for (int i = 0; i < list.getLength(); i++) {
-            if (list.item(i).getNodeName().equals(tag)) {
-                String rawText = list.item(i).getTextContent().trim();
-                if (tag.equals("text") || tag.equals("feedback")) {
-                    return Jsoup.clean(rawText, Safelist.relaxed().addAttributes("img", "src", "alt", "width", "height"));
-                }
-                return rawText;
+    private static Element firstDirectChild(Element parent, String tagName) {
+        NodeList children = parent.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            if (child.getNodeType() == Node.ELEMENT_NODE
+                    && child.getNodeName().equals(tagName)) {
+                return (Element) child;
             }
         }
         return null;
     }
+
+    // -------------------------------------------------------------------------
+    //  Navegación de categorías
+    // -------------------------------------------------------------------------
 
     private static Category findOrCreateCategory(Category root, String fullPath) {
         if (fullPath == null || fullPath.isEmpty()) return root;
@@ -123,16 +155,11 @@ public class XMLParser {
         for (String part : parts) {
             part = part.trim();
             if (part.isEmpty()) continue;
-            // Ignoramos los segmentos técnicos que usa Moodle para anclar la ruta de categorías:
-            // "top" y cualquier placeholder de contexto entre signos de dólar
-            // ($course$, $module$, $system$, etc.), ya que no son categorías reales del usuario.
-            if (part.equalsIgnoreCase("top") || part.matches("(?i)^\\$[a-z0-9_]+\\$$")) continue;
+            if (part.equalsIgnoreCase("top")
+                    || part.matches("(?i)^\\$[a-z0-9_]+\\$$")) continue;
             Category next = null;
             for (Category sub : current.getSubcategories()) {
-                if (sub.getName().equals(part)) {
-                    next = sub;
-                    break;
-                }
+                if (sub.getName().equals(part)) { next = sub; break; }
             }
             if (next == null) {
                 next = new Category(part);

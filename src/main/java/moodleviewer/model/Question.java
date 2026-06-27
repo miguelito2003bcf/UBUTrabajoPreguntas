@@ -21,6 +21,7 @@ import java.util.List;
  * Clase abstracta que representa una pregunta del banco de preguntas de Moodle.
  * Define los atributos comunes, la infraestructura HTML compartida y los métodos 
  * abstractos que cada subclase debe implementar.
+ * * CORRECCIÓN: Acceso a MoodleFile a través de los getters.
  */
 public abstract class Question {
 	
@@ -84,10 +85,10 @@ public abstract class Question {
                 try { filename = java.net.URLDecoder.decode(filename, "UTF-8"); } catch (Exception e) {}
                 
                 for (MoodleFile mf : files) {
-                    if (mf.name.equals(filename) && mf.content != null) {
+                    if (mf.getName().equals(filename) && mf.getContent() != null) {
                         String mimeType = "image/" + (filename.toLowerCase().endsWith(".png") ? "png" : "jpeg");
                         // Sustituimos el src por la imagen en Base64
-                        img.attr("src", "data:" + mimeType + ";base64," + mf.content.replaceAll("\\s+", ""));
+                        img.attr("src", "data:" + mimeType + ";base64," + mf.getContent().replaceAll("\\s+", ""));
                         break;
                     }
                 }
